@@ -1,0 +1,124 @@
+---
+sidebar_position: 2
+title: Pixel Art Grid Worksheet
+---
+
+import PixelArtGrid from '@site/src/components/PixelArtGrid';
+
+# Pixel Art Grid Worksheet
+
+Design your own sprites using classic pixel art grids! This is exactly how game artists designed characters on the Commodore 64 and early consoles.
+
+## How to Use
+
+1. **On screen:** Click cells to toggle them. Choose colors from the palette.
+2. **On paper:** Print this page and fill in squares with colored pencils or markers.
+
+## 8x8 Grid -- Simple Sprites
+
+Perfect for small items: coins, hearts, stars, projectiles. Classic Game Boy and NES sprites used this size.
+
+<PixelArtGrid size={8} title="8x8 Sprite" />
+
+## 16x16 Grid -- Character Sprites
+
+The standard for most 2D platformer characters. This is the size used for Mario, Mega Man, and most SNES-era sprites.
+
+<PixelArtGrid size={16} title="16x16 Character Sprite" />
+
+## Tips for Pixel Art
+
+- **Start with silhouette** -- draw the outline first, then fill in details
+- **Use few colors** -- classic sprites used 3-4 colors max. Constraints breed creativity!
+- **Think about readability** -- your sprite needs to be recognizable at game size
+- **Animation trick** -- design your idle pose first, then make copies and modify them slightly for walk/run frames
+
+## Color Reference
+
+Classic console palettes were limited. Try designing with just these constraints:
+
+| System | Colors Available |
+|---|---|
+| Game Boy | 4 shades of green |
+| NES | 54 colors (4 per sprite) |
+| SNES | 256 colors (16 per sprite) |
+| GDevelop | Unlimited! But restraint makes better art |
+
+## Printable Grids
+
+For paper-based design, print this page. The grids below are optimized for printing:
+
+<div className="print-only-grids">
+
+### 8x8 Blank Grid (Print Version)
+
+```
++---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |
++---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |
++---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |
++---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |
++---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |
++---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |
++---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |
++---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |
++---+---+---+---+---+---+---+---+
+```
+
+### 16x16 Blank Grid (Print Version)
+
+```
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+```
+
+</div>
+
+## Scale Reference: The Pixel Doubling Trick
+
+Classic game consoles displayed pixels at different scales. Here's how pixel art scales:
+
+| Actual Size | Display Scale | Use Case |
+|---|---|---|
+| 1x1 pixel | Tiny dot | Raw data |
+| 2x2 pixels | Small | Game Boy screen |
+| 4x4 pixels | Medium | Comfortable on modern screens |
+| 8x8 pixels | Large | Great for designing on paper |

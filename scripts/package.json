@@ -1,0 +1,11 @@
+{
+  "name": "game-club-scripts",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate-pdfs": "node generate-pdfs.mjs"
+  },
+  "dependencies": {
+    "puppeteer": "^24.0.0"
+  }
+}
