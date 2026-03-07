@@ -2,6 +2,7 @@ import type {ReactNode} from 'react';
 import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 import Layout from '@theme/Layout';
 import Heading from '@theme/Heading';
 
@@ -17,7 +18,7 @@ function HomepageHeader() {
       padding: '0',
     }}>
       <img
-        src="/img/hero-banner.png"
+        src={useBaseUrl('/img/hero-banner.png')}
         alt="Grass Valley Game Club"
         style={{ width: '100%', display: 'block' }}
       />

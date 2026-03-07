@@ -1,6 +1,7 @@
 import React from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 
 interface GameCard {
   title: string;
@@ -28,6 +29,8 @@ const GAMES: GameCard[] = [
 ];
 
 function GameCardComponent({ game }: { game: GameCard }) {
+  const screenshotUrl = useBaseUrl(game.screenshot || '');
+  const playUrl = useBaseUrl(`/arcade/games/${game.slug}/`);
   return (
     <div style={{
       border: '2px solid var(--ifm-color-primary)',
@@ -38,7 +41,7 @@ function GameCardComponent({ game }: { game: GameCard }) {
     }}>
       {game.screenshot && (
         <img
-          src={game.screenshot}
+          src={screenshotUrl}
           alt={`Screenshot of ${game.title}`}
           style={{ width: '100%', borderRadius: '8px', marginBottom: '1rem' }}
         />
@@ -49,7 +52,7 @@ function GameCardComponent({ game }: { game: GameCard }) {
       </p>
       <p style={{ margin: '0 0 1rem 0' }}>{game.description}</p>
       <a
-        href={`/arcade/games/${game.slug}/`}
+        href={playUrl}
         target="_blank"
         rel="noopener noreferrer"
         style={{
@@ -73,7 +76,7 @@ export default function Arcade() {
     <Layout title="Grass Valley Arcade" description="Play games made by Grass Valley Charter School students!">
       <main style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem' }}>
         <img
-          src="/img/arcade-header.png"
+          src={useBaseUrl('/img/arcade-header.png')}
           alt="The Grass Valley Arcade"
           style={{ width: '100%', borderRadius: '12px', marginBottom: '1.5rem' }}
         />
