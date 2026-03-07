@@ -21,7 +21,6 @@ A curated collection of tools, tutorials, and references for the Game Design & P
 |---|---|
 | [Kenney.nl](https://kenney.nl/assets) | High-quality free sprites, tiles, UI, and 3D models |
 | [OpenGameArt.org](https://opengameart.org/) | Community-contributed game art (check licenses) |
-| [itch.io Game Assets](https://itch.io/game-assets/free) | Huge library of free assets |
 | [Freesound.org](https://freesound.org/) | Free sound effects |
 | [Free Music Archive](https://freemusicarchive.org/) | Free music (check licenses) |
 | [Poly Haven](https://polyhaven.com/) | Free 3D models, textures, and HDRIs |
@@ -55,7 +54,7 @@ A curated collection of tools, tutorials, and references for the Game Design & P
 | Platform | Purpose | Cost |
 |---|---|---|
 | GDevelop web export | Instant shareable link | Free |
-| itch.io | Web game hosting | Free |
+| Grass Valley Arcade | School-hosted web arcade | Free |
 | Steam | Desktop distribution | $100 per title |
 
 ## Brian Lowe's Career Highlights

@@ -81,4 +81,3 @@ Use this template to prepare your 1--2 minute presentation:
 
 - [GDevelop Steam Publishing Guide](https://wiki.gdevelop.io/gdevelop5/publishing/desktop/)
 - [How to Create a Steam Developer Account](https://partner.steamgames.com/)
-- [itch.io Publishing Guide](https://itch.io/docs/creators/)
