@@ -3,6 +3,8 @@ sidebar_position: 3
 title: Level Design Planner
 ---
 
+![Level Design](/img/worksheet-level-design-header.png)
+
 # Level Design Planner
 
 Use this worksheet to plan your levels before building them in GDevelop. Good level designers sketch on paper first!

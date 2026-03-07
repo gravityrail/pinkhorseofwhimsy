@@ -72,6 +72,11 @@ export default function Arcade() {
   return (
     <Layout title="Grass Valley Arcade" description="Play games made by Grass Valley Charter School students!">
       <main style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem' }}>
+        <img
+          src="/img/arcade-header.png"
+          alt="The Grass Valley Arcade"
+          style={{ width: '100%', borderRadius: '12px', marginBottom: '1.5rem' }}
+        />
         <h1>The Grass Valley Arcade</h1>
         <p style={{ fontSize: '1.2rem' }}>
           Welcome to the Grass Valley Charter Arcade! These games were designed, built, and

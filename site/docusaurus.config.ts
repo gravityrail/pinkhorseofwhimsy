@@ -40,12 +40,16 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: 'img/social-card.jpg',
+    image: 'img/social-card.png',
     colorMode: {
       respectPrefersColorScheme: true,
     },
     navbar: {
       title: 'Grass Valley Game Club',
+      logo: {
+        alt: 'Grass Valley Game Club Logo',
+        src: 'img/logo.png',
+      },
       items: [
         {
           type: 'docSidebar',

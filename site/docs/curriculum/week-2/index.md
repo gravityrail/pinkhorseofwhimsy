@@ -8,6 +8,8 @@ title: "Week 2: Movement, Sprites & World Building"
 **Date:** April 24, 2026
 **Arc:** 2D Game (Week 1 of 3)
 
+![2D Game Development](/img/week-2d-arc.png)
+
 ## Featured Game: Gunstar Heroes (1993, Treasure / Backbone remaster)
 
 Brian produced the remaster. Play 2 minutes on the projector.

@@ -13,6 +13,8 @@ title: Curriculum Overview
 **Guest Producer:** Brian Lowe -- Weeks 1, 4 & 8
 **Publishing Goal:** Finished games published to Steam and/or the **Grass Valley Charter Arcade** (web)
 
+![2D and 3D Game Development](/img/hero-banner.png)
+
 ## Three Arcs
 
 | Arc | Weeks | Focus |

@@ -8,6 +8,8 @@ title: "Week 5: 3D Space, Camera & Environment"
 **Date:** May 15, 2026
 **Arc:** 3D Game (Week 1 of 3)
 
+![3D Game Development](/img/week-3d-arc.png)
+
 ## Featured Game: Five Nights at Freddy's: Security Breach (2021, Steel Wool)
 
 Brian worked business development. Show the opening -- the player navigating the Mega Pizzaplex.

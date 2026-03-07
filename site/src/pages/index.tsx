@@ -10,12 +10,29 @@ import styles from './index.module.css';
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
   return (
-    <header className={clsx('hero hero--primary', styles.heroBanner)}>
-      <div className="container">
-        <Heading as="h1" className="hero__title">
+    <header style={{
+      position: 'relative',
+      overflow: 'hidden',
+      textAlign: 'center',
+      padding: '0',
+    }}>
+      <img
+        src="/img/hero-banner.png"
+        alt="Grass Valley Game Club"
+        style={{ width: '100%', display: 'block' }}
+      />
+      <div style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        padding: '2rem',
+        background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
+      }}>
+        <Heading as="h1" style={{ color: 'white', fontSize: '2.5rem', margin: '0 0 0.5rem 0', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
           {siteConfig.title}
         </Heading>
-        <p className="hero__subtitle">{siteConfig.tagline}</p>
+        <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '1.2rem', margin: '0 0 1rem 0' }}>{siteConfig.tagline}</p>
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
