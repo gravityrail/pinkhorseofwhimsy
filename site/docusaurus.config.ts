@@ -4,7 +4,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'Grass Valley Game Club',
-  tagline: 'Game Design & Programming Club - Grass Valley Charter School',
+  tagline: 'Game Design & Programming Club - GVCS',
   favicon: 'img/favicon.ico',
 
   future: {
@@ -106,7 +106,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright ${new Date().getFullYear()} Grass Valley Charter School Game Club. Built with Docusaurus.`,
+      copyright: `Copyright ${new Date().getFullYear()} Grass Valley Game Club. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,

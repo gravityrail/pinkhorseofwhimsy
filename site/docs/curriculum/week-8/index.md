@@ -18,14 +18,14 @@ Quick montage of every featured game from the course -- 720deg, Gunstar Heroes, 
 ### Final Build & Export (30 min)
 
 - Last bug fixes and polish on 2D game, 3D game, or both.
-- Final web exports for the Grass Valley Charter Arcade.
+- Final web exports for the Grass Valley Arcade.
 - Desktop exports for students pursuing Steam.
 - Write/finalize game descriptions for the arcade page.
 - Instructor verifies all games are exported and playable.
 
 ### Arcade Mode (30 min)
 
-- **The Grass Valley Charter Arcade goes live.**
+- **The Grass Valley Arcade goes live.**
 - All games open on screens around the room.
 - Students, parents, and siblings rotate and play everything.
 - Each station has the student's name, game title, and description.
@@ -42,9 +42,9 @@ Each student: 1--2 minutes in front of the room.
 
 - Plays 2--3 student games live on the projector, reacting as a real producer.
 - Gives genuine feedback: what works, what's clever, what a studio would build on.
-- *"Here's what I see in your work that's exactly like the real industry."*
+- _"Here's what I see in your work that's exactly like the real industry."_
 - Career Q&A from students AND parents.
-- Closing message: *"You built and shipped two real games in eight weeks. That's not a school project -- that's game development."*
+- Closing message: _"You built and shipped two real games in eight weeks. That's not a school project -- that's game development."_
 
 ### Awards (10 min)
 
@@ -59,7 +59,7 @@ Voted on by the whole room -- students, parents, siblings, everyone:
 
 ## After the Session
 
-- Grass Valley Charter Arcade link shared with all families.
+- Grass Valley Arcade link shared with all families.
 - Students who want to pursue Steam publishing get a follow-up guide.
 - Club info shared for anyone interested in a second session (fall 2026?).
 

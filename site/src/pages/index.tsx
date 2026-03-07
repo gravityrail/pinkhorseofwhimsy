@@ -79,7 +79,7 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title="Home"
-      description="Game Design & Programming Club - Grass Valley Charter School. Build and publish real games in 8 weeks!">
+      description="Game Design & Programming Club. Build and publish real games in 8 weeks!">
       <HomepageHeader />
       <main style={{ maxWidth: '1000px', margin: '0 auto', padding: '2rem' }}>
         <div style={{

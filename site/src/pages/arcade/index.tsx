@@ -73,7 +73,7 @@ function GameCardComponent({ game }: { game: GameCard }) {
 
 export default function Arcade() {
   return (
-    <Layout title="Grass Valley Arcade" description="Play games made by Grass Valley Charter School students!">
+    <Layout title="Grass Valley Arcade" description="Play games made by Grass Valley students!">
       <main style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem' }}>
         <img
           src={useBaseUrl('/img/arcade-header.png')}
@@ -82,7 +82,7 @@ export default function Arcade() {
         />
         <h1>The Grass Valley Arcade</h1>
         <p style={{ fontSize: '1.2rem' }}>
-          Welcome to the Grass Valley Charter Arcade! These games were designed, built, and
+          Welcome to the Grass Valley Arcade! These games were designed, built, and
           published by students in the Game Design & Programming Club (Spring 2026).
         </p>
 
