@@ -46,9 +46,9 @@ A curated collection of tools, tutorials, and references for the Game Design & P
 
 ## Books (for curious students)
 
-- *The Art of Game Design* by Jesse Schell -- the definitive game design textbook
-- *Rules of Play* by Katie Salen & Eric Zimmerman -- game design fundamentals
-- *Level Up! The Guide to Great Video Game Design* by Scott Rogers -- practical and fun
+- [*The Art of Game Design*](https://schellgames.com/art-of-game-design) by Jesse Schell -- the definitive game design textbook
+- [*Rules of Play*](https://mitpress.mit.edu/9780262240451/rules-of-play/) by Katie Salen & Eric Zimmerman -- game design fundamentals
+- [*Level Up! The Guide to Great Video Game Design*](https://www.amazon.com/Level-Guide-Great-Video-Design/dp/1118877160) by Scott Rogers -- practical and fun
 
 ## Publishing
 

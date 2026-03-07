@@ -67,7 +67,7 @@ Brian introduces games from his own career to show how the medium evolved:
 - [GDevelop Official Site](https://gdevelop.io/)
 - [GDevelop Wiki & Documentation](https://wiki.gdevelop.io/)
 - [GDevelop Education Resources](https://gdevelop.io/education)
-- [The Art of Game Design (book)](https://www.schellgames.com/art-of-game-design/) by Jesse Schell
+- [The Art of Game Design (book)](https://schellgames.com/art-of-game-design) by Jesse Schell
 - [Extra Credits: What is a Game?](https://www.youtube.com/watch?v=blj91KLOvZQ) (YouTube)
 - [MDA Framework Paper](https://users.cs.northwestern.edu/~hunicke/MDA.pdf) -- Mechanics, Dynamics, Aesthetics
 
