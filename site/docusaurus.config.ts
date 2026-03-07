@@ -11,11 +11,11 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://grassvalleyarcade.github.io',
-  baseUrl: '/',
+  url: 'https://gravityrail.github.io',
+  baseUrl: '/game-club/',
 
-  organizationName: 'grassvalleyarcade',
-  projectName: 'grassvalleyarcade.github.io',
+  organizationName: 'gravityrail',
+  projectName: 'game-club',
 
   onBrokenLinks: 'throw',
 
