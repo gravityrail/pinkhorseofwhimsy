@@ -1,0 +1,341 @@
+{
+  "firstLayout": "Level1",
+  "gdVersion": { "build": 237, "major": 5, "minor": 5, "revision": 0 },
+  "properties": {
+    "adaptGameResolutionAtRuntime": true,
+    "antialiasingMode": "MSAA",
+    "antialisingEnabledOnMobile": false,
+    "folderProject": false,
+    "orientation": "landscape",
+    "packageName": "com.grassvalley.coincollector",
+    "pixelsRounding": true,
+    "projectUuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "scaleMode": "nearest",
+    "sizeOnStartupMode": "adaptWidth",
+    "templateSlug": "",
+    "version": "1.0.0",
+    "name": "Coin Collector",
+    "description": "A simple 2D platformer where you collect coins. Example project for Week 2 of the Grass Valley Game Club.",
+    "author": "Grass Valley Game Club",
+    "windowWidth": 800,
+    "windowHeight": 600,
+    "latestCompilationDirectory": "",
+    "maxFPS": 60,
+    "minFPS": 20,
+    "verticalSync": false,
+    "platformSpecificAssets": {},
+    "loadingScreen": {
+      "backgroundColor": 1710618,
+      "backgroundFadeInDuration": 0.2,
+      "backgroundImageResourceName": "",
+      "gdevelopLogoStyle": "light",
+      "logoAndProgressColor": 16777215,
+      "logoAndProgressLogoAndProgressFadeInDelay": 0.2,
+      "progressBarColor": 16777215,
+      "progressBarHeight": 20,
+      "progressBarMaxWidth": 200,
+      "progressBarMinWidth": 40,
+      "progressBarWidthPercent": 30,
+      "showGDevelopSplash": true,
+      "showProgressBar": true
+    },
+    "watermark": { "placement": "bottom-left", "showWatermark": true },
+    "authorIds": [],
+    "authorUsernames": [],
+    "categories": [],
+    "playableDevices": ["keyboard"],
+    "extensionProperties": [],
+    "platforms": [
+      { "name": "GDevelop JS platform" }
+    ],
+    "currentPlatform": "GDevelop JS platform"
+  },
+  "resources": {
+    "resources": [],
+    "resourceFolders": []
+  },
+  "objects": [],
+  "objectsFolderStructure": { "folderName": "__ROOT", "children": [] },
+  "objectsGroups": [],
+  "variables": [
+    { "name": "Score", "type": "number", "value": 0 }
+  ],
+  "layouts": [
+    {
+      "b": 200,
+      "disableInputWhenNotFocused": true,
+      "mangledName": "Level1",
+      "name": "Level1",
+      "r": 135,
+      "v": 235,
+      "standardSortMethod": true,
+      "stopSoundsOnStartup": true,
+      "title": "",
+      "uiSettings": {
+        "grid": true,
+        "gridType": "rectangular",
+        "gridWidth": 32,
+        "gridHeight": 32,
+        "gridOffsetX": 0,
+        "gridOffsetY": 0,
+        "gridColor": 10401023,
+        "gridAlpha": 0.8,
+        "snap": true,
+        "zoomFactor": 1,
+        "windowMask": false
+      },
+      "objectsGroups": [
+        { "name": "Platforms", "objects": [{ "name": "Ground" }, { "name": "Platform" }] },
+        { "name": "Coins", "objects": [{ "name": "Coin" }] }
+      ],
+      "variables": [],
+      "instances": [
+        { "angle": 0, "customSize": true, "height": 64, "width": 800, "layer": "", "name": "Ground", "x": 0, "y": 536, "zOrder": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "ground-1" },
+        { "angle": 0, "customSize": true, "height": 32, "width": 192, "layer": "", "name": "Platform", "x": 128, "y": 400, "zOrder": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "plat-1" },
+        { "angle": 0, "customSize": true, "height": 32, "width": 192, "layer": "", "name": "Platform", "x": 450, "y": 300, "zOrder": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "plat-2" },
+        { "angle": 0, "customSize": true, "height": 32, "width": 128, "layer": "", "name": "Platform", "x": 250, "y": 200, "zOrder": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "plat-3" },
+        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Player", "x": 64, "y": 472, "zOrder": 2, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "player-1" },
+        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Coin", "x": 192, "y": 360, "zOrder": 1, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "coin-1" },
+        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Coin", "x": 512, "y": 260, "zOrder": 1, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "coin-2" },
+        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Coin", "x": 300, "y": 160, "zOrder": 1, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "coin-3" },
+        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Coin", "x": 640, "y": 496, "zOrder": 1, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "coin-4" },
+        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Coin", "x": 400, "y": 496, "zOrder": 1, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "coin-5" },
+        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "ScoreText", "x": 16, "y": 16, "zOrder": 10, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "score-1" }
+      ],
+      "objects": [
+        {
+          "assetStoreId": "",
+          "name": "Player",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "PlatformCharacter",
+              "type": "PlatformBehavior::PlatformCharacterBehavior",
+              "acceleration": 1500,
+              "deceleration": 1500,
+              "gravity": 1000,
+              "jumpSpeed": 600,
+              "ladderClimbingSpeed": 150,
+              "maxFallingSpeed": 700,
+              "maxSpeed": 500,
+              "slopeMaxAngle": 60,
+              "canGrabPlatforms": false,
+              "ignoreDefaultControls": false,
+              "canGoDownFromJumpthru": true,
+              "useLegacyTrajectory": false
+            }
+          ],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "player.png",
+                      "points": [],
+                      "originPoint": { "name": "origine", "x": 0, "y": 0 },
+                      "centerPoint": { "automatic": true, "name": "centre", "x": 0, "y": 0 },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Ground",
+          "type": "TiledSpriteObject::TiledSprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Platform",
+              "type": "PlatformBehavior::PlatformBehavior",
+              "canBeGrabbed": false,
+              "platformType": "NormalPlatform"
+            }
+          ],
+          "width": 800,
+          "height": 64,
+          "texture": "ground.png"
+        },
+        {
+          "assetStoreId": "",
+          "name": "Platform",
+          "type": "TiledSpriteObject::TiledSprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Platform",
+              "type": "PlatformBehavior::PlatformBehavior",
+              "canBeGrabbed": false,
+              "platformType": "NormalPlatform"
+            }
+          ],
+          "width": 192,
+          "height": 32,
+          "texture": "platform.png"
+        },
+        {
+          "assetStoreId": "",
+          "name": "Coin",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "spin",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "coin.png",
+                      "points": [],
+                      "originPoint": { "name": "origine", "x": 0, "y": 0 },
+                      "centerPoint": { "automatic": true, "name": "centre", "x": 0, "y": 0 },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "ScoreText",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 32,
+          "font": "",
+          "textAlignment": "left",
+          "color": { "b": 255, "g": 255, "r": 255 },
+          "string": "Score: 0",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": { "b": 0, "g": 0, "r": 0 },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": { "b": 0, "g": 0, "r": 0 },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        }
+      ],
+      "objectsFolderStructure": {
+        "folderName": "__ROOT",
+        "children": [
+          { "objectName": "Player" },
+          { "objectName": "Ground" },
+          { "objectName": "Platform" },
+          { "objectName": "Coin" },
+          { "objectName": "ScoreText" }
+        ]
+      },
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": { "value": "DepartScene" },
+              "parameters": [""]
+            }
+          ],
+          "actions": [
+            {
+              "type": { "value": "SetNumberVariable" },
+              "parameters": ["Score", "=", "0"]
+            },
+            {
+              "type": { "value": "TextObject::String" },
+              "parameters": ["ScoreText", "=", "\"Score: 0\""]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": { "value": "CollisionNP" },
+              "parameters": ["Player", "Coin", "", "", ""]
+            }
+          ],
+          "actions": [
+            {
+              "type": { "value": "Delete" },
+              "parameters": ["Coin", ""]
+            },
+            {
+              "type": { "value": "SetNumberVariable" },
+              "parameters": ["Score", "+", "10"]
+            },
+            {
+              "type": { "value": "TextObject::String" },
+              "parameters": ["ScoreText", "=", "\"Score: \" + ToString(Variable(Score))"]
+            }
+          ]
+        }
+      ],
+      "layers": [
+        {
+          "ambientLightColorB": 200,
+          "ambientLightColorG": 200,
+          "ambientLightColorR": 200,
+          "camera3DFarPlaneDistance": 10000,
+          "camera3DFieldOfView": 45,
+          "camera3DNearPlaneDistance": 3,
+          "followBaseLayerCamera": false,
+          "isLightingLayer": false,
+          "isLocked": false,
+          "name": "",
+          "renderingType": "",
+          "visibility": true,
+          "cameras": [
+            { "defaultSize": true, "defaultViewport": true, "height": 0, "viewportBottom": 1, "viewportLeft": 0, "viewportRight": 1, "viewportTop": 0, "width": 0 }
+          ],
+          "effects": []
+        }
+      ],
+      "behaviorsSharedData": [
+        {
+          "name": "PlatformCharacter",
+          "type": "PlatformBehavior::PlatformCharacterBehavior"
+        },
+        {
+          "name": "Platform",
+          "type": "PlatformBehavior::PlatformBehavior"
+        }
+      ]
+    }
+  ],
+  "externalEvents": [],
+  "eventsFunctionsExtensions": [],
+  "externalLayouts": [],
+  "externalSourceFiles": []
+}

@@ -13,19 +13,30 @@ interface GameCard {
   screenshot?: string;
 }
 
-// Add student games here as they are exported from GDevelop.
-// Place each game's web export in: site/static/arcade/games/<slug>/
-// The game should have an index.html at its root.
+// Games are built from ./games/ directory via `node build-games.mjs`
+// and output to site/static/arcade/games/<slug>/
 const GAMES: GameCard[] = [
-  // Example entry (uncomment and modify when games are ready):
-  // {
-  //   title: 'Super Jump Quest',
-  //   author: 'Student Name',
-  //   description: 'A fast-paced platformer where you collect stars and dodge enemies!',
-  //   type: '2D',
-  //   slug: 'super-jump-quest',
-  //   screenshot: '/arcade/games/super-jump-quest/screenshot.png',
-  // },
+  {
+    title: 'Coin Collector',
+    author: 'Game Club (Example)',
+    description: 'A simple 2D platformer where you jump between platforms and collect coins. Week 2 example project.',
+    type: '2D',
+    slug: 'coin-collector',
+  },
+  {
+    title: 'Platform Runner',
+    author: 'Game Club (Example)',
+    description: 'Dodge spikes and enemies in this 2D platformer with lives and scoring. Week 3 example project.',
+    type: '2D',
+    slug: 'platform-runner',
+  },
+  {
+    title: 'Maze Explorer',
+    author: 'Game Club (Example)',
+    description: 'Navigate a 3D maze, collect gems, and find the exit. Week 5 example project.',
+    type: '3D',
+    slug: 'maze-explorer',
+  },
 ];
 
 function GameCardComponent({ game }: { game: GameCard }) {

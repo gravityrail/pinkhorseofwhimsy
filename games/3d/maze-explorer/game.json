@@ -1,0 +1,211 @@
+{
+  "firstLayout": "Maze",
+  "gdVersion": { "build": 237, "major": 5, "minor": 5, "revision": 0 },
+  "properties": {
+    "adaptGameResolutionAtRuntime": true,
+    "antialiasingMode": "MSAA",
+    "antialisingEnabledOnMobile": false,
+    "folderProject": false,
+    "orientation": "landscape",
+    "packageName": "com.grassvalley.mazeexplorer",
+    "pixelsRounding": false,
+    "projectUuid": "c3d4e5f6-a7b8-9012-cdef-345678901234",
+    "scaleMode": "linear",
+    "sizeOnStartupMode": "adaptWidth",
+    "templateSlug": "",
+    "version": "1.0.0",
+    "name": "Maze Explorer",
+    "description": "A first-person 3D maze where you collect gems and find the key. Example project for Week 5 of the Grass Valley Game Club.",
+    "author": "Grass Valley Game Club",
+    "windowWidth": 800,
+    "windowHeight": 600,
+    "latestCompilationDirectory": "",
+    "maxFPS": 60,
+    "minFPS": 20,
+    "verticalSync": false,
+    "platformSpecificAssets": {},
+    "loadingScreen": {
+      "backgroundColor": 1710618,
+      "backgroundFadeInDuration": 0.2,
+      "backgroundImageResourceName": "",
+      "gdevelopLogoStyle": "light",
+      "logoAndProgressColor": 16777215,
+      "logoAndProgressLogoAndProgressFadeInDelay": 0.2,
+      "progressBarColor": 16777215,
+      "progressBarHeight": 20,
+      "progressBarMaxWidth": 200,
+      "progressBarMinWidth": 40,
+      "progressBarWidthPercent": 30,
+      "showGDevelopSplash": true,
+      "showProgressBar": true
+    },
+    "watermark": { "placement": "bottom-left", "showWatermark": true },
+    "authorIds": [],
+    "authorUsernames": [],
+    "categories": [],
+    "playableDevices": ["keyboard"],
+    "extensionProperties": [],
+    "platforms": [{ "name": "GDevelop JS platform" }],
+    "currentPlatform": "GDevelop JS platform"
+  },
+  "resources": {
+    "resources": [
+      { "file": "wall.png", "kind": "image", "metadata": "", "name": "wall.png", "smoothed": false, "userAdded": true },
+      { "file": "floor.png", "kind": "image", "metadata": "", "name": "floor.png", "smoothed": false, "userAdded": true },
+      { "file": "key.png", "kind": "image", "metadata": "", "name": "key.png", "smoothed": false, "userAdded": true },
+      { "file": "gem.png", "kind": "image", "metadata": "", "name": "gem.png", "smoothed": false, "userAdded": true }
+    ],
+    "resourceFolders": []
+  },
+  "objects": [],
+  "objectsFolderStructure": { "folderName": "__ROOT", "children": [] },
+  "objectsGroups": [],
+  "variables": [
+    { "name": "Gems", "type": "number", "value": 0 },
+    { "name": "HasKey", "type": "number", "value": 0 }
+  ],
+  "layouts": [
+    {
+      "b": 20,
+      "disableInputWhenNotFocused": true,
+      "mangledName": "Maze",
+      "name": "Maze",
+      "r": 10,
+      "v": 30,
+      "standardSortMethod": true,
+      "stopSoundsOnStartup": true,
+      "title": "",
+      "uiSettings": {
+        "grid": true, "gridType": "rectangular", "gridWidth": 100, "gridHeight": 100,
+        "gridOffsetX": 0, "gridOffsetY": 0, "gridColor": 10401023, "gridAlpha": 0.8,
+        "snap": true, "zoomFactor": 0.3, "windowMask": false
+      },
+      "objectsGroups": [
+        { "name": "Walls", "objects": [{ "name": "Wall" }] },
+        { "name": "Collectibles", "objects": [{ "name": "Gem" }] }
+      ],
+      "variables": [],
+      "instances": [
+        { "angle": 0, "customSize": true, "height": 100, "width": 800, "layer": "", "name": "Floor", "x": 0, "y": 0, "zOrder": 0, "z": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "f1" },
+        { "angle": 0, "customSize": true, "height": 100, "width": 800, "layer": "", "name": "Wall", "x": 0, "y": 0, "zOrder": 1, "z": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "w-north" },
+        { "angle": 0, "customSize": true, "height": 100, "width": 800, "layer": "", "name": "Wall", "x": 0, "y": 700, "zOrder": 1, "z": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "w-south" },
+        { "angle": 90, "customSize": true, "height": 100, "width": 800, "layer": "", "name": "Wall", "x": 0, "y": 0, "zOrder": 1, "z": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "w-west" },
+        { "angle": 90, "customSize": true, "height": 100, "width": 800, "layer": "", "name": "Wall", "x": 700, "y": 0, "zOrder": 1, "z": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "w-east" },
+        { "angle": 0, "customSize": true, "height": 100, "width": 400, "layer": "", "name": "Wall", "x": 200, "y": 200, "zOrder": 1, "z": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "w-inner1" },
+        { "angle": 90, "customSize": true, "height": 100, "width": 300, "layer": "", "name": "Wall", "x": 400, "y": 300, "zOrder": 1, "z": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "w-inner2" },
+        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Gem", "x": 350, "y": 400, "zOrder": 2, "z": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "gem1" },
+        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Gem", "x": 150, "y": 550, "zOrder": 2, "z": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "gem2" },
+        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Gem", "x": 600, "y": 150, "zOrder": 2, "z": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "gem3" },
+        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "HUD", "x": 16, "y": 16, "zOrder": 10, "z": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "hud1" }
+      ],
+      "objects": [
+        {
+          "assetStoreId": "", "name": "Wall", "type": "Scene3D::Cube3DObject",
+          "updateIfNotVisible": false, "variables": [], "effects": [], "behaviors": [],
+          "width": 100, "height": 200, "depth": 100,
+          "frontFaceResourceName": "wall.png",
+          "backFaceResourceName": "wall.png",
+          "leftFaceResourceName": "wall.png",
+          "rightFaceResourceName": "wall.png",
+          "topFaceResourceName": "wall.png",
+          "bottomFaceResourceName": "wall.png",
+          "frontFaceVisible": true,
+          "backFaceVisible": true,
+          "leftFaceVisible": true,
+          "rightFaceVisible": true,
+          "topFaceVisible": true,
+          "bottomFaceVisible": true,
+          "frontFaceResourceRepeat": true,
+          "backFaceResourceRepeat": true,
+          "leftFaceResourceRepeat": true,
+          "rightFaceResourceRepeat": true,
+          "topFaceResourceRepeat": true,
+          "bottomFaceResourceRepeat": true,
+          "enableTextureTransparency": false,
+          "materialType": "Basic"
+        },
+        {
+          "assetStoreId": "", "name": "Floor", "type": "Scene3D::Cube3DObject",
+          "updateIfNotVisible": false, "variables": [], "effects": [], "behaviors": [],
+          "width": 800, "height": 10, "depth": 800,
+          "frontFaceResourceName": "floor.png",
+          "backFaceResourceName": "floor.png",
+          "leftFaceResourceName": "floor.png",
+          "rightFaceResourceName": "floor.png",
+          "topFaceResourceName": "floor.png",
+          "bottomFaceResourceName": "floor.png",
+          "frontFaceVisible": true,
+          "backFaceVisible": true,
+          "leftFaceVisible": true,
+          "rightFaceVisible": true,
+          "topFaceVisible": true,
+          "bottomFaceVisible": true,
+          "frontFaceResourceRepeat": true,
+          "backFaceResourceRepeat": true,
+          "leftFaceResourceRepeat": true,
+          "rightFaceResourceRepeat": true,
+          "topFaceResourceRepeat": true,
+          "bottomFaceResourceRepeat": true,
+          "enableTextureTransparency": false,
+          "materialType": "Basic"
+        },
+        {
+          "assetStoreId": "", "name": "Gem", "type": "Sprite",
+          "updateIfNotVisible": false, "variables": [], "effects": [], "behaviors": [],
+          "animations": [{ "name": "idle", "useMultipleDirections": false, "directions": [{ "looping": true, "timeBetweenFrames": 0.08, "sprites": [{ "hasCustomCollisionMask": false, "image": "gem.png", "points": [], "originPoint": { "name": "origine", "x": 0, "y": 0 }, "centerPoint": { "automatic": true, "name": "centre", "x": 0, "y": 0 }, "customCollisionMask": [] }] }] }]
+        },
+        {
+          "assetStoreId": "", "name": "HUD", "type": "TextObject::Text",
+          "updateIfNotVisible": false, "variables": [], "effects": [], "behaviors": [],
+          "characterSize": 24, "font": "", "textAlignment": "left",
+          "color": { "b": 255, "g": 255, "r": 255 }, "string": "Gems: 0",
+          "bold": true, "italic": false, "underlined": false, "smoothed": true,
+          "isOutlineEnabled": true, "outlineColor": { "b": 0, "g": 0, "r": 0 }, "outlineThickness": 2,
+          "isShadowEnabled": false, "shadowColor": { "b": 0, "g": 0, "r": 0 },
+          "shadowOpacity": 127, "shadowDistance": 1, "shadowAngle": 90, "shadowBlurRadius": 1
+        }
+      ],
+      "objectsFolderStructure": {
+        "folderName": "__ROOT",
+        "children": [
+          { "objectName": "Wall" }, { "objectName": "Floor" },
+          { "objectName": "Gem" }, { "objectName": "HUD" }
+        ]
+      },
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [{ "type": { "value": "DepartScene" }, "parameters": [""] }],
+          "actions": [
+            { "type": { "value": "SetNumberVariable" }, "parameters": ["Gems", "=", "0"] },
+            { "type": { "value": "TextObject::String" }, "parameters": ["HUD", "=", "\"Gems: 0\""] }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [{ "type": { "value": "CollisionNP" }, "parameters": ["", "Gem", "", "", ""] }],
+          "actions": [
+            { "type": { "value": "Delete" }, "parameters": ["Gem", ""] },
+            { "type": { "value": "SetNumberVariable" }, "parameters": ["Gems", "+", "1"] },
+            { "type": { "value": "TextObject::String" }, "parameters": ["HUD", "=", "\"Gems: \" + ToString(Variable(Gems))"] }
+          ]
+        }
+      ],
+      "layers": [
+        {
+          "ambientLightColorB": 180, "ambientLightColorG": 180, "ambientLightColorR": 200,
+          "camera3DFarPlaneDistance": 10000, "camera3DFieldOfView": 60, "camera3DNearPlaneDistance": 3,
+          "followBaseLayerCamera": false, "isLightingLayer": false, "isLocked": false,
+          "name": "", "renderingType": "2d+3d", "visibility": true,
+          "cameras": [{ "defaultSize": true, "defaultViewport": true, "height": 0, "viewportBottom": 1, "viewportLeft": 0, "viewportRight": 1, "viewportTop": 0, "width": 0 }],
+          "effects": []
+        }
+      ],
+      "behaviorsSharedData": []
+    }
+  ],
+  "externalEvents": [],
+  "eventsFunctionsExtensions": [],
+  "externalLayouts": [],
+  "externalSourceFiles": []
+}

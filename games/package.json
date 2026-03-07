@@ -1,0 +1,14 @@
+{
+  "name": "game-club-games",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build-games.mjs",
+    "build:2d": "node build-games.mjs --filter 2d",
+    "build:3d": "node build-games.mjs --filter 3d"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.96",
+    "gdexporter": "^1.0.0"
+  }
+}
