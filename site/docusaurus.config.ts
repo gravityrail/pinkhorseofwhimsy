@@ -12,7 +12,7 @@ const config: Config = {
   },
 
   url: 'https://gravityrail.github.io',
-  baseUrl: '/game-club/',
+  baseUrl: '/',
 
   organizationName: 'gravityrail',
   projectName: 'game-club',

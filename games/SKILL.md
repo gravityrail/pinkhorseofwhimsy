@@ -90,7 +90,7 @@ Each layout has objects, instances (placed objects), events (logic), and layers:
   "behaviors": [
     {
       "name": "PlatformCharacter",
-      "type": "PlatformBehavior::PlatformCharacterBehavior",
+      "type": "PlatformBehavior::PlatformerObjectBehavior",
       "gravity": 1000, "jumpSpeed": 600, "maxSpeed": 500,
       "acceleration": 1500, "deceleration": 1500, "maxFallingSpeed": 700
     }
@@ -260,16 +260,81 @@ node build-games.mjs           # Build all
 node build-games.mjs --filter 2d  # Build 2D only
 ```
 
-This uses `gdexporter` (wraps GDevelop's GDJS engine) to produce playable HTML5 builds in `site/static/arcade/games/<name>/`.
+This uses a custom exporter (`games/gdexport/`) that automatically downloads the latest GDevelop core (libGD.js) and GDJS Runtime from GDevelop's infrastructure, builds the TypeScript runtime with esbuild, and exports projects to playable HTML5 in `site/static/arcade/games/<name>/`. The toolchain is cached in `games/gdexport/.cache/`.
+
+**Important:** Every image used by a game must be declared in the `resources.resources` array in game.json:
+```json
+{ "file": "player.png", "kind": "image", "name": "player.png", "smoothed": false, "userAdded": true }
+```
+
+## 3D Model Objects (GLB)
+
+GDevelop supports loading GLB/glTF models via `Scene3D::Model3DObject`:
+
+```json
+{
+  "name": "Barrel",
+  "type": "Scene3D::Model3DObject",
+  "content": {
+    "width": 100, "height": 100, "depth": 100,
+    "modelResourceName": "barrel.glb",
+    "materialType": "KeepOriginal",
+    "originLocation": "BottomCenterZ",
+    "animations": [],
+    "isCastingShadow": true,
+    "isReceivingShadow": true
+  }
+}
+```
+
+GLB resources must be registered with `kind: 'model3D'`:
+```json
+{ "file": "barrel.glb", "kind": "model3D", "name": "barrel.glb", "userAdded": true }
+```
+
+### Animated GLB Models
+
+GLB animations (e.g., blinking LEDs) are supported. Add animation entries to `content.animations`:
+```json
+"animations": [{ "name": "blink", "source": "blink", "loop": true }]
+```
+The first animation plays automatically. `source` must match the animation name in the GLB file.
+
+### Generating GLB Models
+
+**Procedural (simple props):** Use `@gltf-transform/core` to build geometry in code.
+See `games/3d/maze-explorer/generate-props.mjs`. Key notes:
+- All accessors must be assigned to a buffer: `accessor.setBuffer(buf)`
+- Set `.setDoubleSided(true)` on all materials (GDevelop's Y-flip inverts winding)
+- GLB Z axis maps to game vertical (up)
+- Scale animations on child nodes simulate blinking/toggling
+
+**AI-generated (detailed assets):** Use TRELLIS.2 (image → 3D with PBR textures).
+See `games/trellis/SETUP.md` for RunPod setup. Quick usage:
+```bash
+cd games/trellis
+python3 runpod-trellis.py generate --image statue.png --output ../3d/maze-explorer/statue.glb
+```
+
+### GDevelop 3D Coordinate Mapping
+
+- GDevelop: X = right, Y = forward (grid), Z = up
+- GLB model: Z axis → game Z (vertical up)
+- `angle` property rotates around Z (yaw)
+- GDevelop applies Y-flip (`scale.y = -depth`), so use double-sided materials
 
 ## File Structure
 
 ```
 games/
-  package.json              # Dependencies: @napi-rs/canvas, gdexporter
+  package.json              # Dependencies: @napi-rs/canvas
   build-games.mjs           # Build script
   generate-assets.mjs       # Pixel art generator
   SKILL.md                  # This file
+  gdexport/
+    index.mjs               # Export function (uses latest GDCore + GDJS Runtime)
+    setup.mjs               # Downloads libGD.js/wasm, builds GDJS Runtime
+    .cache/                  # Auto-populated: libGD.js, libGD.wasm, built Runtime/
   2d/
     coin-collector/
       game.json             # GDevelop project
@@ -282,10 +347,18 @@ games/
       runner.png, spike.png, ground.png, enemy.png
   3d/
     maze-explorer/
-      game.json
-      wall.png              # 64x64 tileable texture
-      floor.png             # 64x64 tileable
-      key.png, gem.png
+      game.json             # Compiled from level.json
+      level.json            # High-level level description
+      compile-level.mjs     # Level compiler: level.json → game.json
+      generate-props.mjs    # Procedural GLB model generator
+      generate-minimap.mjs  # Minimap image generator
+      *.glb                 # 3D prop models (barrel, crate, computer, sconce, etc.)
+      *.png                 # Textures (wall, floor, ceiling, minimap)
+  trellis/
+    runpod-trellis.py       # RunPod pod manager (start/setup/generate/stop)
+    generate-model.mjs      # Image-to-3D via HuggingFace or RunPod
+    server.py               # Flask API server (runs on the pod)
+    SETUP.md                # Full setup instructions
 ```
 
 ## Adding a New Game

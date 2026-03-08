@@ -1,0 +1,9 @@
+{
+  "mapWidth": 428,
+  "mapHeight": 388,
+  "padding": 110,
+  "pxPerCell": 8,
+  "ringSize": 200,
+  "minimapRadius": 90,
+  "dotSize": 16
+}

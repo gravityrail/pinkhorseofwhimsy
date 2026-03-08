@@ -1,0 +1,262 @@
+{
+  "format": "maze-level-v1",
+
+  "settings": {
+    "cellSize": 200,
+    "wallHeight": 250,
+    "wallThickness": 20,
+    "ceilingGap": 0,
+    "stepHeight": 30,
+    "playerHeight": 80,
+    "playerRadius": 15,
+    "gravity": 800,
+    "jumpSpeed": 400,
+    "moveSpeed": 200,
+    "turnSpeed": 120,
+    "strafeSpeed": 150,
+    "ambientLight": { "color": "#ffffff", "intensity": 0.15 },
+    "directionalLight": {
+      "color": "#ffffff",
+      "intensity": 0.25,
+      "elevation": 60,
+      "rotation": 45,
+      "castShadow": true
+    },
+    "fog": { "type": "linear", "color": "#111122", "near": 400, "far": 3000 },
+    "backgroundColor": "#111122"
+  },
+
+  "textures": {
+    "stone_wall":    { "file": "stone_wall.png",    "tileSize": 64 },
+    "stone_floor":   { "file": "stone_floor.png",   "tileSize": 64 },
+    "stone_ceiling": { "file": "stone_ceiling.png",  "tileSize": 64 },
+    "metal_wall":    { "file": "metal_wall.png",     "tileSize": 64 },
+    "metal_floor":   { "file": "metal_floor.png",    "tileSize": 64 },
+    "metal_ceiling": { "file": "metal_ceiling.png",  "tileSize": 64 }
+  },
+
+  "materials": {
+    "dungeon": {
+      "wall": "stone_wall",
+      "floor": "stone_floor",
+      "ceiling": "stone_ceiling",
+      "materialType": "StandardWithoutMetalness"
+    },
+    "tech": {
+      "wall": "metal_wall",
+      "floor": "metal_floor",
+      "ceiling": "metal_ceiling",
+      "materialType": "StandardWithoutMetalness"
+    }
+  },
+
+  "areas": {
+    ".": {
+      "name": "corridor",
+      "material": "dungeon",
+      "floorHeight": 0,
+      "ceilingHeight": 250,
+      "lighting": {
+        "pattern": "sconces",
+        "spacing": 2,
+        "color": "#ff9944",
+        "intensity": 0.6,
+        "radius": 400
+      }
+    },
+    "C": {
+      "name": "great_hall",
+      "material": "dungeon",
+      "floorHeight": 0,
+      "ceilingHeight": 350,
+      "lighting": {
+        "pattern": "ceiling",
+        "spacing": 2,
+        "color": "#ffcc88",
+        "intensity": 0.8,
+        "radius": 600
+      }
+    },
+    "A": {
+      "name": "armory",
+      "material": "dungeon",
+      "floorHeight": 0,
+      "ceilingHeight": 250,
+      "lighting": {
+        "pattern": "sconces",
+        "spacing": 2,
+        "color": "#ff7744",
+        "intensity": 0.7,
+        "radius": 350
+      }
+    },
+    "S": {
+      "name": "server_room",
+      "material": "tech",
+      "floorHeight": -10,
+      "ceilingHeight": 200,
+      "lighting": {
+        "pattern": "ceiling",
+        "spacing": 2,
+        "color": "#44ff88",
+        "intensity": 0.5,
+        "radius": 300
+      }
+    },
+    "T": {
+      "name": "treasure_room",
+      "material": "dungeon",
+      "floorHeight": 20,
+      "ceilingHeight": 300,
+      "lighting": {
+        "pattern": "ceiling",
+        "spacing": 2,
+        "color": "#ffdd44",
+        "intensity": 1.0,
+        "radius": 500
+      }
+    }
+  },
+
+  "props": {
+    "fountain": {
+      "model": "fountain.glb",
+      "collision": "cylinder",
+      "radius": 60,
+      "height": 80,
+      "materialType": "KeepOriginal",
+      "castShadow": true
+    },
+    "barrel": {
+      "model": "barrel.glb",
+      "collision": "cylinder",
+      "radius": 25,
+      "height": 50,
+      "materialType": "KeepOriginal",
+      "castShadow": true
+    },
+    "computer": {
+      "model": "computer.glb",
+      "collision": "box",
+      "width": 60,
+      "depth": 30,
+      "height": 80,
+      "materialType": "KeepOriginal",
+      "castShadow": true,
+      "light": { "color": "#44ff88", "intensity": 0.3, "radius": 150 }
+    },
+    "torch": {
+      "model": "torch.glb",
+      "collision": "none",
+      "wallMount": true,
+      "materialType": "KeepOriginal",
+      "light": { "color": "#ff9944", "intensity": 0.8, "radius": 300 },
+      "animation": "flame"
+    },
+    "crate": {
+      "model": "crate.glb",
+      "collision": "box",
+      "width": 40,
+      "depth": 40,
+      "height": 40,
+      "materialType": "KeepOriginal",
+      "stackable": true,
+      "castShadow": true
+    }
+  },
+
+  "_gridLegend": "# = solid wall, . = corridor, C = great hall, A = armory, S = server room, T = treasure room",
+
+  "grid": [
+    "##########################",
+    "#........#CCCCCC#........#",
+    "#.######.#CCCCCC#.######.#",
+    "#.#AAAA#.#CCCCCC#.#SSSS#.#",
+    "#..AAAA...CCCCCC...SSSS..#",
+    "#.#AAAA#.#CCCCCC#.#SSSS#.#",
+    "#.######.########.######.#",
+    "#........#......#........#",
+    "#.####...........####..#.#",
+    "#.#..#..#..##..#.#..#..#.#",
+    "#.#..#..#......#.#..#..#.#",
+    "#....#..........##..#....#",
+    "#.####..#......#.####..#.#",
+    "#.......#TTTTTT#.........#",
+    "#.####..#TTTTTT#..####...#",
+    "#.#..#..#TTTTTT#..#..#...#",
+    "#.#..#...TTTTTT...#..#...#",
+    "#.####..#TTTTTT#..####...#",
+    "#.......########.........#",
+    "#........#......#........#",
+    "##########################"
+  ],
+
+  "heights": [
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,10,10,10,10,10,10,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+  ],
+
+  "propPlacements": [
+    { "prop": "barrel", "gx": 3.3, "gy": 3.3 },
+    { "prop": "barrel", "gx": 3.8, "gy": 3.7 },
+    { "prop": "barrel", "gx": 4.5, "gy": 3.2 },
+    { "prop": "barrel", "gx": 5.3, "gy": 3.5 },
+    { "prop": "crate", "gx": 4.2, "gy": 5.3, "stack": 2 },
+    { "prop": "crate", "gx": 4.8, "gy": 5.5, "stack": 1 },
+    { "prop": "crate", "gx": 3.5, "gy": 5.7, "stack": 1 },
+
+    { "prop": "computer", "gx": 21.2, "gy": 3.5 },
+    { "prop": "computer", "gx": 21.2, "gy": 4.5 },
+    { "prop": "computer", "gx": 21.2, "gy": 5.5 },
+    { "prop": "computer", "gx": 22.8, "gy": 3.5 },
+    { "prop": "computer", "gx": 22.8, "gy": 4.5 },
+    { "prop": "computer", "gx": 22.8, "gy": 5.5 },
+
+    { "prop": "crate", "gx": 8.3, "gy": 9.3, "stack": 1 },
+    { "prop": "crate", "gx": 8.7, "gy": 9.7, "stack": 2 },
+    { "prop": "barrel", "gx": 15.5, "gy": 9.5 },
+    { "prop": "barrel", "gx": 16.3, "gy": 9.3 },
+
+    { "prop": "crate", "gx": 2.3, "gy": 11.5, "stack": 1 },
+    { "prop": "crate", "gx": 2.7, "gy": 11.3, "stack": 1 },
+    { "prop": "barrel", "gx": 3.3, "gy": 11.7 },
+
+    { "prop": "barrel", "gx": 22.3, "gy": 11.5 },
+    { "prop": "barrel", "gx": 22.7, "gy": 11.8 },
+    { "prop": "crate", "gx": 23.3, "gy": 11.3, "stack": 2 },
+
+    { "prop": "barrel", "gx": 5.5, "gy": 19.3 },
+    { "prop": "crate", "gx": 19.5, "gy": 19.5, "stack": 1 },
+    { "prop": "barrel", "gx": 20.3, "gy": 19.3 }
+  ],
+
+  "spawn": { "gx": 1.5, "gy": 1.5, "angle": 90 },
+
+  "collectibles": [
+    { "type": "gem", "gx": 4.5, "gy": 4.0 },
+    { "type": "gem", "gx": 21.5, "gy": 4.5 },
+    { "type": "gem", "gx": 12.5, "gy": 10.5 },
+    { "type": "gem", "gx": 3.5, "gy": 15.5 },
+    { "type": "gem", "gx": 22.5, "gy": 15.5 },
+    { "type": "key", "gx": 12.5, "gy": 15.5 }
+  ]
+}

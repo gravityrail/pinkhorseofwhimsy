@@ -27,7 +27,7 @@
     "loadingScreen": {
       "backgroundColor": 1710618,
       "backgroundFadeInDuration": 0.2,
-      "backgroundImageResourceName": "",
+      "backgroundImageResourceName": "loading.png",
       "gdevelopLogoStyle": "light",
       "logoAndProgressColor": 16777215,
       "logoAndProgressLogoAndProgressFadeInDelay": 0.2,
@@ -36,7 +36,7 @@
       "progressBarMaxWidth": 200,
       "progressBarMinWidth": 40,
       "progressBarWidthPercent": 30,
-      "showGDevelopSplash": true,
+      "showGDevelopSplash": false,
       "showProgressBar": true
     },
     "watermark": { "placement": "bottom-left", "showWatermark": true },
@@ -49,7 +49,13 @@
     "currentPlatform": "GDevelop JS platform"
   },
   "resources": {
-    "resources": [],
+    "resources": [
+      { "file": "runner.png", "kind": "image", "name": "runner.png", "smoothed": false, "userAdded": true },
+      { "file": "spike.png", "kind": "image", "name": "spike.png", "smoothed": false, "userAdded": true },
+      { "file": "ground.png", "kind": "image", "name": "ground.png", "smoothed": false, "userAdded": true },
+      { "file": "enemy.png", "kind": "image", "name": "enemy.png", "smoothed": false, "userAdded": true },
+      { "file": "loading.png", "kind": "image", "name": "loading.png", "smoothed": true, "userAdded": true }
+    ],
     "resourceFolders": []
   },
   "objects": [],
@@ -85,7 +91,7 @@
         { "angle": 0, "customSize": true, "height": 32, "width": 192, "layer": "", "name": "Ground", "x": 150, "y": 420, "zOrder": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "g2" },
         { "angle": 0, "customSize": true, "height": 32, "width": 192, "layer": "", "name": "Ground", "x": 480, "y": 340, "zOrder": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "g3" },
         { "angle": 0, "customSize": true, "height": 32, "width": 128, "layer": "", "name": "Ground", "x": 300, "y": 220, "zOrder": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "g4" },
-        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Player", "x": 64, "y": 472, "zOrder": 2, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "p1" },
+        { "angle": 0, "customSize": true, "height": 64, "width": 64, "layer": "", "name": "Player", "x": 64, "y": 472, "zOrder": 2, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "p1" },
         { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Spike", "x": 350, "y": 504, "zOrder": 1, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "s1" },
         { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Spike", "x": 600, "y": 504, "zOrder": 1, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "s2" },
         { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Enemy", "x": 500, "y": 500, "zOrder": 1, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "e1" },
@@ -98,9 +104,9 @@
           "updateIfNotVisible": false, "variables": [], "effects": [],
           "behaviors": [
             {
-              "name": "PlatformCharacter", "type": "PlatformBehavior::PlatformCharacterBehavior",
+              "name": "PlatformCharacter", "type": "PlatformBehavior::PlatformerObjectBehavior",
               "acceleration": 1500, "deceleration": 1500, "gravity": 1200,
-              "jumpSpeed": 650, "ladderClimbingSpeed": 150, "maxFallingSpeed": 700,
+              "jumpSpeed": 850, "ladderClimbingSpeed": 150, "maxFallingSpeed": 700,
               "maxSpeed": 450, "slopeMaxAngle": 60, "canGrabPlatforms": false,
               "ignoreDefaultControls": false, "canGoDownFromJumpthru": true, "useLegacyTrajectory": false
             }
@@ -199,7 +205,7 @@
         }
       ],
       "behaviorsSharedData": [
-        { "name": "PlatformCharacter", "type": "PlatformBehavior::PlatformCharacterBehavior" },
+        { "name": "PlatformCharacter", "type": "PlatformBehavior::PlatformerObjectBehavior" },
         { "name": "Platform", "type": "PlatformBehavior::PlatformBehavior" }
       ]
     }

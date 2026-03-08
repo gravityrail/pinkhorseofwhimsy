@@ -32,6 +32,12 @@ jobs:
         working-directory: games
         run: npm ci
 
+      - name: Cache GDevelop export toolchain
+        uses: actions/cache@v4
+        with:
+          path: games/gdexport/.cache
+          key: gdexport-${{ hashFiles('games/gdexport/setup.mjs') }}
+
       - name: Build example games
         working-directory: games
         run: node build-games.mjs

@@ -5,10 +5,11 @@
   "scripts": {
     "build": "node build-games.mjs",
     "build:2d": "node build-games.mjs --filter 2d",
-    "build:3d": "node build-games.mjs --filter 3d"
+    "build:3d": "node build-games.mjs --filter 3d",
+    "setup": "node gdexport/setup.mjs"
   },
   "dependencies": {
-    "@napi-rs/canvas": "^0.1.96",
-    "gdexporter": "^1.0.0"
+    "@gltf-transform/core": "^4.3.0",
+    "@napi-rs/canvas": "^0.1.96"
   }
 }

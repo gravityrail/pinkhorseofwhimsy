@@ -74,7 +74,7 @@ async function generateCoinCollectorAssets() {
 ......Bb..bB..........
 .....RRR..RRR.........
 .....RRR..RRR.........
-`, palette, 4, 6);
+`, palette, 4, 14);
     await saveCanvas(c, join(base, 'player.png'));
   }
 
@@ -194,7 +194,7 @@ async function generatePlatformRunnerAssets() {
 ......RR...RR.........
 .....GG.....GG........
 .....GG.....GG........
-`, palette, 5, 8);
+`, palette, 5, 17);
     await saveCanvas(c, join(base, 'runner.png'));
   }
 
@@ -310,15 +310,14 @@ KKKKKKKKKKKKKKKKKK..............
 async function generateMazeExplorerAssets() {
   const base = join(__dirname, '3d/maze-explorer');
 
-  // Wall texture: 64x64 stone bricks
+  // Stone wall: 64x64 dark dungeon bricks
   {
     const c = createCanvas(64, 64);
     const ctx = c.getContext('2d');
-    ctx.fillStyle = '#6b7280';
+    ctx.fillStyle = '#3d3d4a';
     ctx.fillRect(0, 0, 64, 64);
-    // Brick pattern
-    ctx.fillStyle = '#4b5563';
-    // Horizontal mortar
+    // Brick pattern - horizontal mortar lines
+    ctx.fillStyle = '#2a2a35';
     for (const y of [0, 16, 32, 48]) {
       ctx.fillRect(0, y, 64, 1);
     }
@@ -330,34 +329,137 @@ async function generateMazeExplorerAssets() {
       ctx.fillRect(15, y + 1, 1, 15);
       ctx.fillRect(47, y + 1, 1, 15);
     }
-    // Highlights and shadows for depth
-    ctx.fillStyle = '#9ca3af';
-    for (const [x, y] of [[2,2],[34,2],[18,18],[50,18],[2,34],[34,34],[18,50],[50,50]]) {
-      ctx.fillRect(x, y, 10, 1);
+    // Top-edge highlights per brick
+    ctx.fillStyle = '#4a4a58';
+    for (const [x, y] of [[1,1],[33,1],[17,17],[49,17],[1,33],[33,33],[17,49],[49,49]]) {
+      ctx.fillRect(x, y, 12, 1);
     }
-    ctx.fillStyle = '#374151';
-    for (const [x, y] of [[5,14],[20,30],[40,14],[55,30],[5,46],[20,62],[40,46],[55,62]]) {
-      ctx.fillRect(x, y, 8, 1);
+    // Bottom-edge shadows per brick
+    ctx.fillStyle = '#252530';
+    for (const [x, y] of [[1,15],[33,15],[17,31],[49,31],[1,47],[33,47],[17,63],[49,63]]) {
+      ctx.fillRect(x, y, 12, 1);
     }
-    await saveCanvas(c, join(base, 'wall.png'));
+    // Subtle stone variation
+    ctx.fillStyle = '#444452';
+    for (const [x, y] of [[4,5],[38,10],[20,22],[52,26],[8,38],[42,44],[24,52],[56,58]]) {
+      ctx.fillRect(x, y, 2, 2);
+    }
+    await saveCanvas(c, join(base, 'stone_wall.png'));
   }
 
-  // Floor: 64x64 flagstone
+  // Stone floor: 64x64 dark flagstone
   {
     const c = createCanvas(64, 64);
     const ctx = c.getContext('2d');
-    ctx.fillStyle = '#4b5563';
+    ctx.fillStyle = '#2d2d38';
     ctx.fillRect(0, 0, 64, 64);
-    // Flagstone pattern
-    ctx.fillStyle = '#374151';
+    // Large flagstone grid
+    ctx.fillStyle = '#222230';
     ctx.fillRect(0, 0, 64, 1); ctx.fillRect(0, 31, 64, 2); ctx.fillRect(0, 63, 64, 1);
     ctx.fillRect(0, 0, 1, 64); ctx.fillRect(31, 0, 2, 64); ctx.fillRect(63, 0, 1, 64);
-    // Subtle variation
-    ctx.fillStyle = '#6b7280';
-    for (const [x, y] of [[4,4],[36,8],[12,36],[44,40]]) {
+    // Subtle highlight on stone edges
+    ctx.fillStyle = '#383848';
+    ctx.fillRect(1, 1, 29, 1); ctx.fillRect(33, 1, 29, 1);
+    ctx.fillRect(1, 33, 29, 1); ctx.fillRect(33, 33, 29, 1);
+    // Dirt/wear variation
+    ctx.fillStyle = '#262634';
+    for (const [x, y] of [[5,8],[40,12],[14,40],[48,46],[22,18],[56,28]]) {
       ctx.fillRect(x, y, 3, 3);
     }
-    await saveCanvas(c, join(base, 'floor.png'));
+    await saveCanvas(c, join(base, 'stone_floor.png'));
+  }
+
+  // Stone ceiling: 64x64 rough dark stone
+  {
+    const c = createCanvas(64, 64);
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#1e1e28';
+    ctx.fillRect(0, 0, 64, 64);
+    // Rough stone texture - random-ish patches
+    ctx.fillStyle = '#252532';
+    for (const [x, y, w, h] of [[2,3,8,6],[18,1,10,5],[40,4,12,4],[8,20,6,8],[32,18,10,6],[50,22,8,7],[4,38,9,5],[24,40,7,8],[44,36,10,6],[14,54,8,5],[36,56,6,4],[54,50,6,8]]) {
+      ctx.fillRect(x, y, w, h);
+    }
+    // Darker cracks
+    ctx.fillStyle = '#161620';
+    for (const [x, y, w, h] of [[12,10,1,8],[30,5,1,12],[50,15,1,6],[6,30,1,10],[42,28,1,8],[22,48,1,6]]) {
+      ctx.fillRect(x, y, w, h);
+    }
+    await saveCanvas(c, join(base, 'stone_ceiling.png'));
+  }
+
+  // Metal wall: 64x64 sci-fi panels
+  {
+    const c = createCanvas(64, 64);
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#404858';
+    ctx.fillRect(0, 0, 64, 64);
+    // Panel borders
+    ctx.fillStyle = '#2c3240';
+    ctx.fillRect(0, 0, 64, 2); ctx.fillRect(0, 30, 64, 4); ctx.fillRect(0, 62, 64, 2);
+    ctx.fillRect(0, 0, 2, 64); ctx.fillRect(30, 0, 4, 64); ctx.fillRect(62, 0, 2, 64);
+    // Panel highlights (top/left edges)
+    ctx.fillStyle = '#505a6a';
+    ctx.fillRect(2, 2, 28, 1); ctx.fillRect(34, 2, 28, 1);
+    ctx.fillRect(2, 34, 28, 1); ctx.fillRect(34, 34, 28, 1);
+    ctx.fillRect(2, 2, 1, 28); ctx.fillRect(34, 2, 1, 28);
+    // Rivet dots
+    ctx.fillStyle = '#5a6474';
+    for (const [x, y] of [[4,4],[28,4],[36,4],[60,4],[4,28],[28,28],[36,28],[60,28],[4,36],[28,36],[36,36],[60,36],[4,60],[28,60],[36,60],[60,60]]) {
+      ctx.fillRect(x, y, 2, 2);
+    }
+    await saveCanvas(c, join(base, 'metal_wall.png'));
+  }
+
+  // Metal floor: 64x64 diamond plate
+  {
+    const c = createCanvas(64, 64);
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#363e4e';
+    ctx.fillRect(0, 0, 64, 64);
+    // Diamond pattern
+    ctx.fillStyle = '#404858';
+    for (let y = 0; y < 64; y += 16) {
+      for (let x = 0; x < 64; x += 16) {
+        // Diamond shape
+        ctx.fillRect(x + 6, y + 2, 4, 1);
+        ctx.fillRect(x + 5, y + 3, 6, 1);
+        ctx.fillRect(x + 4, y + 4, 8, 1);
+        ctx.fillRect(x + 5, y + 5, 6, 1);
+        ctx.fillRect(x + 6, y + 6, 4, 1);
+      }
+    }
+    // Offset row
+    ctx.fillStyle = '#3a4252';
+    for (let y = 8; y < 64; y += 16) {
+      for (let x = 8; x < 64; x += 16) {
+        ctx.fillRect(x + 6, y + 2, 4, 1);
+        ctx.fillRect(x + 5, y + 3, 6, 1);
+        ctx.fillRect(x + 4, y + 4, 8, 1);
+        ctx.fillRect(x + 5, y + 5, 6, 1);
+        ctx.fillRect(x + 6, y + 6, 4, 1);
+      }
+    }
+    await saveCanvas(c, join(base, 'metal_floor.png'));
+  }
+
+  // Metal ceiling: 64x64 dark industrial panels
+  {
+    const c = createCanvas(64, 64);
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#282e3a';
+    ctx.fillRect(0, 0, 64, 64);
+    // Grid of ceiling tiles
+    ctx.fillStyle = '#1e2430';
+    ctx.fillRect(0, 0, 64, 1); ctx.fillRect(0, 31, 64, 2); ctx.fillRect(0, 63, 64, 1);
+    ctx.fillRect(0, 0, 1, 64); ctx.fillRect(31, 0, 2, 64); ctx.fillRect(63, 0, 1, 64);
+    // Vent slits
+    ctx.fillStyle = '#121820';
+    for (const y of [10, 14, 18, 42, 46, 50]) {
+      ctx.fillRect(8, y, 16, 1);
+      ctx.fillRect(40, y, 16, 1);
+    }
+    await saveCanvas(c, join(base, 'metal_ceiling.png'));
   }
 
   // Key: 32x32
@@ -417,7 +519,7 @@ async function generateMazeExplorerAssets() {
     await saveCanvas(c, join(base, 'gem.png'));
   }
 
-  console.log('  maze-explorer: 4 assets');
+  console.log('  maze-explorer: 10 assets');
 }
 
 async function main() {
@@ -425,7 +527,7 @@ async function main() {
   await generateCoinCollectorAssets();
   await generatePlatformRunnerAssets();
   await generateMazeExplorerAssets();
-  console.log('\nDone! 12 assets generated.');
+  console.log('\nDone! 18 assets generated.');
 }
 
 main().catch(console.error);

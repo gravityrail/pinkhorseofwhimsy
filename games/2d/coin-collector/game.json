@@ -27,7 +27,7 @@
     "loadingScreen": {
       "backgroundColor": 1710618,
       "backgroundFadeInDuration": 0.2,
-      "backgroundImageResourceName": "",
+      "backgroundImageResourceName": "loading.png",
       "gdevelopLogoStyle": "light",
       "logoAndProgressColor": 16777215,
       "logoAndProgressLogoAndProgressFadeInDelay": 0.2,
@@ -36,7 +36,7 @@
       "progressBarMaxWidth": 200,
       "progressBarMinWidth": 40,
       "progressBarWidthPercent": 30,
-      "showGDevelopSplash": true,
+      "showGDevelopSplash": false,
       "showProgressBar": true
     },
     "watermark": { "placement": "bottom-left", "showWatermark": true },
@@ -51,7 +51,13 @@
     "currentPlatform": "GDevelop JS platform"
   },
   "resources": {
-    "resources": [],
+    "resources": [
+      { "file": "player.png", "kind": "image", "name": "player.png", "smoothed": false, "userAdded": true },
+      { "file": "coin.png", "kind": "image", "name": "coin.png", "smoothed": false, "userAdded": true },
+      { "file": "ground.png", "kind": "image", "name": "ground.png", "smoothed": false, "userAdded": true },
+      { "file": "platform.png", "kind": "image", "name": "platform.png", "smoothed": false, "userAdded": true },
+      { "file": "loading.png", "kind": "image", "name": "loading.png", "smoothed": true, "userAdded": true }
+    ],
     "resourceFolders": []
   },
   "objects": [],
@@ -94,7 +100,7 @@
         { "angle": 0, "customSize": true, "height": 32, "width": 192, "layer": "", "name": "Platform", "x": 128, "y": 400, "zOrder": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "plat-1" },
         { "angle": 0, "customSize": true, "height": 32, "width": 192, "layer": "", "name": "Platform", "x": 450, "y": 300, "zOrder": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "plat-2" },
         { "angle": 0, "customSize": true, "height": 32, "width": 128, "layer": "", "name": "Platform", "x": 250, "y": 200, "zOrder": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "plat-3" },
-        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Player", "x": 64, "y": 472, "zOrder": 2, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "player-1" },
+        { "angle": 0, "customSize": true, "height": 64, "width": 64, "layer": "", "name": "Player", "x": 64, "y": 472, "zOrder": 2, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "player-1" },
         { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Coin", "x": 192, "y": 360, "zOrder": 1, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "coin-1" },
         { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Coin", "x": 512, "y": 260, "zOrder": 1, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "coin-2" },
         { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Coin", "x": 300, "y": 160, "zOrder": 1, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "coin-3" },
@@ -113,11 +119,11 @@
           "behaviors": [
             {
               "name": "PlatformCharacter",
-              "type": "PlatformBehavior::PlatformCharacterBehavior",
+              "type": "PlatformBehavior::PlatformerObjectBehavior",
               "acceleration": 1500,
               "deceleration": 1500,
               "gravity": 1000,
-              "jumpSpeed": 600,
+              "jumpSpeed": 800,
               "ladderClimbingSpeed": 150,
               "maxFallingSpeed": 700,
               "maxSpeed": 500,
@@ -325,7 +331,7 @@
       "behaviorsSharedData": [
         {
           "name": "PlatformCharacter",
-          "type": "PlatformBehavior::PlatformCharacterBehavior"
+          "type": "PlatformBehavior::PlatformerObjectBehavior"
         },
         {
           "name": "Platform",
