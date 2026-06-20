@@ -19,7 +19,7 @@ function HomepageHeader() {
     }}>
       <img
         src={useBaseUrl('/img/hero-banner.png')}
-        alt="Grass Valley Game Club"
+        alt="Pink Horse of Whimsy"
         style={{ width: '100%', display: 'block' }}
       />
       <div style={{
@@ -44,7 +44,7 @@ function HomepageHeader() {
             className="button button--secondary button--lg"
             to="/arcade"
             style={{ marginLeft: '1rem' }}>
-            Grass Valley Arcade
+            Pink Horse Arcade
           </Link>
         </div>
       </div>
@@ -64,7 +64,7 @@ const FEATURES = [
     link: '/docs/curriculum/week-1/',
   },
   {
-    title: 'Grass Valley Arcade',
+    title: 'Pink Horse Arcade',
     description: 'Play games built by students! All games are published and playable in your browser.',
     link: '/arcade',
   },

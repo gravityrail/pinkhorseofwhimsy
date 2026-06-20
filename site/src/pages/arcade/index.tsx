@@ -10,12 +10,22 @@ interface GameCard {
   type: '2D' | '3D';
   // Path to the game's index.html inside /static/arcade/games/<slug>/
   slug: string;
+  // Optional: a direct URL for standalone games that live elsewhere in /static/
+  href?: string;
   screenshot?: string;
 }
 
 // Games are built from ./games/ directory via `node build-games.mjs`
 // and output to site/static/arcade/games/<slug>/
 const GAMES: GameCard[] = [
+  {
+    title: 'Worm',
+    author: 'Pink Horse of Whimsy',
+    description: 'Burrow through the earth as a 6-segment worm, gobbling treasure across an endless tunnelling world. Dodge the giant birds! Touch-friendly — great on a tablet or car display.',
+    type: '2D',
+    slug: 'worm',
+    href: '/worm/',
+  },
   {
     title: 'Coin Collector',
     author: 'Game Club (Example)',
@@ -41,7 +51,7 @@ const GAMES: GameCard[] = [
 
 function GameCardComponent({ game }: { game: GameCard }) {
   const screenshotUrl = useBaseUrl(game.screenshot || '');
-  const playUrl = useBaseUrl(`/arcade/games/${game.slug}/`);
+  const playUrl = useBaseUrl(game.href || `/arcade/games/${game.slug}/`);
   return (
     <div style={{
       border: '2px solid var(--ifm-color-primary)',
@@ -84,17 +94,16 @@ function GameCardComponent({ game }: { game: GameCard }) {
 
 export default function Arcade() {
   return (
-    <Layout title="Grass Valley Arcade" description="Play games made by Grass Valley students!">
+    <Layout title="Pink Horse Arcade" description="Play games made at Pink Horse of Whimsy!">
       <main style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem' }}>
         <img
           src={useBaseUrl('/img/arcade-header.png')}
-          alt="The Grass Valley Arcade"
+          alt="The Pink Horse Arcade"
           style={{ width: '100%', borderRadius: '12px', marginBottom: '1.5rem' }}
         />
-        <h1>The Grass Valley Arcade</h1>
+        <h1>The Pink Horse Arcade</h1>
         <p style={{ fontSize: '1.2rem' }}>
-          Welcome to the Grass Valley Arcade! These games were designed, built, and
-          published by students in the Game Design & Programming Club (Spring 2026).
+          Welcome to the Pink Horse Arcade! A growing collection of homemade browser games.
         </p>
 
         <div style={{

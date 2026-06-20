@@ -1,12 +1,45 @@
-# Game Design & Programming Club — 8-Week Curriculum
+# 🦄 Pink Horse of Whimsy
 
-## GVCS | Fridays, April 17 – June 5, 2026
+A whimsical little arcade of homemade browser games, hosted at **[pinkhorseofwhimsy.com](https://pinkhorseofwhimsy.com)**.
+
+The site is built with [Docusaurus](https://docusaurus.io/) (in [`site/`](site/)) and deployed to GitHub Pages automatically on every push to `trunk` (see [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)).
+
+## Structure
+
+| Path | What |
+| --- | --- |
+| [`site/`](site/) | The Docusaurus website (homepage, Arcade, curriculum docs). |
+| [`site/static/worm/`](site/static/worm/) | **Worm** — a self-contained HTML5 game (single file, no build step). |
+| [`site/static/arcade/games/`](site/static/arcade/games/) | GDevelop games built from [`games/`](games/) by the deploy workflow. |
+| [`games/`](games/) | Source + build pipeline for the GDevelop example games. |
+
+## Local development
+
+```bash
+cd site
+npm install
+npm start          # dev server with hot reload
+npm run build      # production build into site/build/
+```
+
+Standalone games under `site/static/` (like Worm) are served as-is at their path — e.g. `/worm/`. To add one, drop its files in `site/static/<name>/` and add a card to the `GAMES` array in [`site/src/pages/arcade/index.tsx`](site/src/pages/arcade/index.tsx).
+
+## Adding a game to the Arcade
+
+See [`CLAUDE.md`](CLAUDE.md) for conventions.
+
+---
+
+<details>
+<summary>📚 Legacy: Game Design &amp; Programming Club curriculum (GVCS, Spring 2026)</summary>
+
+This repo began as an 8-week game-design club curriculum. That material is preserved below and still lives under `docs/`.
 
 **Grades:** 5–8 (advanced 4th graders welcome)
 **Sessions:** 1.5 hours (2 hours on guest weeks)
 **Tool:** GDevelop 5 (all 8 weeks)
 **Guest Producer:** Brian Lowe — Weeks 1, 4 & 8
-**Publishing Goal:** Finished games published to Steam and/or the **Grass Valley Arcade** (web)
+**Publishing Goal:** Finished games published to Steam and/or the **Pink Horse Arcade** (web)
 
 ---
 
@@ -40,7 +73,7 @@
 
 Students who complete their games can:
 
-- **Publish to the web** on the **Grass Valley Arcade** — a shared page (itch.io or school-hosted) where all club games are playable.
+- **Publish to the web** on the **Pink Horse Arcade** — a shared page (itch.io or school-hosted) where all club games are playable.
 - **Publish to Steam** via GDevelop's desktop export. Students who want to distribute/sell their games can do so with parental permission.
 - **Share a link** with family and friends immediately via GDevelop's one-click web export.
 
@@ -334,7 +367,7 @@ Brian produced this at Midway. Show a clip.
 - Multiple scenes in 3D: level transitions, loading new environments.
 - Title screens, menus, and game over screens in 3D projects.
 - Sound design for 3D: spatial audio, ambient tracks, UI sounds.
-- Publishing pipeline: web export for the Grass Valley Arcade, desktop export for Steam.
+- Publishing pipeline: web export for the Pink Horse Arcade, desktop export for Steam.
 - What it means to "ship" a game: it doesn't have to be perfect, it has to be done.
 
 ### Build
@@ -354,7 +387,7 @@ Brian produced this at Midway. Show a clip.
 
 ### Publishing Prep
 
-- Instructor helps students export web builds for the Grass Valley Arcade.
+- Instructor helps students export web builds for the Pink Horse Arcade.
 - Discussion: what makes a good game page? Title, screenshot, short description.
 - Students write a 2-sentence description of each game they want to publish.
 
@@ -372,14 +405,14 @@ Quick montage of every featured game from the course — 720°, Gunstar Heroes, 
 ### Final Build & Export (30 min)
 
 - Last bug fixes and polish on 2D game, 3D game, or both.
-- Final web exports for the Grass Valley Arcade.
+- Final web exports for the Pink Horse Arcade.
 - Desktop exports for students pursuing Steam.
 - Write/finalize game descriptions for the arcade page.
 - Instructor verifies all games are exported and playable.
 
 ### Arcade Mode (30 min)
 
-- **The Grass Valley Arcade goes live.**
+- **The Pink Horse Arcade goes live.**
 - All games open on screens around the room. Students, parents, and siblings rotate and play everything.
 - Each station has the student's name, game title, and description.
 - Encourage families to play both the 2D and 3D games.
@@ -411,7 +444,7 @@ Voted on by the whole room — students, parents, siblings, everyone:
 
 ### After the Session
 
-- Grass Valley Arcade link shared with all families.
+- Pink Horse Arcade link shared with all families.
 - Students who want to pursue Steam publishing get a follow-up guide.
 - Club info shared for anyone interested in a second session (fall 2026?).
 
@@ -430,7 +463,7 @@ Voted on by the whole room — students, parents, siblings, everyone:
 | Platform            | Purpose                         | Cost                                     |
 | ------------------- | ------------------------------- | ---------------------------------------- |
 | GDevelop web export | Instant shareable link          | Free                                     |
-| itch.io             | Grass Valley Arcade page        | Free                                     |
+| itch.io             | Pink Horse Arcade page        | Free                                     |
 | Steam               | Desktop distribution (optional) | $100 one-time fee per title (Steamworks) |
 
 ### Per Student
@@ -451,7 +484,7 @@ Voted on by the whole room — students, parents, siblings, everyone:
 - Maintain a "stuck?" cheat sheet of common GDevelop event patterns
 - Have catch-up project files for students who miss a week
 - Test GDevelop web version on school machines/network before Week 1
-- Set up the Grass Valley Arcade itch.io page before Week 7
+- Set up the Pink Horse Arcade itch.io page before Week 7
 - Acquire/prepare clips or ROMs of featured games for each week
 
 ---
@@ -525,3 +558,5 @@ Voted on by the whole room — students, parents, siblings, everyone:
 | 6    | May 22 ⚠️ | 3D          | Interaction, enemies, storytelling     | Ace Patrol            |          |
 | 7    | May 29    | 3D          | Polish, levels, publishing prep        | Rampage 2             |          |
 | 8    | Jun 5     | 🎉          | Demo Day — parents, arcade, celebrate! | All of them           | 🎤 Brian |
+
+</details>

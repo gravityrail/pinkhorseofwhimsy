@@ -3,19 +3,19 @@ import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
-  title: 'Grass Valley Game Club',
-  tagline: 'Game Design & Programming Club - GVCS',
+  title: 'Pink Horse of Whimsy',
+  tagline: 'A whimsical little arcade of homemade games',
   favicon: 'img/favicon.ico',
 
   future: {
     v4: true,
   },
 
-  url: 'https://gravityrail.github.io',
+  url: 'https://pinkhorseofwhimsy.com',
   baseUrl: '/',
 
   organizationName: 'gravityrail',
-  projectName: 'game-club',
+  projectName: 'pinkhorseofwhimsy',
 
   onBrokenLinks: 'throw',
 
@@ -45,9 +45,9 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: 'Grass Valley Game Club',
+      title: 'Pink Horse of Whimsy',
       logo: {
-        alt: 'Grass Valley Game Club Logo',
+        alt: 'Pink Horse of Whimsy Logo',
         src: 'img/logo.png',
       },
       items: [
@@ -106,7 +106,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright ${new Date().getFullYear()} Grass Valley Game Club. Built with Docusaurus.`,
+      copyright: `Copyright ${new Date().getFullYear()} Pink Horse of Whimsy. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,
