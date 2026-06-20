@@ -1,0 +1,2649 @@
+import * as THREE from 'three';
+import DustParticles from './dust-particles.js';
+import { kartSize, PHYSICS, wheelConfig } from './kart-config.js';
+import { TRACK_PHYSICS } from '../track/track-config.js';
+
+class Kart {
+    constructor(scene, track) {
+        this.scene = scene;
+        this.track = track;
+        
+        // Kart physics state
+        this.velocity = 0;                 // Current velocity
+        this.isAccelerating = false;
+        
+        // Jumping and air physics state
+        this.isInAir = false;              // True when kart is airborne
+        this.verticalVelocity = 0;         // Vertical speed (for jumps and gravity)
+        this.airTime = 0;                  // Time spent in the air
+        this.lastGroundY = 0;              // Last ground position before becoming airborne
+        this.airRotation = {
+            x: 0,                          // Pitch rotation in air
+            z: 0,                          // Roll rotation in air
+            velocityX: 0,                  // Rotation speeds
+            velocityZ: 0
+        };
+        
+        // Collision state
+        this.lastCollisionTime = 0;        // Time of last collision
+        this.isColliding = false;          // True during collision handling
+        
+        // Recovery system state
+        this.timeSpentSlow = 0;            // Time spent below minimum velocity
+        this.isBeingReset = false;         // True when the kart is being reset
+        this.resetAnimationTime = 0;       // For reset animation
+        
+        // Audio system will be initialized on demand
+        this.audioContext = null;
+        this.oscillator = null;
+        this.gainNode = null;
+        this.filter = null;
+        
+        // Chassis orientation state (in radians)
+        this.chassisOrientation = {
+            pitch: 0,       // Forward/backward tilt
+            roll: 0,        // Side-to-side tilt
+            pitchVelocity: 0,
+            rollVelocity: 0
+        };
+        
+        // Track state
+        this.isOnTrack = true;
+        this.isOnRamp = false;
+        this.rampInfo = null;
+        
+        // Headlight state
+        this.headlightsOn = false;         // Current state of headlights
+        this.manualHeadlightControl = false; // Whether headlights are manually controlled
+        
+        // Create dust particles system
+        // Make sure we're passing the THREE.Scene object to DustParticles
+        // The 'scene' parameter in the Kart constructor is the custom Scene class,
+        // and we need to pass scene.scene which is the THREE.Scene object
+        this.dustParticles = new DustParticles(scene.scene);
+        
+        // Create kart and add to scene
+        this.createKart();
+        
+        // Initialize suspension state
+        this.initializeSuspension();
+        
+        // Terrain slope physics debug
+        this.slopeDebugEnabled = false; // Set to true to enable slope visualization
+        this.currentSlope = 0;          // Store current slope value for UI and effects
+        this.previousSlope = null;      // For smoothing between frames
+        
+        // Position kart at the starting point of the track
+        this.positionAtStart();
+    }
+    
+    createKart() {
+        // Main group for the entire kart
+        this.kartGroup = new THREE.Group();
+        this.kartGroup.up.set(0, 1, 0); // Ensure kart's up direction is correct
+        
+        // Separate group for just the body (for banking)
+        this.kartBodyGroup = new THREE.Group();
+        this.kartBodyGroup.up.set(0, 1, 0); // Ensure body's up direction is correct
+        
+        // Create kart body
+        this.createKartBody();
+        
+        // Create wheels
+        this.createWheels();
+        
+        // Add the body group to the main kart group
+        this.kartGroup.add(this.kartBodyGroup);
+        
+        // Add the kart to the scene
+        this.scene.add(this.kartGroup);
+    }
+    
+    createKartBody() {
+        // Kart body with improved shape
+        const kartBodyGeometry = new THREE.BoxGeometry(kartSize.width, kartSize.height, kartSize.depth);
+        const kartBodyMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xff0000,
+            roughness: 0.7,
+            metalness: 0.3,
+            envMapIntensity: 0.5
+        }); // Red kart
+        const kartBody = new THREE.Mesh(kartBodyGeometry, kartBodyMaterial);
+        kartBody.castShadow = true;
+        kartBody.receiveShadow = true;
+        this.kartBodyGroup.add(kartBody);
+        
+        // Add some detail to the kart body - a small windshield/cockpit
+        const cockpitGeometry = new THREE.BoxGeometry(kartSize.width * 0.7, kartSize.height * 0.5, kartSize.depth * 0.4);
+        const cockpitMaterial = new THREE.MeshStandardMaterial({
+            color: 0x3366ff, // Blue tinted windshield
+            roughness: 0.2,
+            metalness: 0.8,
+            transparent: true,
+            opacity: 0.7
+        });
+        const cockpit = new THREE.Mesh(cockpitGeometry, cockpitMaterial);
+        cockpit.position.set(0, kartSize.height * 0.6, -kartSize.depth * 0.1);
+        cockpit.castShadow = true;
+        this.kartBodyGroup.add(cockpit);
+        
+        // Add front bumper detail
+        const bumperGeometry = new THREE.BoxGeometry(kartSize.width * 0.9, kartSize.height * 0.4, kartSize.depth * 0.2);
+        const bumperMaterial = new THREE.MeshStandardMaterial({
+            color: 0xeeeeee,
+            roughness: 0.8,
+            metalness: 0.2
+        });
+        const bumper = new THREE.Mesh(bumperGeometry, bumperMaterial);
+        bumper.position.set(0, -kartSize.height * 0.1, kartSize.depth * 0.4);
+        bumper.castShadow = true;
+        this.kartBodyGroup.add(bumper);
+        
+        // Add a small indicator light on top of the kart to show track status
+        const indicatorGeometry = new THREE.SphereGeometry(0.15, 8, 8);
+        const indicatorMaterial = new THREE.MeshStandardMaterial({
+            color: 0x00ff00, // Green when on track
+            emissive: 0x003300,
+            roughness: 0.3,
+            metalness: 0.7
+        });
+        this.trackIndicator = new THREE.Mesh(indicatorGeometry, indicatorMaterial);
+        this.trackIndicator.position.set(0, kartSize.height + 0.25, -kartSize.depth / 3); // Position on top of the kart
+        this.kartBodyGroup.add(this.trackIndicator);
+        
+        // Create headlights
+        this.createHeadlights();
+    }
+    
+    // Create headlights for the kart
+    createHeadlights() {
+        // Create headlight housings
+        const headlightHousingGeometry = new THREE.CylinderGeometry(0.12, 0.14, 0.1, 16);
+        const headlightHousingMaterial = new THREE.MeshStandardMaterial({
+            color: 0x111111, // Dark housing
+            roughness: 0.5,
+            metalness: 0.8
+        });
+        
+        // Left headlight housing
+        const leftHeadlightHousing = new THREE.Mesh(headlightHousingGeometry, headlightHousingMaterial);
+        leftHeadlightHousing.position.set(-kartSize.width * 0.3, 0, kartSize.depth * 0.45);
+        leftHeadlightHousing.rotation.x = Math.PI / 2; // Rotate to face forward
+        leftHeadlightHousing.castShadow = true;
+        this.kartBodyGroup.add(leftHeadlightHousing);
+        
+        // Right headlight housing
+        const rightHeadlightHousing = new THREE.Mesh(headlightHousingGeometry, headlightHousingMaterial);
+        rightHeadlightHousing.position.set(kartSize.width * 0.3, 0, kartSize.depth * 0.45);
+        rightHeadlightHousing.rotation.x = Math.PI / 2; // Rotate to face forward
+        rightHeadlightHousing.castShadow = true;
+        this.kartBodyGroup.add(rightHeadlightHousing);
+        
+        // Create headlight bulbs (always visible, but emissive changes)
+        const headlightBulbGeometry = new THREE.SphereGeometry(0.1, 16, 16);
+        const headlightBulbMaterial = new THREE.MeshStandardMaterial({
+            color: 0xffffee, // Warm white
+            roughness: 0.1,
+            metalness: 0.9,
+            emissive: 0x000000, // Start with no emission
+            emissiveIntensity: 1.0
+        });
+        
+        // Left headlight bulb
+        this.leftHeadlight = new THREE.Mesh(headlightBulbGeometry, headlightBulbMaterial.clone());
+        this.leftHeadlight.position.set(-kartSize.width * 0.3, 0, kartSize.depth * 0.48);
+        this.kartBodyGroup.add(this.leftHeadlight);
+        
+        // Right headlight bulb
+        this.rightHeadlight = new THREE.Mesh(headlightBulbGeometry, headlightBulbMaterial.clone());
+        this.rightHeadlight.position.set(kartSize.width * 0.3, 0, kartSize.depth * 0.48);
+        this.kartBodyGroup.add(this.rightHeadlight);
+        
+        // Create spotlights for dynamic lighting
+        this.createSpotlights();
+    }
+    
+    // Create spotlight sources that cast proper light
+    createSpotlights() {
+        // Create stronger spotlight for left headlight with wider angle
+        this.leftSpotlight = new THREE.SpotLight(0xffffee, 3.0, 50, Math.PI / 5, 0.3, 1.5);
+        this.leftSpotlight.position.set(-kartSize.width * 0.3, 0, kartSize.depth * 0.5);
+        
+        // Point the spotlight forward and slightly down for better visibility
+        this.leftSpotlight.target.position.set(-kartSize.width * 0.3, -5, kartSize.depth * 6);
+        
+        // Enable high-quality shadows for the spotlight
+        this.leftSpotlight.castShadow = true;
+        this.leftSpotlight.shadow.mapSize.width = 1024; // Higher resolution shadows
+        this.leftSpotlight.shadow.mapSize.height = 1024;
+        this.leftSpotlight.shadow.camera.near = 0.5;
+        this.leftSpotlight.shadow.camera.far = 50;
+        this.leftSpotlight.shadow.bias = -0.0005; // Reduce shadow acne
+        
+        // Create visible light cone helper for the left spotlight
+        this.leftLightCone = new THREE.Group();
+        
+        // Create a cone mesh to visualize the light
+        const coneGeometry = new THREE.ConeGeometry(2, 8, 16, 1, true);
+        const coneMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffffee,
+            transparent: true,
+            opacity: 0.15,
+            side: THREE.BackSide
+        });
+        
+        const leftLightConeMesh = new THREE.Mesh(coneGeometry, coneMaterial);
+        // Position and rotate the cone to match the spotlight
+        leftLightConeMesh.position.set(0, 0, 4);
+        leftLightConeMesh.rotation.x = Math.PI;
+        this.leftLightCone.add(leftLightConeMesh);
+        this.leftLightCone.position.copy(this.leftSpotlight.position);
+        this.leftLightCone.lookAt(this.leftSpotlight.target.position);
+        
+        // Add spotlight, target, and light cone to body group
+        this.kartBodyGroup.add(this.leftSpotlight);
+        this.kartBodyGroup.add(this.leftSpotlight.target);
+        this.kartBodyGroup.add(this.leftLightCone);
+        
+        // Create spotlight for right headlight (same settings as left)
+        this.rightSpotlight = new THREE.SpotLight(0xffffee, 3.0, 50, Math.PI / 5, 0.3, 1.5);
+        this.rightSpotlight.position.set(kartSize.width * 0.3, 0, kartSize.depth * 0.5);
+        
+        // Point the spotlight forward and slightly down
+        this.rightSpotlight.target.position.set(kartSize.width * 0.3, -5, kartSize.depth * 6);
+        
+        // Enable high-quality shadows
+        this.rightSpotlight.castShadow = true;
+        this.rightSpotlight.shadow.mapSize.width = 1024;
+        this.rightSpotlight.shadow.mapSize.height = 1024;
+        this.rightSpotlight.shadow.camera.near = 0.5;
+        this.rightSpotlight.shadow.camera.far = 50;
+        this.rightSpotlight.shadow.bias = -0.0005;
+        
+        // Create visible light cone for right spotlight
+        this.rightLightCone = new THREE.Group();
+        const rightLightConeMesh = new THREE.Mesh(coneGeometry, coneMaterial.clone());
+        rightLightConeMesh.position.set(0, 0, 4);
+        rightLightConeMesh.rotation.x = Math.PI;
+        this.rightLightCone.add(rightLightConeMesh);
+        this.rightLightCone.position.copy(this.rightSpotlight.position);
+        this.rightLightCone.lookAt(this.rightSpotlight.target.position);
+        
+        // Add spotlight, target, and light cone to body group
+        this.kartBodyGroup.add(this.rightSpotlight);
+        this.kartBodyGroup.add(this.rightSpotlight.target);
+        this.kartBodyGroup.add(this.rightLightCone);
+        
+        // Start with headlights off
+        this.setHeadlightsState(false);
+    }
+    
+    // Set headlights on or off
+    setHeadlightsState(isOn) {
+        if (!this.leftHeadlight || !this.rightHeadlight) return;
+        
+        // Store current state
+        this.headlightsOn = isOn;
+        
+        if (isOn) {
+            // Turn on emissive for the bulbs
+            this.leftHeadlight.material.emissive.set(0xffffee);
+            this.rightHeadlight.material.emissive.set(0xffffee);
+            
+            // Make headlights bright and visible
+            this.leftHeadlight.material.emissiveIntensity = 1.0;
+            this.rightHeadlight.material.emissiveIntensity = 1.0;
+            
+            // Turn on the spotlights - higher intensity so they're visible during day
+            this.leftSpotlight.intensity = 5.0;
+            this.rightSpotlight.intensity = 5.0;
+            
+            // Ensure spotlights cast shadows
+            this.leftSpotlight.castShadow = true;
+            this.rightSpotlight.castShadow = true;
+            
+            // Set spotlight parameters for better visibility
+            this.leftSpotlight.angle = Math.PI / 5;   // Wider cone (36 degrees)
+            this.leftSpotlight.penumbra = 0.3;        // Softer edges
+            this.leftSpotlight.decay = 1.5;           // Physically correct falloff
+            
+            this.rightSpotlight.angle = Math.PI / 5;  // Wider cone (36 degrees)
+            this.rightSpotlight.penumbra = 0.3;       // Softer edges
+            this.rightSpotlight.decay = 1.5;          // Physically correct falloff
+            
+            // Make visible light cones show up
+            if (this.leftLightCone && this.rightLightCone) {
+                // Show light cones
+                this.leftLightCone.visible = true;
+                this.rightLightCone.visible = true;
+                
+                // Make cone material more visible
+                this.leftLightCone.children[0].material.opacity = 0.2;
+                this.rightLightCone.children[0].material.opacity = 0.2;
+            }
+        } else {
+            // Turn off emissive for the bulbs
+            this.leftHeadlight.material.emissive.set(0x000000);
+            this.rightHeadlight.material.emissive.set(0x000000);
+            
+            // Turn off the spotlights
+            this.leftSpotlight.intensity = 0;
+            this.rightSpotlight.intensity = 0;
+            
+            // Hide light cones
+            if (this.leftLightCone && this.rightLightCone) {
+                this.leftLightCone.visible = false;
+                this.rightLightCone.visible = false;
+            }
+        }
+        
+        // Log headlight state for debugging
+        console.log("Headlights set to:", isOn);
+    }
+    
+    // Toggle headlights state
+    toggleHeadlights() {
+        this.setHeadlightsState(!this.headlightsOn);
+        return this.headlightsOn;
+    }
+    
+    createWheels() {
+        // Create wheel mesh
+        const wheelGeometry = new THREE.CylinderGeometry(
+            wheelConfig.radius, 
+            wheelConfig.radius, 
+            wheelConfig.thickness, 
+            24
+        );
+        const wheelMaterial = new THREE.MeshStandardMaterial({
+            color: 0x333333, // Dark gray/black
+            roughness: 0.9,
+            metalness: 0.1
+        });
+        
+        // Create wheel groups with suspension
+        this.frontLeftWheelGroup = new THREE.Group();
+        this.frontRightWheelGroup = new THREE.Group();
+        this.rearLeftWheelGroup = new THREE.Group();
+        this.rearRightWheelGroup = new THREE.Group();
+        
+        // Suspension material
+        const suspensionMaterial = new THREE.MeshStandardMaterial({
+            color: 0x555555,
+            roughness: 0.7,
+            metalness: 0.8
+        });
+        
+        // Create wheels with suspension
+        this.frontLeftWheel = this.createWheelWithSuspension(
+            this.frontLeftWheelGroup, wheelGeometry, wheelMaterial, suspensionMaterial, true
+        );
+        this.frontLeftWheelGroup.position.set(
+            -wheelConfig.offsetX, 
+            wheelConfig.offsetY, 
+            wheelConfig.frontOffsetZ
+        );
+        this.kartGroup.add(this.frontLeftWheelGroup);
+        
+        this.frontRightWheel = this.createWheelWithSuspension(
+            this.frontRightWheelGroup, wheelGeometry, wheelMaterial, suspensionMaterial, false
+        );
+        this.frontRightWheelGroup.position.set(
+            wheelConfig.offsetX, 
+            wheelConfig.offsetY, 
+            wheelConfig.frontOffsetZ
+        );
+        this.kartGroup.add(this.frontRightWheelGroup);
+        
+        this.rearLeftWheel = this.createWheelWithSuspension(
+            this.rearLeftWheelGroup, wheelGeometry, wheelMaterial, suspensionMaterial, true
+        );
+        this.rearLeftWheelGroup.position.set(
+            -wheelConfig.offsetX, 
+            wheelConfig.offsetY, 
+            wheelConfig.rearOffsetZ
+        );
+        this.kartGroup.add(this.rearLeftWheelGroup);
+        
+        this.rearRightWheel = this.createWheelWithSuspension(
+            this.rearRightWheelGroup, wheelGeometry, wheelMaterial, suspensionMaterial, false
+        );
+        this.rearRightWheelGroup.position.set(
+            wheelConfig.offsetX, 
+            wheelConfig.offsetY, 
+            wheelConfig.rearOffsetZ
+        );
+        this.kartGroup.add(this.rearRightWheelGroup);
+        
+        // Add wheel caps
+        this.addWheelCaps();
+    }
+    
+    createWheelWithSuspension(wheelGroup, wheelGeometry, wheelMaterial, suspensionMaterial, isLeftSide) {
+        // Create wheel
+        const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+        wheel.rotation.z = Math.PI / 2; // Rotate to be perpendicular to axle
+        wheel.castShadow = true;
+        wheelGroup.add(wheel);
+        
+        // Create suspension spring (a small cylinder)
+        const springGeometry = new THREE.CylinderGeometry(0.05, 0.05, PHYSICS.suspensionTravel, 8);
+        const spring = new THREE.Mesh(springGeometry, suspensionMaterial);
+        spring.position.y = PHYSICS.suspensionTravel / 2;
+        
+        // Create axle connecting to chassis (two parts - fixed and moving)
+        const axleGeometry = new THREE.BoxGeometry(0.1, 0.05, 0.3);
+        
+        // Fixed part (attached to chassis)
+        const fixedAxle = new THREE.Mesh(axleGeometry, suspensionMaterial);
+        fixedAxle.position.y = PHYSICS.suspensionTravel + 0.05;
+        fixedAxle.position.x = isLeftSide ? -0.05 : 0.05;
+        
+        // Moving part (attached to wheel)
+        const movingAxle = new THREE.Mesh(axleGeometry, suspensionMaterial);
+        movingAxle.position.y = 0.05;
+        movingAxle.position.x = isLeftSide ? -0.05 : 0.05;
+        
+        // Add suspension components to wheel group
+        wheelGroup.add(spring);
+        wheelGroup.add(fixedAxle);
+        wheelGroup.add(movingAxle);
+        
+        // Store references to the suspension components for animation
+        wheelGroup.userData = {
+            spring: spring,
+            fixedAxle: fixedAxle,
+            movingAxle: movingAxle,
+            suspensionTravel: PHYSICS.suspensionTravel,
+            isLeftSide: isLeftSide
+        };
+        
+        // Return the wheel for reference
+        return wheel;
+    }
+    
+    addWheelCaps() {
+        // Wheel cap material
+        const wheelCapMaterial = new THREE.MeshStandardMaterial({
+            color: 0xC0C0C0, // Silver
+            roughness: 0.5,
+            metalness: 0.8
+        });
+        
+        // Wheel cap geometry
+        const wheelCapGeometry = new THREE.CircleGeometry(wheelConfig.radius * 0.7, 16);
+        
+        // Add caps to each wheel
+        this.addWheelCap(this.frontLeftWheel, wheelCapGeometry, wheelCapMaterial, 1);
+        this.addWheelCap(this.frontRightWheel, wheelCapGeometry, wheelCapMaterial, -1);
+        this.addWheelCap(this.rearLeftWheel, wheelCapGeometry, wheelCapMaterial, 1);
+        this.addWheelCap(this.rearRightWheel, wheelCapGeometry, wheelCapMaterial, -1);
+    }
+    
+    addWheelCap(wheel, geometry, material, side) {
+        const cap = new THREE.Mesh(geometry, material);
+        cap.position.set(0, 0, side * wheelConfig.thickness / 2 + 0.01);
+        wheel.add(cap);
+    }
+    
+    initializeSuspension() {
+        // Suspension state - each wheel has its own suspension
+        this.wheelSuspensions = {
+            frontLeft: { 
+                compression: 0,       // Current compression (0-1)
+                velocity: 0,          // Vertical velocity of suspension
+                force: 0,             // Current force exerted on chassis
+                groundHeight: 0       // Height of ground at this wheel
+            },
+            frontRight: { 
+                compression: 0, 
+                velocity: 0, 
+                force: 0,
+                groundHeight: 0
+            },
+            rearLeft: { 
+                compression: 0, 
+                velocity: 0, 
+                force: 0,
+                groundHeight: 0
+            },
+            rearRight: { 
+                compression: 0, 
+                velocity: 0, 
+                force: 0,
+                groundHeight: 0
+            }
+        };
+    }
+    
+    positionAtStart() {
+        // Get start position from track
+        const startPosition = this.track.getStartPosition();
+        
+        // Get rotation at start
+        const startRotation = this.track.getStartRotation();
+        
+        // Set kart rotation
+        this.kartGroup.rotation.y = startRotation;
+        
+        // Set kart position with correct height
+        this.kartGroup.position.set(
+            startPosition.x, 
+            startPosition.y + kartSize.height / 2 + 0.05, // Position kart above the track
+            startPosition.z
+        );
+        
+        // Initialize kart with correct up direction
+        this.kartGroup.rotation.z = 0;  // No roll initially
+        this.kartGroup.rotation.x = 0;  // No pitch initially
+    }
+    
+    update(deltaTime, keys, environment) {
+        // Store the keys for use in other methods
+        this.keys = keys;
+        
+        // Check for manual reset request via 'r' key
+        if (keys.r) {
+            this.beginResetAnimation();
+            // Clear the key to prevent continuous resets
+            keys.r = false;
+            return;
+        }
+        
+        // Handle inputs
+        this.handleInput(deltaTime, keys);
+        
+        // Add default values for missing properties if they don't exist yet
+        // This is to avoid errors during the first update cycle
+        if (this.lastCollisionTime === undefined) {
+            this.lastCollisionTime = 0;
+        }
+        
+        // If we're in the reset animation, handle that first and return
+        if (this.isBeingReset) {
+            this.handleResetAnimation(deltaTime);
+            return;
+        }
+        
+        // Check for stuck conditions
+        this.checkForStuck(deltaTime);
+        
+        // Check for collisions with track objects
+        this.checkCollisions(deltaTime);
+        
+        // Don't process physics during collision recovery
+        if (this.isColliding) {
+            // Process collision recovery
+            this.handleCollisionRecovery(deltaTime);
+        }
+        else {
+            // Update kart physics depending on if we're in air or on ground
+            if (this.isInAir) {
+                this.updateAirPhysics(deltaTime);
+            } else {
+                this.updateGroundPhysics(deltaTime);
+                
+                // Update suspension only when on ground
+                this.updateSuspension(deltaTime);
+                
+                // Ensure physics state consistency: if we're on ground, make sure 
+                // air rotation values are zeroed out
+                this.airRotation.x = 0;
+                this.airRotation.z = 0;
+                this.airRotation.velocityX = 0;
+                this.airRotation.velocityZ = 0;
+                
+                // Check track status (on/off track, on ramp)
+                this.checkTrackStatus();
+                
+                // Check if we should jump (leaving a ramp)
+                this.checkForJump(deltaTime);
+            }
+        }
+        
+        // Update wheel rotation based on speed (both in air and on ground)
+        this.updateWheels(deltaTime);
+        
+        // Apply actual rotations to the visual model - ensures consistency
+        // between physics state and visual representation
+        if (this.isInAir) {
+            // Air rotation directly affects body
+            this.kartBodyGroup.rotation.x = this.airRotation.x;
+            this.kartBodyGroup.rotation.z = this.airRotation.z;
+        } else {
+            // Ground rotation from chassis orientation
+            this.kartBodyGroup.rotation.x = this.chassisOrientation.pitch;
+            this.kartBodyGroup.rotation.z = this.chassisOrientation.roll;
+        }
+        
+        // Update dust particles (only when on ground and off-track)
+        if (!this.isInAir && !this.isColliding) {
+            this.dustParticles.update(this);
+        }
+        
+        // Update headlights based on environment time of day
+        this.updateHeadlights(environment);
+        
+        // Update UI status display
+        this.updateStatusDisplay();
+        
+        // Update engine sound
+        this.updateEngineSound();
+    }
+    
+    // Check if the kart is stuck and needs to be reset
+    checkForStuck(deltaTime) {
+        // Special check for in-air state
+        if (this.isInAir) {
+            // We already have a forced landing for excessive air time,
+            // but let's also track how long we're in the air for the stuck detection
+            
+            // If we've been in the air for more than 3 seconds, start counting as "slow"
+            if (this.airTime > 3.0) {
+                this.timeSpentSlow += deltaTime;
+                
+                // Trigger reset after being in the air too long
+                if (this.timeSpentSlow > TRACK_PHYSICS.recoveryTimeout) {
+                    console.log("Kart has been in the air too long - resetting");
+                    this.beginResetAnimation();
+                    return;
+                }
+            } else {
+                this.timeSpentSlow = 0;
+            }
+            return;
+        }
+        
+        // Check if the kart is upside down or at a bad angle
+        const isUpsideDown = this.kartBodyGroup.rotation.z > Math.PI/2 || 
+                             this.kartBodyGroup.rotation.z < -Math.PI/2 ||
+                             this.kartBodyGroup.rotation.x > Math.PI/2 || 
+                             this.kartBodyGroup.rotation.x < -Math.PI/2;
+        
+        if (isUpsideDown) {
+            console.log("Kart is upside down - triggering reset");
+            this.beginResetAnimation();
+            return;
+        }
+        
+        // Check if we're moving very slowly or not at all
+        if (Math.abs(this.velocity) < TRACK_PHYSICS.recoveryMinVelocity) {
+            // Accumulate time spent below minimum velocity
+            this.timeSpentSlow += deltaTime;
+            
+            // Check if we've been stuck for too long
+            if (this.timeSpentSlow > TRACK_PHYSICS.recoveryTimeout) {
+                // Trigger reset animation
+                this.beginResetAnimation();
+            }
+        } else {
+            // Reset timer if we're moving
+            this.timeSpentSlow = 0;
+        }
+    }
+    
+    // Begin reset animation process
+    beginResetAnimation() {
+        console.log("Kart is stuck! Beginning reset sequence...");
+        this.isBeingReset = true;
+        this.resetAnimationTime = 0;
+        
+        // Flash the kart to indicate reset is happening
+        this.kartBodyGroup.visible = false;
+        
+        // Store current position for interpolation
+        this.resetStartPosition = {
+            x: this.kartGroup.position.x,
+            y: this.kartGroup.position.y,
+            z: this.kartGroup.position.z
+        };
+        
+        // Get a safe position on the track to reset to
+        this.resetEndPosition = this.track.getStartPosition();
+    }
+    
+    // Handle the reset animation
+    handleResetAnimation(deltaTime) {
+        this.resetAnimationTime += deltaTime;
+        
+        // Flash the kart during reset
+        if (Math.floor(this.resetAnimationTime / 0.2) % 2 === 0) {
+            this.kartBodyGroup.visible = true;
+        } else {
+            this.kartBodyGroup.visible = false;
+        }
+        
+        // After 1 second, position the kart at the reset position
+        if (this.resetAnimationTime >= 1.0) {
+            // Set the final position and rotation
+            this.kartGroup.position.set(
+                this.resetEndPosition.x,
+                this.resetEndPosition.y + kartSize.height / 2,
+                this.resetEndPosition.z
+            );
+            
+            this.kartGroup.rotation.y = this.track.getStartRotation();
+            
+            // Reset physics state
+            this.velocity = 0;
+            this.verticalVelocity = 0;
+            this.airTime = 0;
+            this.isInAir = false;
+            this.isColliding = false;
+            this.timeSpentSlow = 0;
+            
+            // Reset rotation state
+            this.chassisOrientation.pitch = 0;
+            this.chassisOrientation.roll = 0;
+            this.chassisOrientation.pitchVelocity = 0;
+            this.chassisOrientation.rollVelocity = 0;
+            this.airRotation.x = 0;
+            this.airRotation.z = 0;
+            this.airRotation.velocityX = 0;
+            this.airRotation.velocityZ = 0;
+            
+            // Ensure kart is visible
+            this.kartBodyGroup.visible = true;
+            
+            // End reset animation
+            this.isBeingReset = false;
+            console.log("Kart reset complete!");
+        }
+    }
+    
+    // New method: Update physics when in the air
+    updateAirPhysics(deltaTime) {
+        // Apply gravity - stronger for more noticeable falling
+        this.verticalVelocity -= TRACK_PHYSICS.gravity * deltaTime;
+        
+        // Update position based on velocities
+        const moveX = Math.sin(this.kartGroup.rotation.y) * this.velocity;
+        const moveZ = Math.cos(this.kartGroup.rotation.y) * this.velocity;
+        
+        this.kartGroup.position.x += moveX;
+        this.kartGroup.position.y += this.verticalVelocity * deltaTime;
+        this.kartGroup.position.z += moveZ;
+        
+        // Log information about air state
+        if (this.airTime === 0) {
+            console.log("Starting jump! Initial Y position:", this.kartGroup.position.y,
+                       "Initial vertical velocity:", this.verticalVelocity);
+        }
+        
+        // Update air time counter
+        this.airTime += deltaTime;
+        
+        // More aggressive damping of rotation for better control
+        const airDampingFactor = 0.97; // Increased from 0.98
+        this.airRotation.velocityX *= airDampingFactor; 
+        this.airRotation.velocityZ *= airDampingFactor;
+        
+        // Cap maximum rotation velocities - reduced for better stability
+        const maxRotVelocity = 0.3; // Reduced from 0.4
+        this.airRotation.velocityX = Math.max(-maxRotVelocity, Math.min(maxRotVelocity, this.airRotation.velocityX));
+        this.airRotation.velocityZ = Math.max(-maxRotVelocity, Math.min(maxRotVelocity, this.airRotation.velocityZ));
+        
+        // Update orientation
+        this.airRotation.x += this.airRotation.velocityX * deltaTime;
+        this.airRotation.z += this.airRotation.velocityZ * deltaTime;
+        
+        // Limit maximum rotation angles to prevent flipping too far
+        const maxRotAngle = 0.4; // Reduced from 0.5 (about 23 degrees)
+        this.airRotation.x = Math.max(-maxRotAngle, Math.min(maxRotAngle, this.airRotation.x));
+        this.airRotation.z = Math.max(-maxRotAngle, Math.min(maxRotAngle, this.airRotation.z));
+        
+        // Apply air rotation to chassis
+        this.kartBodyGroup.rotation.x = this.airRotation.x;
+        this.kartBodyGroup.rotation.z = this.airRotation.z;
+        
+        // Automatically stabilize kart in air for better control - helps kart land properly
+        // This applies a gentle force to return to level orientation when in air
+        if (this.airTime > 0.5) { // Only start auto-leveling after 0.5s in air
+            // Auto-level strength increases with air time
+            const levelingFactor = Math.min(0.03, 0.01 + (this.airTime - 0.5) * 0.01);
+            
+            // Apply auto-leveling torque
+            this.airRotation.velocityX -= this.airRotation.x * levelingFactor;
+            this.airRotation.velocityZ -= this.airRotation.z * levelingFactor;
+        }
+        
+        // Log air position every 10 frames
+        if (Math.floor(this.airTime / deltaTime) % 10 === 0) {
+            console.log("Air time:", this.airTime.toFixed(2), 
+                       "Height:", (this.kartGroup.position.y - this.lastGroundY).toFixed(2),
+                       "Vertical velocity:", this.verticalVelocity.toFixed(2));
+        }
+        
+        // SAFETY CHECK: Force landing if any of these conditions are met:
+        // 1. Air time exceeds max allowed time
+        // 2. Below minimum height (detection failed)
+        // 3. Very low vertical velocity and near ground
+        const MAX_AIR_TIME = 5.0; // Maximum 5 seconds of air time
+        const MIN_HEIGHT = -10;   // Don't allow kart to fall below this height
+        
+        // Check for proximity to ground for forced landing when moving very slowly
+        let forceGroundCheck = false;
+        if (this.airTime > 0.5 && Math.abs(this.verticalVelocity) < 0.05 && Math.abs(this.velocity) < 0.05) {
+            // If barely moving in any direction after being airborne for a while, force a landing check
+            forceGroundCheck = true;
+        }
+        
+        if (this.airTime > MAX_AIR_TIME || this.kartGroup.position.y < MIN_HEIGHT || forceGroundCheck) {
+            if (forceGroundCheck) {
+                console.log("SAFETY: Forcing landing check due to low velocity near ground");
+            } else {
+                console.log("SAFETY: Forcing landing after excessive air time or below ground");
+            }
+            this.forceLanding();
+            return;
+        }
+        
+        // More frequent landing checks when falling
+        if (this.verticalVelocity < 0) {
+            // Check for landing multiple times if falling - this helps catch landing opportunities
+            this.checkForLanding();
+            
+            // If falling fast, check again for more reliable landing detection
+            if (this.verticalVelocity < -0.2 && this.isInAir) {
+                this.checkForLanding();
+            }
+        } else {
+            // Regular landing check when going up
+            this.checkForLanding();
+        }
+        
+        // Apply slight air resistance - reduced to maintain more momentum
+        this.velocity *= 0.997; // Changed from 0.995
+    }
+    
+    // New method: Update physics when on the ground
+    updateGroundPhysics(deltaTime) {
+        // Reset air state
+        this.airTime = 0;
+        this.airRotation.velocityX = 0;
+        this.airRotation.velocityZ = 0;
+        
+        // Regular ground physics
+        this.updatePhysics(deltaTime);
+    }
+    
+    // New method: Check if we're on a ramp and should jump
+    checkForJump(deltaTime) {
+        const { x, z } = this.kartGroup.position;
+        
+        // Get track info including ramp data
+        let trackInfo;
+        try {
+            trackInfo = this.track.getHeightWithRamps(x, z);
+            
+            // Debug info to check what's happening with ramps
+            if (trackInfo.onRamp) {
+                console.log("On ramp:", trackInfo.rampPosition, "Height:", trackInfo.height, 
+                           "Ramp height:", trackInfo.height - this.track.getHeightAt(x, z).height);
+            }
+        } catch (e) {
+            console.error("Error in getHeightWithRamps:", e);
+            // Fallback if getHeightWithRamps doesn't exist or fails
+            trackInfo = { 
+                ...this.track.getHeightAt(x, z), 
+                onRamp: false
+            };
+        }
+        
+        // Store ramp info
+        this.isOnRamp = trackInfo.onRamp;
+        this.rampInfo = trackInfo.onRamp ? trackInfo : null;
+        
+        // If we're on a ramp
+        if (this.isOnRamp) {
+            // Apply special ramp physics (less friction)
+            this.velocity *= TRACK_PHYSICS.rampFriction;
+            
+            // As we approach the ramp, increase velocity for better launch
+            if (this.rampInfo.rampPosition > 0.3 && this.rampInfo.rampPosition < 0.7) {
+                // Accelerate while going up the ramp
+                const rampBoost = 1.02; // Small boost per frame
+                this.velocity *= rampBoost;
+            }
+            
+            // Check if we're at the end of the ramp and moving forward
+            if (this.rampInfo.rampPosition > 0.75 && this.velocity > 0.05) {
+                // Calculate launch angle based on ramp normal
+                const rampNormal = this.rampInfo.rampNormal || { x: 0, y: 1, z: 0 };
+                
+                // Get slope of ramp at exit point for better launch
+                const exitSlope = 1 - Math.abs(rampNormal.y); // 0 = flat, 1 = vertical
+                
+                // Stronger vertical velocity for steeper ramps
+                const launchFactor = TRACK_PHYSICS.jumpLaunchFactor * (1 + exitSlope * 3);
+                
+                // Launch into the air with increased height!
+                this.isInAir = true;
+                this.verticalVelocity = this.velocity * launchFactor;
+                this.lastGroundY = this.kartGroup.position.y;
+                
+                // Boost forward velocity for longer jumps
+                this.velocity *= TRACK_PHYSICS.jumpForwardBoost;
+                
+                // Force the kart up a bit to ensure it leaves the ground
+                this.kartGroup.position.y += 0.2;
+                
+                // Calculate rotation impulse based on ramp normal and kart speed
+                this.airRotation.x = this.chassisOrientation.pitch;
+                this.airRotation.z = this.chassisOrientation.roll;
+                
+                // Add rotation based on ramp normal and kart velocity for more dramatic stunts
+                this.airRotation.velocityX = -this.velocity * rampNormal.z * 2.5;
+                this.airRotation.velocityZ = this.velocity * rampNormal.x * 2.5;
+                
+                // Add some random variation for more interesting jumps
+                if (Math.random() > 0.5) {
+                    // Occasional backflip tendency
+                    this.airRotation.velocityX -= 0.2;
+                }
+                
+                console.log("MEGA JUMP! Vertical velocity:", this.verticalVelocity, 
+                           "Forward velocity:", this.velocity,
+                           "Rotation X:", this.airRotation.velocityX,
+                           "Rotation Z:", this.airRotation.velocityZ);
+                
+                // Play jump sound if available
+                // TODO: Add jump sound
+            }
+        }
+    }
+    
+    // Force an immediate landing (for safety check or user-triggered reset)
+    forceLanding() {
+        if (!this.isInAir) return;
+        
+        const { x, z } = this.kartGroup.position;
+        
+        // Get ground height at current position - try to use ramp heights if available
+        let groundHeight, groundInfo;
+        try {
+            // First try to get height with ramps for more accurate placement
+            groundInfo = this.track.getHeightWithRamps(x, z);
+            groundHeight = groundInfo.height;
+        } catch (e) {
+            try {
+                // Fall back to basic height if getHeightWithRamps fails
+                groundHeight = this.track.getHeightAt(x, z).height;
+            } catch (e2) {
+                // Ultimate fallback if even getHeightAt fails
+                groundHeight = 0;
+            }
+        }
+        
+        console.log("Emergency landing initiated at position:", x, z, "Ground height:", groundHeight);
+        
+        // Land the kart
+        this.isInAir = false;
+        
+        // Position at ground level with a small safety margin
+        this.kartGroup.position.y = groundHeight + kartSize.height / 2 + 0.1;
+        
+        // Reset vertical velocity
+        this.verticalVelocity = 0;
+        
+        // Ensure wheels and body are operating in the same physics system by
+        // completely resetting all rotation state
+        this.airRotation.x = 0;
+        this.airRotation.z = 0;
+        this.airRotation.velocityX = 0;
+        this.airRotation.velocityZ = 0;
+        
+        // Reset chassis orientation for a flat landing
+        this.chassisOrientation.pitch = 0;
+        this.chassisOrientation.roll = 0;
+        this.chassisOrientation.pitchVelocity = 0;
+        this.chassisOrientation.rollVelocity = 0;
+        
+        // Apply chassis stabilization to body
+        this.kartBodyGroup.rotation.x = 0;
+        this.kartBodyGroup.rotation.z = 0;
+        
+        // Reset wheel suspension to default state
+        this.initializeSuspension();
+        
+        // Sync wheel visuals with chassis state
+        this.updateSuspension(0.016); // Single update with nominal frame time
+        
+        // Reset air time tracking
+        this.airTime = 0;
+        
+        // Prevent stuck detection from immediately triggering again
+        this.timeSpentSlow = 0;
+        
+        // Preserve some of the horizontal velocity for smoother transition (less jarring than complete stop)
+        // But still slow the kart down from the landing
+        this.velocity *= 0.8; // Increased from 0.7
+        
+        console.log("Emergency landing completed. Kart stabilized.");
+    }
+    
+    // New method: Check if we've landed after being in the air
+    checkForLanding() {
+        if (!this.isInAir) return;
+        
+        const { x, y, z } = this.kartGroup.position;
+        
+        // Get ground height at current position
+        // Use the track's getHeightWithRamps method if it exists, otherwise fall back to getHeightAt
+        let groundInfo;
+        try {
+            groundInfo = this.track.getHeightWithRamps(x, z);
+        } catch (e) {
+            // Fallback to basic height check if getHeightWithRamps is not available
+            groundInfo = this.track.getHeightAt(x, z);
+        }
+        
+        const groundHeight = groundInfo.height;
+        
+        // More forgiving landing detection:
+        // 1. Check if we're close to ground or below it
+        // 2. Add an extra margin for landing detection (0.2 units)
+        // 3. Special case for downward trajectory - easier landing when falling
+        
+        const landingMargin = 0.2; // Extra height margin for landing detection
+        const isNearGround = y <= groundHeight + kartSize.height / 2 + landingMargin;
+        const isFalling = this.verticalVelocity < 0;
+        
+        // Land when we're near ground or if we're falling and very close to ground
+        if (isNearGround || (isFalling && y <= groundHeight + kartSize.height / 2 + 0.4)) {
+            // Land the kart
+            this.isInAir = false;
+            
+            // Position at ground level
+            this.kartGroup.position.y = groundHeight + kartSize.height / 2;
+            
+            // Only bounce if we're hitting the ground hard with significant vertical velocity
+            const landingForce = Math.abs(this.verticalVelocity);
+            if (landingForce > 0.18) { // Increased threshold to reduce bouncing
+                // Reduced bounce intensity
+                this.verticalVelocity = landingForce * 0.15; // 15% bounce instead of 20%
+                this.isInAir = true; // Still in air for small bounce
+            } else {
+                // Proper transition from air physics to ground physics
+                // First reset air rotation velocities to prevent continued rotation
+                this.airRotation.velocityX = 0;
+                this.airRotation.velocityZ = 0;
+                
+                // Transfer current air orientation to chassis for continuity
+                // Use limited rotation transfer to prevent extreme angles
+                const transferFactor = 0.8; // Only transfer 80% of air rotation
+                this.chassisOrientation.pitch = this.airRotation.x * transferFactor;
+                this.chassisOrientation.roll = this.airRotation.z * transferFactor;
+                
+                // Significantly reduced rotation velocity transfer for smoother landing
+                this.chassisOrientation.pitchVelocity = this.airRotation.velocityX * 0.05;
+                this.chassisOrientation.rollVelocity = this.airRotation.velocityZ * 0.05;
+                
+                // Reset air rotation state
+                this.airRotation.x = 0;
+                this.airRotation.z = 0;
+                
+                // Apply strong damping to limit initial ground rotation
+                this.chassisOrientation.pitchVelocity *= 0.3;
+                this.chassisOrientation.rollVelocity *= 0.3;
+                
+                // Constrain extreme orientations for stability
+                const maxLandingAngle = 0.12; // Reduced from 0.15 (about 7 degrees)
+                this.chassisOrientation.pitch = Math.max(-maxLandingAngle, 
+                                                        Math.min(maxLandingAngle, this.chassisOrientation.pitch));
+                this.chassisOrientation.roll = Math.max(-maxLandingAngle, 
+                                                       Math.min(maxLandingAngle, this.chassisOrientation.roll));
+                
+                // Ensure clean landing state
+                this.airTime = 0;
+                
+                console.log("Landing completed - transitioning to ground physics");
+                
+                // Play landing sound if available
+                // TODO: Add landing sound
+            }
+        }
+    }
+    
+    handleInput(deltaTime, keys) {
+        // Handle headlight toggle with 'L' key (one-time press)
+        if (keys.l && !this.lKeyPressed) {
+            this.lKeyPressed = true;
+            this.manualHeadlightControl = true;
+            this.toggleHeadlights();
+        }
+        
+        // Toggle slope debug visualization with 'S' key (one-time press)
+        if (keys.s && !this.sKeyPressed) {
+            this.sKeyPressed = true;
+            this.slopeDebugEnabled = !this.slopeDebugEnabled;
+            console.log("Slope visualization:", this.slopeDebugEnabled ? "enabled" : "disabled");
+            
+            // Clear any existing visualization if turning off
+            if (!this.slopeDebugEnabled && this.slopeArrow) {
+                this.scene.remove(this.slopeArrow);
+                this.slopeArrow = null;
+            }
+        } else if (!keys.s && this.sKeyPressed) {
+            this.sKeyPressed = false;
+        }
+        
+        // Reset headlight key state when key is released
+        if (!keys.l && this.lKeyPressed) {
+            this.lKeyPressed = false;
+        }
+        
+        // Different handling based on whether kart is in air or on ground
+        if (this.isInAir) {
+            this.handleAirInput(deltaTime, keys);
+        } else {
+            this.handleGroundInput(deltaTime, keys);
+        }
+    }
+    
+    // New method: Handle inputs when on the ground
+    handleGroundInput(deltaTime, keys) {
+        // Store steering input for visual wheels and further calculations
+        let steeringInput = 0;
+        
+        if (keys.ArrowLeft) {
+            steeringInput = 1.0; // Full left
+        } else if (keys.ArrowRight) {
+            steeringInput = -1.0; // Full right
+        }
+        
+        // ------ ACCELERATION AND BRAKING ------
+        
+        // Enhanced gradual acceleration with weight transfer effects
+        if (keys.ArrowUp) {
+            // Calculate acceleration force, factoring in mass for more realism
+            const accelerationForce = PHYSICS.kartPower / PHYSICS.kartMass;
+            
+            // Apply acceleration with diminishing returns at higher speeds
+            if (this.velocity < PHYSICS.kartMaxSpeed) {
+                // Apply reduced acceleration at higher speeds to simulate air resistance
+                // Stronger diminishing returns at higher speeds
+                const speedRatio = this.velocity / PHYSICS.kartMaxSpeed;
+                // Quadratic reduction for more gradual acceleration feel
+                const speedFactor = 1 - Math.pow(speedRatio, 1.5) * 0.7;
+                
+                // Apply acceleration with smoother curve
+                const accelerationDelta = accelerationForce * speedFactor * deltaTime;
+                
+                // Weight transfer affects acceleration - rear wheels dig in during acceleration
+                // This gives a slight boost at the start but diminishes as speed increases
+                const weightTransferBoost = (1 - speedRatio) * PHYSICS.massTransferFactor * 0.3;
+                
+                // Apply acceleration with weight transfer effect
+                this.velocity += accelerationDelta * (1 + weightTransferBoost);
+                
+                // Cap speed
+                if (this.velocity > PHYSICS.kartMaxSpeed) {
+                    this.velocity = PHYSICS.kartMaxSpeed;
+                }
+                
+                // Apply weight transfer to chassis - pitch back during acceleration
+                const accelerationPitch = -0.04 * accelerationDelta * (1 - speedRatio * 0.6);
+                this.chassisOrientation.pitchVelocity += accelerationPitch;
+            }
+            
+            this.isAccelerating = true;
+        } else {
+            this.isAccelerating = false;
+        }
+        
+        // Enhanced gradual braking with weight transfer effects
+        if (keys.ArrowDown) {
+            // Calculate braking force, scaling with current speed
+            const brakeForce = PHYSICS.brakingPower / PHYSICS.kartMass;
+            
+            // More effective braking at higher speeds, but more gradual pattern
+            const speedRatio = this.velocity / PHYSICS.kartMaxSpeed;
+            // Quadratic curve for more natural braking feel
+            const brakingEffectiveness = 0.3 + 0.7 * Math.pow(speedRatio, 1.2);
+            
+            // Weight transfer affects braking - front wheels dig in
+            const weightTransferFactor = PHYSICS.massTransferFactor * speedRatio;
+            
+            // Calculate braking delta with weight transfer boost
+            const brakingDelta = brakeForce * brakingEffectiveness * (1 + weightTransferFactor) * deltaTime;
+            
+            // Apply braking
+            this.velocity -= brakingDelta;
+            
+            // Don't allow moving backwards (for now)
+            if (this.velocity < 0) {
+                this.velocity = 0;
+            }
+            
+            // Apply weight transfer to chassis - pitch forward during braking
+            const brakingPitch = 0.06 * brakingDelta * speedRatio;
+            this.chassisOrientation.pitchVelocity += brakingPitch;
+        }
+        
+        // ------ ENHANCED REALISTIC STEERING PHYSICS ------
+        
+        // Maximum steering angle in radians (approximately 30 degrees)
+        const maxSteeringAngle = 0.5;
+        
+        // Update visual wheel steering based on input, with centering force
+        // Wheels naturally try to return to center position
+        
+        // Add a slight anticipatory steering effect for more responsive feel
+        // Current wheel angle
+        const currentWheelAngle = this.frontLeftWheel.rotation.x;
+        
+        if (Math.abs(steeringInput) > 0.1) {
+            // Target angle based on input
+            const targetAngle = steeringInput * maxSteeringAngle;
+            
+            // Faster steering response at higher speeds
+            const steeringSpeed = Math.min(1.0, 0.3 + this.velocity / PHYSICS.kartMaxSpeed * 0.7);
+            
+            // Interpolate toward target angle - faster response at higher speeds
+            this.frontLeftWheel.rotation.x += (targetAngle - currentWheelAngle) * steeringSpeed;
+            this.frontRightWheel.rotation.x += (targetAngle - currentWheelAngle) * steeringSpeed;
+            
+            // Clamp to max angle
+            this.frontLeftWheel.rotation.x = Math.max(-maxSteeringAngle, 
+                                                     Math.min(maxSteeringAngle, this.frontLeftWheel.rotation.x));
+            this.frontRightWheel.rotation.x = Math.max(-maxSteeringAngle, 
+                                                     Math.min(maxSteeringAngle, this.frontRightWheel.rotation.x));
+        } else {
+            // When not actively steering, wheels gradually return to center
+            this.frontLeftWheel.rotation.x *= PHYSICS.steeringRecoveryRate;
+            this.frontRightWheel.rotation.x *= PHYSICS.steeringRecoveryRate;
+        }
+        
+        // Only apply turning effect if we're moving fast enough
+        if (Math.abs(this.velocity) >= PHYSICS.minSpeedForSteering) {
+            // ------ MOMENTUM AND INERTIA EFFECTS ------
+            
+            // Current direction of travel may not match kart's facing direction due to sliding
+            // This creates drift behavior, where the kart can slide sideways through turns
+            
+            // Calculate speed ratio for various effects
+            const speedRatio = this.velocity / PHYSICS.kartMaxSpeed;
+            
+            // Allow steering at low speeds
+            let steeringEffectiveness;
+            
+            if (Math.abs(this.velocity) <= PHYSICS.steeringDeadzone) {
+                // Provide minimum steering effectiveness at very low speeds
+                steeringEffectiveness = 0.5; 
+            } else {
+                // Modified curve for better high-speed steering
+                // Uses flatter response curve and reduced understeer effect
+                // This gives more consistent control throughout the speed range
+                let baseEffectiveness = Math.pow(speedRatio, PHYSICS.steeringResponseCurve);
+                
+                // Apply reduced understeer at high speeds
+                let understeerEffect = speedRatio * PHYSICS.understeerFactor;
+                
+                // High-speed steering boost - increases effectiveness at top speeds
+                // Counteracts some of the understeer for better responsiveness
+                let highSpeedBoost = 0;
+                if (speedRatio > 0.8) {
+                    // Apply boost only at 80%+ of max speed
+                    highSpeedBoost = (speedRatio - 0.8) * 0.4; // Up to 0.08 boost at max speed
+                }
+                
+                // Combine all factors
+                steeringEffectiveness = baseEffectiveness * (1 - understeerEffect) + highSpeedBoost;
+                
+                // Ensure minimum effectiveness
+                steeringEffectiveness = Math.max(0.6, steeringEffectiveness);
+            }
+            
+            // Calculate turn amount - scaled by our effectiveness curve
+            const turnAmount = PHYSICS.turnSpeed * steeringEffectiveness;
+            
+            // Apply turn based on steering input - rotate the kart
+            this.kartGroup.rotation.y += turnAmount * steeringInput;
+            
+            // ------ GRIP AND WEIGHT TRANSFER DURING CORNERING ------
+            
+            // More pronounced banking when turning at speed
+            if (Math.abs(steeringInput) > 0.1 && speedRatio > 0.2) {
+                // Bank in direction of turn - stronger effect at higher speeds
+                // This increases with speed but also with steering sharpness
+                const corneringForce = Math.abs(steeringInput) * speedRatio;
+                const bankAmount = 0.05 * corneringForce * steeringInput;
+                
+                // Weight transfer to outside wheels during cornering
+                this.chassisOrientation.rollVelocity += bankAmount;
+                
+                // Optional: Add slight understeer/oversteer balancing here
+                // Understeer: front wheels lose grip, reducing turning effectiveness
+                // Oversteer: rear wheels lose grip, causing tail to slide out
+                // For karts, usually emphasize oversteer for fun sliding behavior
+                
+                // For oversteer: at high speeds, sharp turns can cause the tail to slide out
+                if (speedRatio > 0.6 && Math.abs(steeringInput) > 0.8) {
+                    // Apply a small counter-rotation to simulate tail sliding out
+                    const overSteerEffect = 0.01 * (speedRatio - 0.6) * steeringInput;
+                    this.kartGroup.rotation.y -= overSteerEffect;
+                }
+            }
+        }
+    }
+    
+    // New method: Handle inputs when in the air
+    handleAirInput(deltaTime, keys) {
+        // Air control is more limited
+        const airSteeringFactor = TRACK_PHYSICS.airSteeringFactor;
+        
+        // Limited turning in air - no speed dependency
+        if (keys.ArrowLeft) {
+            // Reduced turn amount in air
+            const airTurnAmount = PHYSICS.turnSpeed * airSteeringFactor;
+            
+            // Apply turn
+            this.kartGroup.rotation.y += airTurnAmount;
+            
+            // In air, turning can also apply a slight roll in the turn direction
+            this.airRotation.velocityZ += 0.1 * deltaTime;
+            
+            // Update wheel visuals
+            this.frontLeftWheel.rotation.x = 0.4;
+            this.frontRightWheel.rotation.x = 0.4;
+        } 
+        else if (keys.ArrowRight) {
+            // Reduced turn amount in air
+            const airTurnAmount = PHYSICS.turnSpeed * airSteeringFactor;
+            
+            // Apply turn
+            this.kartGroup.rotation.y -= airTurnAmount;
+            
+            // Apply slight roll in turn direction
+            this.airRotation.velocityZ -= 0.1 * deltaTime;
+            
+            // Update wheel visuals
+            this.frontLeftWheel.rotation.x = -0.4;
+            this.frontRightWheel.rotation.x = -0.4;
+        }
+        else {
+            // Center wheels
+            this.frontLeftWheel.rotation.x = 0;
+            this.frontRightWheel.rotation.x = 0;
+        }
+        
+        // Pitch control in air
+        if (keys.ArrowUp) {
+            // Lean forward
+            this.airRotation.velocityX += 0.1 * deltaTime;
+            this.isAccelerating = true;
+        } else if (keys.ArrowDown) {
+            // Lean backward
+            this.airRotation.velocityX -= 0.1 * deltaTime;
+            this.isAccelerating = false;
+        }
+        
+        // Limit rotation rates
+        const maxRotationRate = 0.5;
+        this.airRotation.velocityX = Math.max(-maxRotationRate, Math.min(maxRotationRate, this.airRotation.velocityX));
+        this.airRotation.velocityZ = Math.max(-maxRotationRate, Math.min(maxRotationRate, this.airRotation.velocityZ));
+    }
+    
+    // Calculate the terrain slope at the current kart position
+    calculateTerrainSlope() {
+        // Get current position
+        const position = this.kartGroup.position;
+        const { x, y, z } = position;
+        const kartRotation = this.kartGroup.rotation.y;
+        
+        // Determine forward direction
+        const forwardX = Math.sin(kartRotation);
+        const forwardZ = Math.cos(kartRotation);
+        
+        // Get height at current position
+        const centerHeight = this.track.getHeightAt(x, z).height;
+        
+        // Use multiple sample points for a more accurate slope calculation
+        const sampleDistances = [1.0, 2.0, 3.0]; // Sample at different distances for better slope averaging
+        let slopes = [];
+        
+        // Calculate slopes at different distances
+        for (const sampleDistance of sampleDistances) {
+            // Point ahead
+            const frontX = x + forwardX * sampleDistance;
+            const frontZ = z + forwardZ * sampleDistance;
+            const frontHeight = this.track.getHeightAt(frontX, frontZ).height;
+            
+            // Point behind
+            const rearX = x - forwardX * sampleDistance;
+            const rearZ = z - forwardZ * sampleDistance;
+            const rearHeight = this.track.getHeightAt(rearX, rearZ).height;
+            
+            // Calculate slope (positive = downhill, negative = uphill)
+            let slopeAtDistance = 0;
+            
+            // If moving forward
+            if (this.velocity >= 0) {
+                slopeAtDistance = (frontHeight - centerHeight) / sampleDistance;
+            } 
+            // If moving backward
+            else {
+                slopeAtDistance = (centerHeight - rearHeight) / sampleDistance;
+            }
+            
+            slopes.push(slopeAtDistance);
+        }
+        
+        // Average the slopes, but give more weight to closer samples
+        const weights = [0.5, 0.3, 0.2]; // More weight to closer points
+        let weightedSlope = 0;
+        let totalWeight = 0;
+        
+        for (let i = 0; i < slopes.length; i++) {
+            weightedSlope += slopes[i] * weights[i];
+            totalWeight += weights[i];
+        }
+        
+        const finalSlope = weightedSlope / totalWeight;
+        
+        // Add smoothing to prevent sudden changes
+        if (!this.previousSlope) {
+            this.previousSlope = finalSlope;
+        }
+        
+        // Smooth transition between slope values (avoid jerky physics)
+        const smoothingFactor = 0.8; // Higher = more smoothing
+        const smoothedSlope = this.previousSlope * smoothingFactor + finalSlope * (1 - smoothingFactor);
+        this.previousSlope = smoothedSlope;
+        
+        return smoothedSlope;
+    }
+    
+    updatePhysics(deltaTime) {
+        // ------ TERRAIN SLOPE PHYSICS ------
+        
+        // Calculate the slope of the terrain at the kart's position
+        const slope = this.calculateTerrainSlope();
+        
+        // Store slope for UI display and effects
+        this.currentSlope = slope;
+        
+        // Apply gravity effects based on slope
+        // Only apply if the slope is significant (avoid micro-slopes)
+        if (Math.abs(slope) > PHYSICS.slopeThreshold) {
+            // More pronounced force on steeper slopes (quadratic effect)
+            const steepnessFactor = 1 + Math.pow(Math.abs(slope) * 10, 1.5);
+            const slopeForce = slope * PHYSICS.slopeSensitivity * steepnessFactor;
+            
+            // Modify slopeForce magnitude based on current speed and direction
+            let slopeAcceleration = 0;
+            
+            // Use different factors for uphill vs downhill
+            if (slope > 0) {
+                // Downhill: accelerate
+                // Increase effect with steepness, but avoid too much acceleration
+                const speedRatio = Math.abs(this.velocity) / PHYSICS.kartMaxSpeed;
+                const speedLimitFactor = Math.max(0.5, 1 - speedRatio * 0.5); // Reduce effect at high speeds
+                slopeAcceleration = slopeForce * PHYSICS.downhillAccelerationFactor * speedLimitFactor;
+                
+                // Add slight engine boost sound when going downhill
+                if (this.engineAudioNode && slope > 0.05) {
+                    this.setEngineBoostSound(0.1);
+                }
+            } else {
+                // Uphill: decelerate
+                // More struggle as the slope gets steeper
+                const uphillSteepnessFactor = Math.pow(Math.abs(slope) * 10, 0.8);
+                slopeAcceleration = slopeForce * PHYSICS.uphillDecelerationFactor * uphillSteepnessFactor;
+                
+                // Engine struggles more on steep uphills
+                if (this.engineAudioNode && slope < -0.05) {
+                    // Make engine sound strained when going uphill
+                    this.setEngineStrainSound(Math.abs(slope) * 5);
+                }
+            }
+            
+            // Mass-based effect (heavier karts will accelerate faster downhill due to gravity)
+            const massFactor = PHYSICS.kartMass / 430; // Normalized to default mass
+            slopeAcceleration *= massFactor;
+            
+            // Calculate speed change due to gravity on slope (f = ma)
+            const slopeSpeedChange = slopeAcceleration * PHYSICS.gravity * PHYSICS.gravityFactor * deltaTime;
+            
+            // Limit the maximum effect based on config, but allow stronger effects for steeper slopes
+            const slopeSteepnessMultiplier = 1 + Math.pow(Math.abs(slope) * 10, 0.7);
+            const maxSlopeEffect = PHYSICS.kartMaxSpeed * PHYSICS.maxSlopeEffect * slopeSteepnessMultiplier;
+            const limitedSpeedChange = Math.max(-maxSlopeEffect, Math.min(maxSlopeEffect, slopeSpeedChange));
+            
+            // Apply slope effect to velocity
+            this.velocity += limitedSpeedChange;
+            
+            // Add visual pitch to the kart body when going up/down hills
+            // Scale pitch by slope - sharper pitch for steeper slopes
+            // Use a slightly curved response for more natural look
+            const pitchFactor = Math.sign(slope) * Math.pow(Math.abs(slope) * 3, 0.8);
+            this.chassisOrientation.pitch = -pitchFactor; // Negative because we want to pitch down when going uphill
+            
+            // Add subtle roll when kart is on a banked section of track
+            // (This would need track banking info from the track system)
+            if (this.onBankedSection) {
+                this.chassisOrientation.roll = this.bankingAngle * 0.7;
+            }
+            
+            // Temporary track visualization for debugging
+            if (this.slopeDebugEnabled) {
+                this.visualizeSlopeDirection(slope);
+            }
+        } else {
+            // Gradually return to level on flat ground
+            this.chassisOrientation.pitch *= 0.9;
+            
+            // Reset any engine audio effects
+            if (this.engineAudioNode) {
+                this.resetEngineAudioEffects();
+            }
+        }
+        
+        // ------ FRICTION AND INERTIA ------
+        
+        // Apply friction if no acceleration or braking - simulate momentum and rolling resistance
+        if (!this.isAccelerating && !(this.keys && this.keys.ArrowDown)) {
+            // Use appropriate friction based on track status
+            let frictionFactor = this.isOnTrack ? PHYSICS.onTrackFriction : PHYSICS.offTrackFriction;
+            
+            // Enhanced realistic deceleration with stronger friction at lower speeds
+            // This simulates increased rolling resistance at lower speeds
+            const speedRatio = this.velocity / PHYSICS.kartMaxSpeed;
+            
+            if (speedRatio < 0.25) {
+                // Progressive non-linear increase in friction at very low speeds
+                // This creates a more natural stop without sliding forever
+                const lowSpeedFrictionIncrease = Math.pow(1 - speedRatio/0.25, 2) * 0.03;
+                frictionFactor *= (0.97 + lowSpeedFrictionIncrease);
+            }
+            
+            // Apply friction with mass-based factor for heavier feel
+            // Heavier karts maintain momentum better
+            const massBasedFriction = Math.pow(frictionFactor, 450 / PHYSICS.kartMass);
+            this.velocity *= massBasedFriction;
+            
+            // Stop completely at very low speeds to prevent sliding forever
+            // Higher threshold for more immediate stop at very low speeds
+            if (this.velocity < 0.002) {
+                this.velocity = 0;
+            }
+        }
+        
+        // Apply off-track slowdown if needed with more gradual buildup for heavy kart
+        if (!this.isOnTrack) {
+            // Progressive slowdown that builds up the longer you're off track
+            // Slower buildup rate for heavier kart - feels like sinking into soft ground
+            const buildup = (1 - PHYSICS.offTrackSpeedMultiplier) * (2.5 + this.velocity * 10) * deltaTime;
+            const offTrackFactor = Math.max(PHYSICS.offTrackSpeedMultiplier, 1 - buildup);
+            this.velocity *= offTrackFactor;
+            
+            // Optional: Add random bumps for off-track terrain
+            if (Math.random() < 0.05 && this.velocity > 0.03) {
+                // Random terrain bump
+                const bumpIntensity = 0.01 * Math.random() * this.velocity * 5;
+                this.chassisOrientation.pitchVelocity += (Math.random() - 0.5) * bumpIntensity;
+                this.chassisOrientation.rollVelocity += (Math.random() - 0.5) * bumpIntensity;
+            }
+        }
+        
+        // ------ MOVEMENT WITH INERTIA PHYSICS ------
+        
+        // Calculate facing direction (where the kart is pointing)
+        const facingDirX = Math.sin(this.kartGroup.rotation.y);
+        const facingDirZ = Math.cos(this.kartGroup.rotation.y);
+        
+        // Initialize movement direction - initially matches facing direction
+        let moveDirX = facingDirX;
+        let moveDirZ = facingDirZ;
+        
+        // Store movement vector for inertia calculations (if not already defined)
+        if (!this.moveDirection) {
+            this.moveDirection = { x: facingDirX, z: facingDirZ };
+        }
+        
+        // Apply inertia - movement direction gradually aligns with facing direction
+        // This creates sliding/drifting effects when turning sharply
+        const inertiaFactor = PHYSICS.inertiaFactor * (1 + (this.velocity / PHYSICS.kartMaxSpeed) * 0.5);
+        
+        // Interpolate between current movement direction and facing direction
+        // Higher inertia means the kart maintains its direction of travel longer when turning
+        this.moveDirection.x += (facingDirX - this.moveDirection.x) * (1 - inertiaFactor) * 10 * deltaTime;
+        this.moveDirection.z += (facingDirZ - this.moveDirection.z) * (1 - inertiaFactor) * 10 * deltaTime;
+        
+        // Normalize move direction vector
+        const moveDirLength = Math.sqrt(
+            this.moveDirection.x * this.moveDirection.x + 
+            this.moveDirection.z * this.moveDirection.z
+        );
+        
+        // Prevent division by zero
+        if (moveDirLength > 0.001) {
+            moveDirX = this.moveDirection.x / moveDirLength;
+            moveDirZ = this.moveDirection.z / moveDirLength;
+        }
+        
+        // Calculate lateral velocity component (sideways sliding)
+        // This is the dot product of the side vector with the movement direction
+        const sideX = Math.cos(this.kartGroup.rotation.y);
+        const sideZ = -Math.sin(this.kartGroup.rotation.y);
+        
+        const lateralVelocity = (moveDirX * sideX + moveDirZ * sideZ) * this.velocity;
+        
+        // Apply grip reduction when sliding sideways (drift physics)
+        if (Math.abs(lateralVelocity) > 0.01 && this.velocity > 0.05) {
+            // Calculate grip loss based on how much we're sliding sideways
+            const lateralRatio = Math.abs(lateralVelocity) / this.velocity;
+            
+            // Reduce velocity when sliding a lot (simulates tire scrub)
+            const gripLoss = lateralRatio * (1 - PHYSICS.lateralGripDecay) * deltaTime * 2;
+            this.velocity *= (1 - gripLoss);
+            
+            // Apply visual feedback for sliding
+            if (lateralRatio > 0.2) {
+                // TODO: Could add drift particles here
+                
+                // Add banking effect during drift
+                const driftRoll = 0.04 * lateralVelocity;
+                this.chassisOrientation.rollVelocity += driftRoll * deltaTime;
+            }
+        }
+        
+        // Calculate final movement vector using the interpolated direction and current velocity
+        const moveX = moveDirX * this.velocity;
+        const moveZ = moveDirZ * this.velocity;
+        
+        // Update position
+        this.kartGroup.position.x += moveX;
+        this.kartGroup.position.z += moveZ;
+        
+        // ------ CHASSIS DYNAMICS ------
+        
+        // Apply chassis rotation for tilt with enhanced physics for heavier kart
+        this.chassisOrientation.roll += this.chassisOrientation.rollVelocity * deltaTime;
+        this.chassisOrientation.pitch += this.chassisOrientation.pitchVelocity * deltaTime;
+        
+        // Natural damping to return to neutral orientation - heavier chassis has more momentum
+        // Use the configured damping coefficient for smoother feel
+        this.chassisOrientation.rollVelocity *= PHYSICS.dampingCoefficient;
+        this.chassisOrientation.pitchVelocity *= PHYSICS.dampingCoefficient;
+        this.chassisOrientation.roll *= PHYSICS.dampingCoefficient;
+        this.chassisOrientation.pitch *= PHYSICS.dampingCoefficient;
+        
+        // Limit maximum tilt for stability but allow more extreme angles
+        const maxAngle = 0.3;  // About 17 degrees
+        this.chassisOrientation.roll = Math.max(-maxAngle, Math.min(maxAngle, this.chassisOrientation.roll));
+        this.chassisOrientation.pitch = Math.max(-maxAngle, Math.min(maxAngle, this.chassisOrientation.pitch));
+        
+        // Apply chassis rotation for tilt
+        this.kartBodyGroup.rotation.z = this.chassisOrientation.roll;  // Apply side-to-side roll
+        this.kartBodyGroup.rotation.x = this.chassisOrientation.pitch; // Apply front-to-back pitch
+    }
+    
+    updateSuspension(deltaTime) {
+        // Get current kart position and rotation
+        const kartPosition = this.kartGroup.position;
+        const kartRotation = this.kartGroup.rotation.y;
+        
+        // Calculate positions for each wheel in the world
+        const wheelPositions = this.calculateWheelPositions(kartPosition, kartRotation);
+        
+        // Update each wheel's suspension
+        this.updateWheelSuspension('frontLeft', wheelPositions.frontLeft, deltaTime);
+        this.updateWheelSuspension('frontRight', wheelPositions.frontRight, deltaTime);
+        this.updateWheelSuspension('rearLeft', wheelPositions.rearLeft, deltaTime);
+        this.updateWheelSuspension('rearRight', wheelPositions.rearRight, deltaTime);
+        
+        // Update chassis orientation based on suspension forces
+        this.updateChassisOrientation(deltaTime);
+        
+        // Update kart height to match track/ground
+        this.updateKartHeight();
+    }
+    
+    updateKartHeight() {
+        // Calculate average ground height from all wheels
+        const avgGroundHeight = (
+            this.wheelSuspensions.frontLeft.groundHeight +
+            this.wheelSuspensions.frontRight.groundHeight +
+            this.wheelSuspensions.rearLeft.groundHeight +
+            this.wheelSuspensions.rearRight.groundHeight
+        ) / 4;
+        
+        // Calculate target height: ground height + chassis height + suspension height
+        const targetHeight = avgGroundHeight + (kartSize.height / 2) + PHYSICS.suspensionRestHeight;
+        
+        // Smoothly move towards target height
+        const heightLerp = 0.2; // Adjust for smoother or quicker height adjustment
+        this.kartGroup.position.y += (targetHeight - this.kartGroup.position.y) * heightLerp;
+    }
+    
+    calculateWheelPositions(kartPosition, kartRotation) {
+        // Calculate the wheel positions in world space
+        return {
+            frontLeft: {
+                x: kartPosition.x - Math.cos(kartRotation) * wheelConfig.offsetX - Math.sin(kartRotation) * wheelConfig.frontOffsetZ,
+                z: kartPosition.z - Math.sin(kartRotation) * wheelConfig.offsetX + Math.cos(kartRotation) * wheelConfig.frontOffsetZ
+            },
+            frontRight: {
+                x: kartPosition.x + Math.cos(kartRotation) * wheelConfig.offsetX - Math.sin(kartRotation) * wheelConfig.frontOffsetZ,
+                z: kartPosition.z + Math.sin(kartRotation) * wheelConfig.offsetX + Math.cos(kartRotation) * wheelConfig.frontOffsetZ
+            },
+            rearLeft: {
+                x: kartPosition.x - Math.cos(kartRotation) * wheelConfig.offsetX - Math.sin(kartRotation) * wheelConfig.rearOffsetZ,
+                z: kartPosition.z - Math.sin(kartRotation) * wheelConfig.offsetX + Math.cos(kartRotation) * wheelConfig.rearOffsetZ
+            },
+            rearRight: {
+                x: kartPosition.x + Math.cos(kartRotation) * wheelConfig.offsetX - Math.sin(kartRotation) * wheelConfig.rearOffsetZ,
+                z: kartPosition.z + Math.sin(kartRotation) * wheelConfig.offsetX + Math.cos(kartRotation) * wheelConfig.rearOffsetZ
+            }
+        };
+    }
+    
+    updateWheelSuspension(wheelName, position, deltaTime) {
+        // Get the suspension data
+        const suspension = this.wheelSuspensions[wheelName];
+        const wheelGroup = this[wheelName + 'WheelGroup'];
+        
+        // Different surface handling based on kart state
+        let surfaceInfo;
+        
+        if (this.isInAir) {
+            // In air - wheels hang freely
+            surfaceInfo = {
+                height: this.kartGroup.position.y - kartSize.height/2 - PHYSICS.suspensionTravel,
+                onTrack: false,
+                normal: { x: 0, y: 1, z: 0 }
+            };
+        } else if (this.isOnRamp && this.rampInfo) {
+            // On ramp - use ramp height and normal
+            try {
+                // For wheels, use the more precise ramp positioning
+                surfaceInfo = this.track.getHeightWithRamps(position.x, position.z);
+            } catch (e) {
+                // Fallback to regular height
+                surfaceInfo = this.track.getHeightAt(position.x, position.z);
+            }
+        } else {
+            // Regular ground/track surface
+            surfaceInfo = this.track.getHeightAt(position.x, position.z);
+        }
+        
+        // Set suspension data from surface
+        suspension.groundHeight = surfaceInfo.height;
+        suspension.onTrack = surfaceInfo.onTrack;
+        
+        // Store the ground normal if provided (for wheel alignment)
+        if (surfaceInfo.normal) {
+            suspension.normal = surfaceInfo.normal;
+        } else {
+            suspension.normal = { x: 0, y: 1, z: 0 }; // Default to upward normal
+        }
+        
+        // Calculate how much the suspension should compress
+        const kartHeight = this.kartGroup.position.y - kartSize.height / 2; // Bottom of kart
+        const compression = Math.max(0, Math.min(1, 
+            (kartHeight - surfaceInfo.height) / PHYSICS.suspensionTravel
+        ));
+        
+        // Calculate spring force (F = -kx)
+        const springForce = -PHYSICS.suspensionStiffness * (compression - PHYSICS.suspensionRestHeight) / PHYSICS.suspensionTravel;
+        
+        // Calculate damping force (F = -c * v)
+        const dampingForce = -PHYSICS.suspensionDamping * suspension.velocity;
+        
+        // Total force
+        const totalForce = springForce + dampingForce;
+        
+        // Update suspension state
+        suspension.force = totalForce;
+        
+        // Update suspension velocity and displacement
+        suspension.velocity += totalForce / PHYSICS.kartMass * deltaTime;
+        const oldCompression = suspension.compression;
+        suspension.compression = Math.max(0, Math.min(1, oldCompression + suspension.velocity * deltaTime));
+        
+        // Update suspension velocity based on actual change in compression
+        suspension.velocity = (suspension.compression - oldCompression) / deltaTime;
+        
+        // Visually update the wheel and suspension
+        this.updateWheelVisualization(wheelGroup, suspension);
+    }
+    
+    updateWheelVisualization(wheelGroup, suspension) {
+        // Get the suspension components
+        const { spring, movingAxle } = wheelGroup.userData;
+        
+        // Set spring compression
+        spring.scale.y = 1 - suspension.compression * 0.5;
+        spring.position.y = (1 - suspension.compression) * PHYSICS.suspensionTravel / 2;
+        
+        // Set axle position
+        movingAxle.position.y = (1 - suspension.compression) * PHYSICS.suspensionTravel + 0.05;
+        
+        // Adjust wheel height (the entire group moves)
+        wheelGroup.position.y = wheelConfig.offsetY - suspension.compression * PHYSICS.suspensionTravel;
+        
+        // Align wheel to surface normal for better visual contact
+        if (!this.isInAir) {
+            const wheel = wheelGroup.children[0]; // The wheel mesh
+            
+            // Get the surface normal
+            const normal = suspension.normal;
+            
+            // Only adjust wheel orientation if we have a valid normal
+            if (normal && normal.y !== 0) {
+                // Calculate how much to rotate wheel to match ground
+                // For simplicity, we'll just align to the two main axes
+                
+                // First, calculate the angle to rotate around the X axis (for slope in Z direction)
+                // This affects the wheel's pitch
+                const xAngle = Math.atan2(normal.z, normal.y) * 0.5; // Scale down for subtle effect
+                
+                // Then calculate angle to rotate around the Z axis (for slope in X direction)
+                // This affects the wheel's roll
+                const zAngle = -Math.atan2(normal.x, normal.y) * 0.5; // Scale down for subtle effect
+                
+                // Apply the rotation, keep existing rotation.x which is for steering
+                const steeringAngle = wheel.rotation.x;
+                wheel.rotation.x = steeringAngle + xAngle;
+                wheel.rotation.z = zAngle;
+            }
+        }
+    }
+    
+    updateChassisOrientation(deltaTime) {
+        // Check if we're on the track (at least 3 wheels on track means we're on track)
+        const wheelsOnTrack = [
+            this.wheelSuspensions.frontLeft.onTrack,
+            this.wheelSuspensions.frontRight.onTrack,
+            this.wheelSuspensions.rearLeft.onTrack,
+            this.wheelSuspensions.rearRight.onTrack
+        ].filter(onTrack => onTrack).length;
+        
+        const isFullyOnTrack = wheelsOnTrack >= 3;
+        
+        if (isFullyOnTrack) {
+            // When on track, align with track surface using the normals
+            this.alignChassisWithTrack(deltaTime);
+        } else {
+            // When off track or transitioning, use the suspension-based orientation
+            this.calculateChassisFromSuspension(deltaTime);
+        }
+    }
+    
+    alignChassisWithTrack(deltaTime) {
+        // Calculate average normal from all wheel positions
+        const avgNormalX = (
+            this.wheelSuspensions.frontLeft.normal.x +
+            this.wheelSuspensions.frontRight.normal.x +
+            this.wheelSuspensions.rearLeft.normal.x +
+            this.wheelSuspensions.rearRight.normal.x
+        ) / 4;
+        
+        const avgNormalY = (
+            this.wheelSuspensions.frontLeft.normal.y +
+            this.wheelSuspensions.frontRight.normal.y +
+            this.wheelSuspensions.rearLeft.normal.y +
+            this.wheelSuspensions.rearRight.normal.y
+        ) / 4;
+        
+        const avgNormalZ = (
+            this.wheelSuspensions.frontLeft.normal.z +
+            this.wheelSuspensions.frontRight.normal.z +
+            this.wheelSuspensions.rearLeft.normal.z +
+            this.wheelSuspensions.rearRight.normal.z
+        ) / 4;
+        
+        // Normalize the average normal
+        const normalLength = Math.sqrt(avgNormalX*avgNormalX + avgNormalY*avgNormalY + avgNormalZ*avgNormalZ);
+        const normX = avgNormalX / normalLength;
+        const normY = avgNormalY / normalLength;
+        const normZ = avgNormalZ / normalLength;
+        
+        // Calculate target roll and pitch from normal
+        // This is an approximation - for true alignment we'd use quaternions
+        // Forward direction of kart is +Z in local space
+        const forwardX = Math.sin(this.kartGroup.rotation.y);
+        const forwardZ = Math.cos(this.kartGroup.rotation.y);
+        
+        // Right direction is perpendicular to forward
+        const rightX = Math.cos(this.kartGroup.rotation.y);
+        const rightZ = -Math.sin(this.kartGroup.rotation.y);
+        
+        // Calculate roll (angle between normal and right vector)
+        // Roll is rotation around Z axis (local)
+        const rightDot = rightX * normX + 0 * normY + rightZ * normZ;
+        const targetRoll = Math.asin(rightDot);
+        
+        // Calculate pitch (angle between normal and forward vector)
+        // Pitch is rotation around X axis (local)
+        const forwardDot = forwardX * normX + 0 * normY + forwardZ * normZ;
+        const targetPitch = -Math.asin(forwardDot);
+        
+        // Smoothly interpolate to target orientations
+        const orientationLerp = 0.1; // Adjust for smoother or quicker banking match
+        
+        // Apply lerp to roll and pitch
+        this.chassisOrientation.roll += (targetRoll - this.chassisOrientation.roll) * orientationLerp;
+        this.chassisOrientation.pitch += (targetPitch - this.chassisOrientation.pitch) * orientationLerp;
+        
+        // Apply limits for stability
+        const maxAngle = 0.3; // About 17 degrees
+        this.chassisOrientation.roll = Math.max(-maxAngle, Math.min(maxAngle, this.chassisOrientation.roll));
+        this.chassisOrientation.pitch = Math.max(-maxAngle, Math.min(maxAngle, this.chassisOrientation.pitch));
+    }
+    
+    calculateChassisFromSuspension(deltaTime) {
+        // Calculate roll (side-to-side tilt) from left vs right wheel heights
+        const frontDiff = this.wheelSuspensions.frontLeft.compression - this.wheelSuspensions.frontRight.compression;
+        const rearDiff = this.wheelSuspensions.rearLeft.compression - this.wheelSuspensions.rearRight.compression;
+        const rollForce = (frontDiff + rearDiff) / 2 * PHYSICS.chassisRollStiffness;
+        
+        // Calculate pitch (front-to-back tilt) from front vs rear wheel heights
+        const leftDiff = this.wheelSuspensions.frontLeft.compression - this.wheelSuspensions.rearLeft.compression;
+        const rightDiff = this.wheelSuspensions.frontRight.compression - this.wheelSuspensions.rearRight.compression;
+        const pitchForce = (leftDiff + rightDiff) / 2 * PHYSICS.pitchStiffness;
+        
+        // Calculate new orientation using spring-mass-damper system
+        // Roll
+        const rollAccel = rollForce / PHYSICS.kartMass - this.chassisOrientation.rollVelocity * 10;
+        this.chassisOrientation.rollVelocity += rollAccel * deltaTime;
+        this.chassisOrientation.roll += this.chassisOrientation.rollVelocity * deltaTime;
+        
+        // Apply roll damping
+        this.chassisOrientation.rollVelocity *= 0.95;
+        
+        // Pitch
+        const pitchAccel = pitchForce / PHYSICS.kartMass - this.chassisOrientation.pitchVelocity * 10;
+        this.chassisOrientation.pitchVelocity += pitchAccel * deltaTime;
+        this.chassisOrientation.pitch += this.chassisOrientation.pitchVelocity * deltaTime;
+        
+        // Apply pitch damping
+        this.chassisOrientation.pitchVelocity *= 0.95;
+        
+        // Limit chassis angles for stability
+        const maxAngle = 0.2; // About 11 degrees
+        this.chassisOrientation.roll = Math.max(-maxAngle, Math.min(maxAngle, this.chassisOrientation.roll));
+        this.chassisOrientation.pitch = Math.max(-maxAngle, Math.min(maxAngle, this.chassisOrientation.pitch));
+    }
+    
+    updateWheels(deltaTime) {
+        // Calculate wheel rotation speed based on kart velocity
+        const rotationSpeed = this.velocity / wheelConfig.radius * 5;
+        
+        // Update wheel rotation animations
+        this.frontLeftWheel.rotation.y += rotationSpeed * deltaTime;
+        this.frontRightWheel.rotation.y += rotationSpeed * deltaTime;
+        this.rearLeftWheel.rotation.y += rotationSpeed * deltaTime;
+        this.rearRightWheel.rotation.y += rotationSpeed * deltaTime;
+    }
+    
+    checkTrackStatus() {
+        // Check if the kart's center is on the track
+        const { x, z } = this.kartGroup.position;
+        const margin = 0.5; // Additional margin for better gameplay
+        
+        // Update track status
+        this.isOnTrack = this.track.isPointOnTrack(x, z, margin);
+        
+        // Update indicator color
+        this.trackIndicator.material.color.set(this.isOnTrack ? 0x00ff00 : 0xff0000);
+        this.trackIndicator.material.emissive.set(this.isOnTrack ? 0x003300 : 0x330000);
+    }
+    
+    // Check if headlights should be on based on time of day
+    updateHeadlights(environment) {
+        // Debug information
+        console.log("updateHeadlights called, manualControl:", this.manualHeadlightControl);
+        
+        if (!this.leftHeadlight || !this.rightHeadlight) {
+            console.log("Headlights not yet initialized");
+            return;
+        }
+        
+        // If headlights are manually controlled, don't auto-toggle
+        if (this.manualHeadlightControl) {
+            console.log("Headlights are manually controlled. Current state:", this.headlightsOn);
+            return;
+        }
+        
+        // Get time of day if available from environment
+        let timeOfDay = null;
+        if (environment && environment.sky) {
+            timeOfDay = environment.sky.timeOfDay;
+            console.log("Current time of day:", timeOfDay);
+        } else {
+            console.log("Environment or sky not available");
+        }
+        
+        // Turn on headlights during sunset, night, and dawn
+        if (timeOfDay !== null) {
+            // Turn on during sunset, night and dawn (timeOfDay between 0.45 and 0.95)
+            const shouldBeOn = timeOfDay > 0.45 && timeOfDay < 0.95;
+            console.log("Auto headlights: should be", shouldBeOn ? "ON" : "OFF", "at time", timeOfDay);
+            
+            // Set headlight state
+            this.setHeadlightsState(shouldBeOn);
+        }
+    }
+    
+    updateStatusDisplay() {
+        // Update the track status
+        const trackStatusElement = document.getElementById('trackStatus');
+        if (trackStatusElement) {
+            let statusText = 'On Track';
+            let statusColor = 'lightgreen';
+            
+            if (this.isBeingReset) {
+                statusText = 'RESETTING...';
+                statusColor = 'red';
+            } else if (this.isInAir) {
+                statusText = 'In Air!';
+                statusColor = 'lightblue';
+            } else if (this.isColliding) {
+                statusText = 'Collision!';
+                statusColor = 'orange';
+            } else if (this.isOnRamp) {
+                statusText = 'On Ramp';
+                statusColor = 'yellow';
+            } else if (!this.isOnTrack) {
+                statusText = 'Off Track';
+                statusColor = 'pink';
+            }
+            
+            trackStatusElement.textContent = statusText;
+            trackStatusElement.style.color = statusColor;
+        }
+        
+        // Update the speed display
+        const speedStatusElement = document.getElementById('speedStatus');
+        if (speedStatusElement) {
+            const speedPercent = Math.round((this.velocity / PHYSICS.kartMaxSpeed) * 100);
+            speedStatusElement.textContent = `${speedPercent}%`;
+        }
+        
+        // Update throttle/brake bars
+        const throttleBar = document.getElementById('throttleBar');
+        const brakeBar = document.getElementById('brakeBar');
+        
+        if (throttleBar) {
+            throttleBar.style.width = this.isAccelerating ? '100%' : '0%';
+        }
+        
+        if (brakeBar && this.keys) {
+            brakeBar.style.width = this.keys.ArrowDown ? '100%' : '0%';
+        }
+        
+        // Update suspension displays
+        this.updateSuspensionDisplay('flSusp', this.wheelSuspensions.frontLeft.compression);
+        this.updateSuspensionDisplay('frSusp', this.wheelSuspensions.frontRight.compression);
+        this.updateSuspensionDisplay('rlSusp', this.wheelSuspensions.rearLeft.compression);
+        this.updateSuspensionDisplay('rrSusp', this.wheelSuspensions.rearRight.compression);
+        
+        // Additional jump/air info if available
+        const airInfoElement = document.getElementById('airInfo');
+        if (airInfoElement) {
+            if (this.isBeingReset) {
+                // Show reset countdown
+                const resetTimeLeft = Math.max(0, Math.round((1.0 - this.resetAnimationTime) * 10) / 10);
+                airInfoElement.textContent = `Resetting kart in ${resetTimeLeft.toFixed(1)}s`;
+                airInfoElement.style.display = 'block';
+                airInfoElement.style.color = 'red';
+            } else if (this.isInAir) {
+                // Show jump info
+                const airTimeSeconds = Math.round(this.airTime * 10) / 10;
+                const height = Math.round((this.kartGroup.position.y - this.lastGroundY) * 10) / 10;
+                airInfoElement.textContent = `Air Time: ${airTimeSeconds}s | Height: ${height}m`;
+                airInfoElement.style.display = 'block';
+                airInfoElement.style.color = 'lightblue';
+            } else if (this.timeSpentSlow > 0) {
+                // Show stuck warning if we're getting close to reset
+                const resetCountdown = Math.max(0, TRACK_PHYSICS.recoveryTimeout - this.timeSpentSlow);
+                if (resetCountdown < 3) {
+                    airInfoElement.textContent = `Kart stuck! Resetting in ${resetCountdown.toFixed(1)}s`;
+                    airInfoElement.style.display = 'block';
+                    airInfoElement.style.color = 'orange';
+                } else {
+                    airInfoElement.style.display = 'none';
+                }
+            } else {
+                airInfoElement.style.display = 'none';
+            }
+        }
+    }
+    
+    updateSuspensionDisplay(id, compression) {
+        const element = document.getElementById(id);
+        if (element) {
+            // Calculate a color from green (uncompressed) to red (fully compressed)
+            const red = Math.round(compression * 255);
+            const green = Math.round((1 - compression) * 255);
+            element.style.backgroundColor = `rgb(${red}, ${green}, 0)`;
+            
+            // Show compression as bar height
+            element.style.height = `${Math.max(2, 10 * compression)}px`;
+        }
+    }
+    
+    // New method: Check for collisions with obstacles
+    checkCollisions(deltaTime) {
+        // Skip collision detection if already colliding (in recovery phase)
+        if (this.isColliding) return;
+        
+        // Skip collision detection if we recently collided (grace period)
+        const timeSinceLastCollision = performance.now() - this.lastCollisionTime;
+        if (timeSinceLastCollision < 500) return; // 500ms grace period
+        
+        // Get kart position and create a debug sphere to visualize the kart's collision radius
+        const kartPosition = this.kartGroup.position;
+        
+        // Define the kart's collision area - slightly smaller than the visual model for gameplay feel
+        const kartRadius = Math.max(kartSize.width, kartSize.depth) / 2 * 0.8;
+        
+        // Create more obstacles with better placement for testing
+        const obstacles = [
+            // Trees in strategic positions 
+            { type: 'tree', x: -60, z: 0, radius: 2.0 },
+            { type: 'tree', x: 60, z: 0, radius: 2.0 },
+            { type: 'tree', x: 0, z: 60, radius: 2.0 },
+            { type: 'tree', x: 0, z: -60, radius: 2.0 },
+            { type: 'tree', x: -30, z: 30, radius: 2.0 },
+            { type: 'tree', x: 30, z: -30, radius: 2.0 },
+            
+            // Rocks - place them in locations where the player is likely to hit them
+            // Increase radius to make them easier to hit
+            { type: 'rock', x: -25, z: 15, radius: 1.5 },
+            { type: 'rock', x: 25, z: -15, radius: 1.5 },
+            { type: 'rock', x: 15, z: 25, radius: 1.5 },
+            { type: 'rock', x: -15, z: -25, radius: 1.5 },
+            
+            // More rocks along racing line
+            { type: 'rock', x: -5, z: 15, radius: 1.5 },
+            { type: 'rock', x: 5, z: -15, radius: 1.5 }
+        ];
+        
+        // Debug visualization of collision areas (uncomment to debug)
+        // this.debugCollisionAreas(kartPosition, kartRadius, obstacles);
+        
+        // Check each wheel's position for collisions too - this helps with catching glancing hits
+        const wheelPositions = this.calculateWheelPositions(kartPosition, this.kartGroup.rotation.y);
+        const wheelPositionsArray = [
+            wheelPositions.frontLeft,
+            wheelPositions.frontRight,
+            wheelPositions.rearLeft,
+            wheelPositions.rearRight
+        ];
+        
+        // Check central kart position first
+        for (const obstacle of obstacles) {
+            // Calculate distance from kart to obstacle
+            const dx = kartPosition.x - obstacle.x;
+            const dz = kartPosition.z - obstacle.z;
+            const distance = Math.sqrt(dx * dx + dz * dz);
+            
+            // Check for collision with kart center
+            if (distance < kartRadius + obstacle.radius) {
+                console.log(`Direct collision with ${obstacle.type} at distance ${distance.toFixed(2)}`);
+                this.handleCollision(obstacle, dx, dz, distance);
+                return; // Exit after handling collision
+            }
+        }
+        
+        // Check wheels next - with smaller collision radius for each wheel
+        const wheelCollisionRadius = 0.3; // Wheel collision radius
+        
+        for (const wheelPos of wheelPositionsArray) {
+            for (const obstacle of obstacles) {
+                // Calculate distance from wheel to obstacle
+                const dx = wheelPos.x - obstacle.x;
+                const dz = wheelPos.z - obstacle.z;
+                const distance = Math.sqrt(dx * dx + dz * dz);
+                
+                // Check for collision with wheel
+                if (distance < wheelCollisionRadius + obstacle.radius) {
+                    console.log(`Wheel collision with ${obstacle.type} at distance ${distance.toFixed(2)}`);
+                    this.handleCollision(obstacle, dx, dz, distance);
+                    return; // Exit after handling collision
+                }
+            }
+        }
+    }
+    
+    // Debug method to visualize collision areas
+    debugCollisionAreas(kartPosition, kartRadius, obstacles) {
+        // This is just for debugging - not needed in final code
+        console.log("Kart position:", kartPosition.x, kartPosition.z, "radius:", kartRadius);
+        
+        // Log each obstacle's position and collision radius
+        obstacles.forEach(obs => {
+            console.log(`${obs.type} at ${obs.x}, ${obs.z} with radius ${obs.radius}`);
+            const distToKart = Math.sqrt(
+                Math.pow(kartPosition.x - obs.x, 2) + 
+                Math.pow(kartPosition.z - obs.z, 2)
+            );
+            console.log(`  Distance to kart: ${distToKart}, collision distance: ${kartRadius + obs.radius}`);
+            console.log(`  Will collide: ${distToKart < kartRadius + obs.radius}`);
+        });
+    }
+    
+    // New method: Handle collision with obstacle
+    handleCollision(obstacle, dx, dz, distance) {
+        // Set collision state
+        this.isColliding = true;
+        this.lastCollisionTime = performance.now();
+        
+        // Normalize direction vector from obstacle to kart
+        const normalizedDx = dx / distance;
+        const normalizedDz = dz / distance;
+        
+        // Calculate overlap (how far the kart penetrated the obstacle)
+        const overlap = (kartSize.width / 2 + obstacle.radius) - distance;
+        
+        // Push kart away from obstacle
+        this.kartGroup.position.x += normalizedDx * overlap * 1.1; // Push a bit further to prevent sticking
+        this.kartGroup.position.z += normalizedDz * overlap * 1.1;
+        
+        // Add a slight bounce effect
+        if (!this.isInAir) {
+            // Ground collision - apply bounce
+            this.verticalVelocity = 0.05 * TRACK_PHYSICS.collisionBounceFactor;
+            
+            // Go airborne for a short bounce
+            if (this.verticalVelocity > 0.01) {
+                this.isInAir = true;
+            }
+        }
+        
+        // As per requirements: Reduce kart velocity to exactly 10% of max velocity for both rocks and trees
+        this.velocity = PHYSICS.kartMaxSpeed * TRACK_PHYSICS.collisionSpeedFactor;
+        
+        console.log(`Collision with ${obstacle.type}! Speed reduced to ${Math.round(this.velocity/PHYSICS.kartMaxSpeed*100)}% of max.`);
+        
+        // Different visual effects based on obstacle type
+        if (obstacle.type === 'tree') {
+            // Trees have a stronger impact on orientation
+            const rotationImpulse = 0.15 + Math.random() * 0.3;
+            const rotationDirection = Math.random() > 0.5 ? 1 : -1;
+            
+            if (!this.isInAir) {
+                // Ground collision - chassis orientation
+                this.chassisOrientation.rollVelocity += rotationImpulse * rotationDirection * 1.5;
+                this.chassisOrientation.pitchVelocity += rotationImpulse * (Math.random() > 0.5 ? 1 : -1);
+            } else {
+                // Air collision - add rotation
+                this.airRotation.velocityZ += rotationImpulse * 2 * rotationDirection;
+                this.airRotation.velocityX += rotationImpulse * (Math.random() > 0.5 ? 1 : -1);
+            }
+        } else if (obstacle.type === 'rock') {
+            // Rocks make the kart bounce more
+            if (!this.isInAir) {
+                this.verticalVelocity *= 2.0;
+            }
+            
+            // Rocks have a more moderate impact on orientation
+            const rotationImpulse = 0.08 + Math.random() * 0.15;
+            const rotationDirection = Math.random() > 0.5 ? 1 : -1;
+            
+            if (!this.isInAir) {
+                // Ground collision - chassis orientation
+                this.chassisOrientation.rollVelocity += rotationImpulse * rotationDirection;
+                this.chassisOrientation.pitchVelocity += (rotationImpulse / 2) * (Math.random() > 0.5 ? 1 : -1);
+            } else {
+                // Air collision - add rotation
+                this.airRotation.velocityZ += rotationImpulse * 1.5 * rotationDirection;
+                this.airRotation.velocityX += rotationImpulse * 0.8 * (Math.random() > 0.5 ? 1 : -1);
+            }
+        }
+        
+        // TODO: Play collision sound
+        // If there was audio, we'd play it here
+    }
+    
+    // New method: Handle recovery after collision
+    handleCollisionRecovery(deltaTime) {
+        // Calculate how much time has passed since collision
+        const timeInCollision = performance.now() - this.lastCollisionTime;
+        
+        // End collision recovery after a short time
+        if (timeInCollision > 300) { // 300ms recovery time
+            this.isColliding = false;
+            return;
+        }
+        
+        // Gradually recover from collision
+        // Apply physics during recovery
+        if (this.isInAir) {
+            // Air physics but with reduced control
+            this.updateAirPhysics(deltaTime);
+        } else {
+            // Ground physics with reduced speed and control
+            this.updatePhysics(deltaTime);
+            
+            // Apply damping to stabilize kart
+            this.chassisOrientation.rollVelocity *= 0.9;
+            this.chassisOrientation.pitchVelocity *= 0.9;
+        }
+    }
+    
+    updateEngineSound() {
+        // Check if audio context is initialized
+        if (!this.audioContext) {
+            this.initializeAudio();
+        }
+        
+        if (!this.audioContext || !this.oscillator) return;
+        
+        // Update engine sound based on velocity
+        const speedRatio = this.velocity / PHYSICS.kartMaxSpeed;
+        
+        // Get base frequency based on speed (lower pitch range overall)
+        const minFreq = 40; // Very low idle frequency for deep rumble
+        const maxFreq = 100; // Still relatively low at top speed
+        const baseFreq = minFreq + speedRatio * (maxFreq - minFreq);
+        
+        // Update main oscillator frequency
+        this.oscillator.frequency.setValueAtTime(baseFreq, this.audioContext.currentTime);
+        
+        // Update the secondary oscillator if it exists (for chug-chug effect)
+        if (this.chugOscillator) {
+            // Speed of "chugging" increases with velocity
+            const chugFreq = 4 + speedRatio * 16; // 4Hz at idle, up to 20Hz at max speed
+            this.chugOscillator.frequency.setValueAtTime(chugFreq, this.audioContext.currentTime);
+            
+            // Depth of modulation reduces slightly at high speeds
+            const modulationDepth = 0.6 - speedRatio * 0.3; // 0.6 at idle, 0.3 at max speed
+            this.chugDepth.gain.setValueAtTime(modulationDepth, this.audioContext.currentTime);
+        }
+        
+        // Update filter to open up at higher speeds (more harmonics)
+        if (this.filter) {
+            const minFilterFreq = 200;
+            const maxFilterFreq = 800;
+            const filterFreq = minFilterFreq + speedRatio * (maxFilterFreq - minFilterFreq);
+            this.filter.frequency.setValueAtTime(filterFreq, this.audioContext.currentTime);
+            
+            // Reduce resonance at high speeds for less whine
+            const minQ = 2;
+            const maxQ = 8;
+            this.filter.Q.setValueAtTime(maxQ - speedRatio * (maxQ - minQ), this.audioContext.currentTime);
+        }
+        
+        // Update gain based on speed - louder when faster
+        const minGain = 0.05; // Quiet when idle
+        const maxGain = 0.2;  // Louder at max speed
+        const baseGain = minGain + speedRatio * (maxGain - minGain);
+        
+        // Add a bit more volume when accelerating
+        const accelBonus = this.isAccelerating ? 0.05 : 0;
+        
+        // Set the gain
+        this.gainNode.gain.setValueAtTime(baseGain + accelBonus, this.audioContext.currentTime);
+        
+        // Add random amplitude variations to simulate combustion irregularities
+        if (this.noiseGain && this.time !== undefined) {
+            this.time += 1/60; // Assume ~60fps
+            const noiseAmount = 0.02 + speedRatio * 0.04;
+            const noise = Math.sin(this.time * 17.3) * Math.sin(this.time * 5.9) * noiseAmount;
+            this.noiseGain.gain.setValueAtTime(noise, this.audioContext.currentTime);
+        }
+    }
+    
+    initializeAudio() {
+        // Only initialize once and check for browser support
+        if (this.audioContext || !window.AudioContext) return;
+        
+        try {
+            // Internal time tracker for variations
+            this.time = 0;
+            
+            // Create audio context
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Create main oscillator for engine base sound (deep rumble)
+            this.oscillator = this.audioContext.createOscillator();
+            this.oscillator.type = 'triangle'; // Triangle wave for less harsh base sound 
+            this.oscillator.frequency.setValueAtTime(40, this.audioContext.currentTime); // Very low base frequency
+            
+            // Create secondary oscillator for "chug-chug" sound
+            this.chugOscillator = this.audioContext.createOscillator();
+            this.chugOscillator.type = 'sine';
+            this.chugOscillator.frequency.setValueAtTime(4, this.audioContext.currentTime); // 4Hz = 4 chugs per second at idle
+            
+            // Create gain node to control chug depth
+            this.chugDepth = this.audioContext.createGain();
+            this.chugDepth.gain.setValueAtTime(0.6, this.audioContext.currentTime); // Modulation depth
+            
+            // Create gain node to control overall volume
+            this.gainNode = this.audioContext.createGain();
+            this.gainNode.gain.setValueAtTime(0.05, this.audioContext.currentTime); // Start quiet
+            
+            // Create modulator for "chug" effect
+            // We'll modify the main oscillator's frequency and amplitude with this
+            this.chugModulator = this.audioContext.createGain();
+            this.chugModulator.gain.setValueAtTime(1, this.audioContext.currentTime); // Base value for the carrier
+            
+            // Create a noise source for irregularity
+            this.noiseGain = this.audioContext.createGain();
+            this.noiseGain.gain.setValueAtTime(0.02, this.audioContext.currentTime);
+            
+            // Create a filter chain for more engine-like sound
+            // Low-pass filter to tame the high frequencies
+            this.filter = this.audioContext.createBiquadFilter();
+            this.filter.type = 'lowpass';
+            this.filter.frequency.setValueAtTime(200, this.audioContext.currentTime); // Lower cutoff for deeper sound
+            this.filter.Q.setValueAtTime(8, this.audioContext.currentTime); // Resonance for character
+            
+            // Additional filters for more character
+            this.lowMidFilter = this.audioContext.createBiquadFilter();
+            this.lowMidFilter.type = 'peaking';
+            this.lowMidFilter.frequency.setValueAtTime(120, this.audioContext.currentTime);
+            this.lowMidFilter.Q.setValueAtTime(2, this.audioContext.currentTime);
+            this.lowMidFilter.gain.setValueAtTime(6, this.audioContext.currentTime); // Boost low-mids
+            
+            // Connect the chug modulator
+            this.chugOscillator.connect(this.chugDepth);
+            this.chugDepth.connect(this.chugModulator.gain); // Modulate the carrier gain
+            
+            // Connect the oscillator chain
+            this.oscillator.connect(this.chugModulator);
+            this.chugModulator.connect(this.filter);
+            this.filter.connect(this.lowMidFilter);
+            this.lowMidFilter.connect(this.gainNode);
+            this.gainNode.connect(this.noiseGain);
+            this.noiseGain.connect(this.audioContext.destination);
+            
+            // Start all oscillators
+            this.oscillator.start();
+            this.chugOscillator.start();
+            
+            // Initialize audio on first user interaction
+            document.addEventListener('click', () => {
+                if (this.audioContext.state === 'suspended') {
+                    this.audioContext.resume();
+                }
+            }, { once: true });
+            
+            document.addEventListener('keydown', () => {
+                if (this.audioContext.state === 'suspended') {
+                    this.audioContext.resume();
+                }
+            }, { once: true });
+            
+            console.log("Audio engine initialized");
+        } catch (error) {
+            console.error("Error initializing audio:", error);
+            this.audioContext = null;
+        }
+    }
+    
+    getPosition() {
+        return this.kartGroup.position;
+    }
+    
+    getRotation() {
+        return {
+            x: this.kartGroup.rotation.x,
+            y: this.kartGroup.rotation.y,
+            z: this.kartGroup.rotation.z
+        };
+    }
+    
+    // Method to visualize the slope direction for debugging
+    visualizeSlopeDirection(slope) {
+        // Clean up any existing visualization
+        if (this.slopeArrow) {
+            this.scene.remove(this.slopeArrow);
+        }
+        
+        // Get current position
+        const position = this.kartGroup.position;
+        const { x, y, z } = position;
+        const kartRotation = this.kartGroup.rotation.y;
+        
+        // Determine forward direction
+        const forwardX = Math.sin(kartRotation);
+        const forwardZ = Math.cos(kartRotation);
+        
+        // Create arrow to show slope direction
+        const arrowLength = 3 + Math.abs(slope) * 10; // Longer arrow for steeper slopes
+        const startPoint = new THREE.Vector3(x, y + 2, z); // Start above the kart
+        
+        // End point shows the slope direction (down for downhill, up for uphill)
+        const endPoint = new THREE.Vector3(
+            x + forwardX * arrowLength,
+            y + 2 + slope * -arrowLength, // Negative because slope is positive for downhill
+            z + forwardZ * arrowLength
+        );
+        
+        // Create the arrow
+        const arrowGeometry = new THREE.BufferGeometry().setFromPoints([startPoint, endPoint]);
+        
+        // Color based on slope: red for uphill, green for downhill
+        const arrowColor = slope > 0 ? 0x00ff00 : 0xff0000;
+        const arrowMaterial = new THREE.LineBasicMaterial({ 
+            color: arrowColor,
+            linewidth: 3
+        });
+        
+        this.slopeArrow = new THREE.Line(arrowGeometry, arrowMaterial);
+        this.scene.add(this.slopeArrow);
+        
+        // Add arrow head (cone)
+        const arrowHeadGeometry = new THREE.ConeGeometry(0.2, 0.6, 8);
+        const arrowHeadMaterial = new THREE.MeshBasicMaterial({ color: arrowColor });
+        const arrowHead = new THREE.Mesh(arrowHeadGeometry, arrowHeadMaterial);
+        
+        // Position and orient the arrow head
+        arrowHead.position.copy(endPoint);
+        
+        // Calculate the direction vector
+        const direction = new THREE.Vector3().subVectors(endPoint, startPoint).normalize();
+        
+        // Calculate the rotation to align with the direction
+        const axis = new THREE.Vector3(0, 1, 0).cross(direction).normalize();
+        const angle = Math.acos(new THREE.Vector3(0, 1, 0).dot(direction));
+        arrowHead.quaternion.setFromAxisAngle(axis, angle);
+        
+        // Add to scene and track for cleanup
+        this.slopeArrow.add(arrowHead);
+    }
+    
+    // Add engine strain effect for uphill slopes
+    setEngineStrainSound(strainLevel) {
+        // Only apply if we have audio initialized
+        if (!this.audioContext || !this.oscillator) return;
+        
+        // Limit strain level
+        const clampedStrain = Math.min(1.0, Math.max(0, strainLevel));
+        
+        // Lower pitch for strained engine
+        const currentFreq = this.oscillator.frequency.value;
+        const strainedFreq = currentFreq * (1 - clampedStrain * 0.2);
+        this.oscillator.frequency.setValueAtTime(strainedFreq, this.audioContext.currentTime);
+        
+        // Increase chug effect for struggling engine
+        if (this.chugOscillator && this.chugDepth) {
+            // More pronounced chugging when engine is under strain
+            const baseChugDepth = this.chugDepth.gain.value;
+            const strainedChugDepth = Math.min(1.0, baseChugDepth + clampedStrain * 0.4);
+            this.chugDepth.gain.setValueAtTime(strainedChugDepth, this.audioContext.currentTime);
+            
+            // Slower chugging when strained
+            const currentChugFreq = this.chugOscillator.frequency.value;
+            const strainedChugFreq = currentChugFreq * (1 - clampedStrain * 0.4);
+            this.chugOscillator.frequency.setValueAtTime(strainedChugFreq, this.audioContext.currentTime);
+        }
+        
+        // Apply filter changes for muffled strained sound
+        if (this.filter) {
+            // Lower filter cutoff for more muffled sound
+            const currentFilterFreq = this.filter.frequency.value;
+            const strainedFilterFreq = currentFilterFreq * (1 - clampedStrain * 0.3);
+            this.filter.frequency.setValueAtTime(strainedFilterFreq, this.audioContext.currentTime);
+            
+            // Increase resonance for more "struggling" character
+            const currentQ = this.filter.Q.value;
+            const strainedQ = currentQ + clampedStrain * 2;
+            this.filter.Q.setValueAtTime(strainedQ, this.audioContext.currentTime);
+        }
+        
+        // Subtle volume increase for strain
+        if (this.gainNode) {
+            const currentGain = this.gainNode.gain.value;
+            const strainedGain = currentGain * (1 + clampedStrain * 0.15);
+            this.gainNode.gain.setValueAtTime(strainedGain, this.audioContext.currentTime);
+        }
+    }
+    
+    // Add engine boost effect for downhill slopes
+    setEngineBoostSound(boostLevel) {
+        // Only apply if we have audio initialized
+        if (!this.audioContext || !this.oscillator) return;
+        
+        // Limit boost level
+        const clampedBoost = Math.min(1.0, Math.max(0, boostLevel));
+        
+        // Slightly higher pitch for "revving" downhill sound
+        const currentFreq = this.oscillator.frequency.value;
+        const boostedFreq = currentFreq * (1 + clampedBoost * 0.1);
+        this.oscillator.frequency.setValueAtTime(boostedFreq, this.audioContext.currentTime);
+        
+        // Smoother, more consistent engine sound (less chugging) 
+        if (this.chugOscillator && this.chugDepth) {
+            // Less pronounced chugging when engine is in boost mode
+            const baseChugDepth = this.chugDepth.gain.value;
+            const boostedChugDepth = baseChugDepth * (1 - clampedBoost * 0.3);
+            this.chugDepth.gain.setValueAtTime(boostedChugDepth, this.audioContext.currentTime);
+            
+            // Faster, more consistent chugging
+            const currentChugFreq = this.chugOscillator.frequency.value;
+            const boostedChugFreq = currentChugFreq * (1 + clampedBoost * 0.2);
+            this.chugOscillator.frequency.setValueAtTime(boostedChugFreq, this.audioContext.currentTime);
+        }
+        
+        // Apply filter changes for more open, powerful sound
+        if (this.filter) {
+            // Higher filter cutoff for brighter sound
+            const currentFilterFreq = this.filter.frequency.value;
+            const boostedFilterFreq = currentFilterFreq * (1 + clampedBoost * 0.4);
+            this.filter.frequency.setValueAtTime(boostedFilterFreq, this.audioContext.currentTime);
+            
+            // Decrease resonance for smoother character
+            const currentQ = this.filter.Q.value;
+            const boostedQ = Math.max(1, currentQ * (1 - clampedBoost * 0.3));
+            this.filter.Q.setValueAtTime(boostedQ, this.audioContext.currentTime);
+        }
+    }
+    
+    // Reset all engine audio effects to normal
+    resetEngineAudioEffects() {
+        // Nothing to do if audio is not initialized
+        if (!this.audioContext || !this.oscillator) return;
+        
+        // Engine sounds will be automatically reset on the next updateEngineSound call
+        // We don't need to do anything special here
+    }
+}
+
+export default Kart;

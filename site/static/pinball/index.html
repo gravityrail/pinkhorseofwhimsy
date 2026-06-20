@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Three.js Pinball Simulator</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #111; }
+        canvas { display: block; }
+        #gameInfo {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-family: monospace;
+            font-size: 14px;
+            background-color: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameInfo">Press 1 to insert a quarter (3 balls per quarter)</div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+    
+    <script>
+        // Game configuration
+        const config = {
+            paddles: {
+                bottomLeft: { key: 'z', position: [-6, 0.5, 18] },
+                bottomRight: { key: 'x', position: [6, 0.5, 18] },
+                sideLeft: { key: 'z', position: [-11.5, 0.5, 0] }
+            },
+            plunger: {
+                key: 'm',
+                position: [10, 1, 15],
+                pullTime: 3 // seconds for full pull-back
+            },
+            scoring: {
+                bollard: 100,
+                rampEntry: 1000,
+                rampExit: 5000,
+                allTargets: 1000000
+            }
+        };
+
+        // Scene setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x111111);
+
+        // Camera setup - looking down at 45 degrees
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 50, 50);
+        camera.lookAt(0, 0, 0);
+
+        // Renderer setup
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+
+        // Physics world
+        const world = new CANNON.World();
+        world.gravity.set(0, -25, 0); // Strong gravity for pinball
+        world.broadphase = new CANNON.NaiveBroadphase();
+        world.solver.iterations = 10;
+
+        // Game state
+        const gameState = {
+            score: 0,
+            ballsRemaining: 0,
+            highScores: [],
+            quartersInserted: 0,
+            gameActive: false,
+            targetHits: [false, false, false],
+            pointsToDisplay: null,
+            pointsDisplayTimer: 0,
+            plungerPower: 0,
+            plungerCharging: false,
+            inRamp: false
+        };
+
+        // Materials
+        const materials = {
+            table: new THREE.MeshStandardMaterial({ color: 0x009900, roughness: 0.3 }),
+            wall: new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.7 }),
+            paddle: new THREE.MeshStandardMaterial({ color: 0xff3333, metalness: 0.5 }),
+            ball: new THREE.MeshStandardMaterial({ color: 0xdddddd, metalness: 0.9, roughness: 0.1 }),
+            target: new THREE.MeshStandardMaterial({ color: 0xffaa00 }),
+            bollard: new THREE.MeshStandardMaterial({ color: 0x3333ff, metalness: 0.6 }),
+            scoreboard: new THREE.MeshStandardMaterial({ color: 0x222222 }),
+            leg: new THREE.MeshStandardMaterial({ color: 0x333333 }),
+            ramp: new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.8 }),
+            gutter: new THREE.MeshStandardMaterial({ color: 0x222222 })
+        };
+
+        // Physics materials
+        const physicsMaterials = {
+            table: new CANNON.Material('table'),
+            wall: new CANNON.Material('wall'),
+            paddle: new CANNON.Material('paddle'),
+            ball: new CANNON.Material('ball'),
+            target: new CANNON.Material('target'),
+            bollard: new CANNON.Material('bollard'),
+            ramp: new CANNON.Material('ramp')
+        };
+
+        // Contact materials for different bounce effects
+        const ballToTable = new CANNON.ContactMaterial(
+            physicsMaterials.ball, physicsMaterials.table, { friction: 0.01, restitution: 0.5 }
+        );
+
+        const ballToWall = new CANNON.ContactMaterial(
+            physicsMaterials.ball, physicsMaterials.wall, { friction: 0.0, restitution: 0.9 }
+        );
+
+        const ballToPaddle = new CANNON.ContactMaterial(
+            physicsMaterials.ball, physicsMaterials.paddle, { friction: 0.0, restitution: 1.5 }
+        );
+
+        const ballToBollard = new CANNON.ContactMaterial(
+            physicsMaterials.ball, physicsMaterials.bollard, { friction: 0.0, restitution: 2.0 }
+        );
+
+        const ballToTarget = new CANNON.ContactMaterial(
+            physicsMaterials.ball, physicsMaterials.target, { friction: 0.0, restitution: 0.7 }
+        );
+
+        const ballToRamp = new CANNON.ContactMaterial(
+            physicsMaterials.ball, physicsMaterials.ramp, { friction: 0.05, restitution: 0.7 }
+        );
+
+        world.addContactMaterial(ballToTable);
+        world.addContactMaterial(ballToWall);
+        world.addContactMaterial(ballToPaddle);
+        world.addContactMaterial(ballToBollard);
+        world.addContactMaterial(ballToTarget);
+        world.addContactMaterial(ballToRamp);
+
+        // Game objects
+        let machine, playfield, ball;
+        let paddles = {};
+        let plunger = {};
+        let targets = [];
+        let bollards = [];
+        let ramp = {};
+        let exitZone, leftGutter, rightGutter;
+        let scoreDisplay, scoreTexture, scoreCanvas, scoreContext;
+
+        // Create pinball machine
+        function createMachine() {
+            // Machine base
+            const baseGeometry = new THREE.BoxGeometry(40, 5, 60);
+            const baseMesh = new THREE.Mesh(baseGeometry, materials.wall);
+            baseMesh.position.set(0, -2.5, 0);
+            baseMesh.receiveShadow = true;
+            scene.add(baseMesh);
+
+            // Machine legs (4 legs)
+            const legGeometry = new THREE.CylinderGeometry(1, 1, 20);
+            for (let i = 0; i < 4; i++) {
+                const legMesh = new THREE.Mesh(legGeometry, materials.leg);
+                legMesh.position.set(
+                    (i % 2 === 0 ? 1 : -1) * 15,
+                    -10,
+                    (i < 2 ? 1 : -1) * 25
+                );
+                legMesh.castShadow = true;
+                scene.add(legMesh);
+            }
+
+            // Playfield (tilted towards player)
+            const playfieldGeometry = new THREE.BoxGeometry(30, 2, 50);
+            playfield = new THREE.Mesh(playfieldGeometry, materials.table);
+            playfield.position.set(0, 1, 0);
+            playfield.rotation.x = -Math.PI / 12; // Tilt angle
+            playfield.receiveShadow = true;
+            scene.add(playfield);
+
+            // Playfield physics
+            const playfieldShape = new CANNON.Box(new CANNON.Vec3(15, 1, 25));
+            const playfieldBody = new CANNON.Body({
+                mass: 0, // Static body
+                material: physicsMaterials.table
+            });
+            playfieldBody.addShape(playfieldShape);
+            playfieldBody.position.set(0, 1, 0);
+            playfieldBody.quaternion.setFromAxisAngle(
+                new CANNON.Vec3(1, 0, 0),
+                -Math.PI / 12
+            );
+            world.addBody(playfieldBody);
+
+            // Create walls
+            createWalls();
+
+            // Create score display
+            createScoreDisplay();
+            
+            machine = {
+                base: baseMesh,
+                playfield: playfield
+            };
+        }
+
+        function createWalls() {
+            const wallHeight = 4;
+            const wallThickness = 1;
+            
+            // Left wall
+            const leftWallGeometry = new THREE.BoxGeometry(wallThickness, wallHeight, 50);
+            const leftWallMesh = new THREE.Mesh(leftWallGeometry, materials.wall);
+            leftWallMesh.position.set(-15, wallHeight/2 + 1, 0);
+            leftWallMesh.rotation.x = -Math.PI / 12;
+            leftWallMesh.castShadow = true;
+            scene.add(leftWallMesh);
+            
+            const leftWallShape = new CANNON.Box(new CANNON.Vec3(wallThickness/2, wallHeight/2, 25));
+            const leftWallBody = new CANNON.Body({
+                mass: 0,
+                material: physicsMaterials.wall
+            });
+            leftWallBody.addShape(leftWallShape);
+            leftWallBody.position.set(-15, wallHeight/2 + 1, 0);
+            leftWallBody.quaternion.setFromAxisAngle(
+                new CANNON.Vec3(1, 0, 0),
+                -Math.PI / 12
+            );
+            world.addBody(leftWallBody);
+            
+            // Right wall
+            const rightWallGeometry = new THREE.BoxGeometry(wallThickness, wallHeight, 50);
+            const rightWallMesh = new THREE.Mesh(rightWallGeometry, materials.wall);
+            rightWallMesh.position.set(15, wallHeight/2 + 1, 0);
+            rightWallMesh.rotation.x = -Math.PI / 12;
+            rightWallMesh.castShadow = true;
+            scene.add(rightWallMesh);
+            
+            const rightWallShape = new CANNON.Box(new CANNON.Vec3(wallThickness/2, wallHeight/2, 25));
+            const rightWallBody = new CANNON.Body({
+                mass: 0,
+                material: physicsMaterials.wall
+            });
+            rightWallBody.addShape(rightWallShape);
+            rightWallBody.position.set(15, wallHeight/2 + 1, 0);
+            rightWallBody.quaternion.setFromAxisAngle(
+                new CANNON.Vec3(1, 0, 0),
+                -Math.PI / 12
+            );
+            world.addBody(rightWallBody);
+            
+            // Top wall (back)
+            const topWallGeometry = new THREE.BoxGeometry(30, wallHeight, wallThickness);
+            const topWallMesh = new THREE.Mesh(topWallGeometry, materials.wall);
+            topWallMesh.position.set(0, wallHeight/2 + 1, -25);
+            topWallMesh.rotation.x = -Math.PI / 12;
+            topWallMesh.castShadow = true;
+            scene.add(topWallMesh);
+            
+            const topWallShape = new CANNON.Box(new CANNON.Vec3(15, wallHeight/2, wallThickness/2));
+            const topWallBody = new CANNON.Body({
+                mass: 0,
+                material: physicsMaterials.wall
+            });
+            topWallBody.addShape(topWallShape);
+            topWallBody.position.set(0, wallHeight/2 + 1, -25);
+            topWallBody.quaternion.setFromAxisAngle(
+                new CANNON.Vec3(1, 0, 0),
+                -Math.PI / 12
+            );
+            world.addBody(topWallBody);
+            
+            // Bottom walls (partial, with exit gap)
+            const bottomWallWidth = 10;
+            
+            // Bottom left partial wall
+            const bottomLeftWallGeometry = new THREE.BoxGeometry(bottomWallWidth, wallHeight, wallThickness);
+            const bottomLeftWallMesh = new THREE.Mesh(bottomLeftWallGeometry, materials.wall);
+            bottomLeftWallMesh.position.set(-10, wallHeight/2 + 1, 25);
+            bottomLeftWallMesh.rotation.x = -Math.PI / 12;
+            bottomLeftWallMesh.castShadow = true;
+            scene.add(bottomLeftWallMesh);
+            
+            const bottomLeftWallShape = new CANNON.Box(new CANNON.Vec3(bottomWallWidth/2, wallHeight/2, wallThickness/2));
+            const bottomLeftWallBody = new CANNON.Body({
+                mass: 0,
+                material: physicsMaterials.wall
+            });
+            bottomLeftWallBody.addShape(bottomLeftWallShape);
+            bottomLeftWallBody.position.set(-10, wallHeight/2 + 1, 25);
+            bottomLeftWallBody.quaternion.setFromAxisAngle(
+                new CANNON.Vec3(1, 0, 0),
+                -Math.PI / 12
+            );
+            world.addBody(bottomLeftWallBody);
+            
+            // Bottom right partial wall
+            const bottomRightWallGeometry = new THREE.BoxGeometry(bottomWallWidth, wallHeight, wallThickness);
+            const bottomRightWallMesh = new THREE.Mesh(bottomRightWallGeometry, materials.wall);
+            bottomRightWallMesh.position.set(10, wallHeight/2 + 1, 25);
+            bottomRightWallMesh.rotation.x = -Math.PI / 12;
+            bottomRightWallMesh.castShadow = true;
+            scene.add(bottomRightWallMesh);
+            
+            const bottomRightWallShape = new CANNON.Box(new CANNON.Vec3(bottomWallWidth/2, wallHeight/2, wallThickness/2));
+            const bottomRightWallBody = new CANNON.Body({
+                mass: 0,
+                material: physicsMaterials.wall
+            });
+            bottomRightWallBody.addShape(bottomRightWallShape);
+            bottomRightWallBody.position.set(10, wallHeight/2 + 1, 25);
+            bottomRightWallBody.quaternion.setFromAxisAngle(
+                new CANNON.Vec3(1, 0, 0),
+                -Math.PI / 12
+            );
+            world.addBody(bottomRightWallBody);
+            
+            // Create exit zone
+            createExitZone();
+            
+            // Create gutters
+            createGutters();
+        }
+
+        function createExitZone() {
+            // Exit zone (black area at bottom center)
+            const exitGeometry = new THREE.BoxGeometry(10, 0.5, 2);
+            const exitMesh = new THREE.Mesh(exitGeometry, new THREE.MeshBasicMaterial({ color: 0x000000 }));
+            exitMesh.position.set(0, 0.75, 25);
+            exitMesh.rotation.x = -Math.PI / 12;
+            scene.add(exitMesh);
+            
+            // Invisible detection zone for ball exit
+            exitZone = new THREE.Mesh(
+                new THREE.BoxGeometry(10, 0.1, 2), 
+                new THREE.MeshBasicMaterial({ visible: false })
+            );
+            exitZone.position.set(0, 0, 30); // Positioned below playfield end
+            scene.add(exitZone);
+        }
+
+        function createGutters() {
+            // Left gutter (channel that leads to exit)
+            const leftGutterGeometry = new THREE.BoxGeometry(2, 0.5, 10);
+            leftGutter = new THREE.Mesh(leftGutterGeometry, materials.gutter);
+            leftGutter.position.set(-13, 1, 17.5);
+            leftGutter.rotation.x = -Math.PI / 12;
+            scene.add(leftGutter);
+            
+            // Right gutter (channel that leads to exit)
+            const rightGutterGeometry = new THREE.BoxGeometry(2, 0.5, 10);
+            rightGutter = new THREE.Mesh(rightGutterGeometry, materials.gutter);
+            rightGutter.position.set(13, 1, 17.5);
+            rightGutter.rotation.x = -Math.PI / 12;
+            scene.add(rightGutter);
+            
+            // Left gutter physics (sloped channel)
+            const leftGutterShape = new CANNON.Box(new CANNON.Vec3(1, 0.25, 5));
+            const leftGutterBody = new CANNON.Body({
+                mass: 0,
+                material: physicsMaterials.wall
+            });
+            leftGutterBody.addShape(leftGutterShape);
+            leftGutterBody.position.set(-13, 1, 17.5);
+            leftGutterBody.quaternion.setFromAxisAngle(
+                new CANNON.Vec3(1, 0, 0),
+                -Math.PI / 6  // Steeper angle than playfield
+            );
+            world.addBody(leftGutterBody);
+            
+            // Right gutter physics
+            const rightGutterShape = new CANNON.Box(new CANNON.Vec3(1, 0.25, 5));
+            const rightGutterBody = new CANNON.Body({
+                mass: 0,
+                material: physicsMaterials.wall
+            });
+            rightGutterBody.addShape(rightGutterShape);
+            rightGutterBody.position.set(13, 1, 17.5);
+            rightGutterBody.quaternion.setFromAxisAngle(
+                new CANNON.Vec3(1, 0, 0),
+                -Math.PI / 6  // Steeper angle than playfield
+            );
+            world.addBody(rightGutterBody);
+        }
+
+        function createScoreDisplay() {
+            // Rear panel with score display
+            const backPanelGeometry = new THREE.BoxGeometry(26, 15, 1);
+            const backPanel = new THREE.Mesh(backPanelGeometry, materials.scoreboard);
+            backPanel.position.set(0, 10, -24);
+            backPanel.rotation.x = Math.PI / 8; // Tilted towards player
+            scene.add(backPanel);
+            
+            // Create canvas for score display
+            scoreCanvas = document.createElement('canvas');
+            scoreCanvas.width = 320;
+            scoreCanvas.height = 200;
+            scoreContext = scoreCanvas.getContext('2d');
+            
+            // Create texture from canvas
+            scoreTexture = new THREE.CanvasTexture(scoreCanvas);
+            
+            // Create score display mesh
+            const displayGeometry = new THREE.PlaneGeometry(24, 13);
+            scoreDisplay = new THREE.Mesh(
+                displayGeometry,
+                new THREE.MeshBasicMaterial({ map: scoreTexture })
+            );
+            scoreDisplay.position.set(0, 10, -23.5);
+            scoreDisplay.rotation.x = Math.PI / 8;
+            scene.add(scoreDisplay);
+            
+            // Initial score display
+            updateScoreDisplay();
+        }
+
+        function updateScoreDisplay() {
+            // Clear canvas
+            scoreContext.fillStyle = 'black';
+            scoreContext.fillRect(0, 0, scoreCanvas.width, scoreCanvas.height);
+            
+            // Draw score
+            scoreContext.fillStyle = 'orange';
+            scoreContext.font = 'bold 32px monospace';
+            scoreContext.textAlign = 'center';
+            scoreContext.fillText(`SCORE: ${gameState.score}`, scoreCanvas.width / 2, 50);
+            
+            // Draw balls remaining
+            scoreContext.font = '24px monospace';
+            scoreContext.fillText(`BALLS: ${gameState.ballsRemaining}`, scoreCanvas.width / 2, 90);
+            
+            // Draw recent points added
+            if (gameState.pointsToDisplay !== null && gameState.pointsDisplayTimer > 0) {
+                scoreContext.font = 'bold 48px monospace';
+                scoreContext.fillText(`+${gameState.pointsToDisplay}`, scoreCanvas.width / 2, 150);
+            }
+            
+            // Draw high scores if game not active
+            if (!gameState.gameActive && gameState.highScores.length > 0) {
+                scoreContext.font = '18px monospace';
+                scoreContext.fillText('HIGH SCORES', scoreCanvas.width / 2, 130);
+                
+                for (let i = 0; i < Math.min(3, gameState.highScores.length); i++) {
+                    scoreContext.fillText(
+                        `${i+1}. ${gameState.highScores[i]}`, 
+                        scoreCanvas.width / 2, 
+                        160 + i * 25
+                    );
+                }
+            }
+            
+            // Update texture
+            scoreTexture.needsUpdate = true;
+        }
+
+        function createPaddles() {
+            // Create the three paddles
+            paddles.bottomLeft = createPaddle(
+                config.paddles.bottomLeft.position[0],
+                config.paddles.bottomLeft.position[1],
+                config.paddles.bottomLeft.position[2],
+                4, // width
+                'bottomLeft'
+            );
+            
+            paddles.bottomRight = createPaddle(
+                config.paddles.bottomRight.position[0],
+                config.paddles.bottomRight.position[1],
+                config.paddles.bottomRight.position[2],
+                4, // width
+                'bottomRight'
+            );
+            
+            paddles.sideLeft = createPaddle(
+                config.paddles.sideLeft.position[0],
+                config.paddles.sideLeft.position[1],
+                config.paddles.sideLeft.position[2],
+                4, // width
+                'sideLeft'
+            );
+        }
+
+        function createPaddle(x, y, z, width, type) {
+            // Paddle dimensions
+            const paddleWidth = width;
+            const paddleHeight = 0.7;
+            const paddleDepth = 2;
+            
+            // Create paddle mesh
+            const paddleGeometry = new THREE.BoxGeometry(paddleWidth, paddleHeight, paddleDepth);
+            const paddleMesh = new THREE.Mesh(paddleGeometry, materials.paddle);
+            
+            let rotationY = 0;
+            let hingePosition = new THREE.Vector3();
+            
+            // Set position and rotation based on paddle type
+            if (type === 'sideLeft') {
+                // Side paddle along left wall
+                paddleMesh.position.set(x, y, z);
+                paddleMesh.rotation.set(-Math.PI/12, Math.PI/2, 0);
+                rotationY = Math.PI/2;
+                hingePosition.set(x, y, z - paddleDepth/2);
+            } else if (type === 'bottomLeft') {
+                // Bottom left paddle
+                paddleMesh.position.set(x, y, z);
+                paddleMesh.rotation.x = -Math.PI/12;
+                hingePosition.set(x + paddleWidth/2, y, z);
+            } else { // bottomRight
+                // Bottom right paddle
+                paddleMesh.position.set(x, y, z);
+                paddleMesh.rotation.x = -Math.PI/12;
+                hingePosition.set(x - paddleWidth/2, y, z);
+            }
+            
+            paddleMesh.castShadow = true;
+            scene.add(paddleMesh);
+            
+            // Create paddle physics
+            const paddleShape = new CANNON.Box(
+                new CANNON.Vec3(paddleWidth/2, paddleHeight/2, paddleDepth/2)
+            );
+            const paddleBody = new CANNON.Body({
+                mass: 1,
+                material: physicsMaterials.paddle
+            });
+            paddleBody.addShape(paddleShape);
+            
+            // Set position and rotation for physics body
+            if (type === 'sideLeft') {
+                paddleBody.position.set(x, y, z);
+                paddleBody.quaternion.setFromAxisAngle(
+                    new CANNON.Vec3(1, 0, 0),
+                    -Math.PI/12
+                );
+                paddleBody.quaternion.mult(
+                    new CANNON.Quaternion().setFromAxisAngle(
+                        new CANNON.Vec3(0, 1, 0),
+                        Math.PI/2
+                    ),
+                    paddleBody.quaternion
+                );
+            } else {
+                paddleBody.position.set(x, y, z);
+                paddleBody.quaternion.setFromAxisAngle(
+                    new CANNON.Vec3(1, 0, 0),
+                    -Math.PI/12
+                );
+            }
+            
+            world.addBody(paddleBody);
+            
+            // Create hinge constraint
+            const fixedBody = new CANNON.Body({ mass: 0 });
+            
+            if (type === 'sideLeft') {
+                fixedBody.position.set(hingePosition.x, hingePosition.y, hingePosition.z);
+            } else if (type === 'bottomLeft') {
+                fixedBody.position.set(hingePosition.x, hingePosition.y, hingePosition.z);
+            } else { // bottomRight
+                fixedBody.position.set(hingePosition.x, hingePosition.y, hingePosition.z);
+            }
+            
+            fixedBody.quaternion.copy(paddleBody.quaternion);
+            world.addBody(fixedBody);
+            
+            // Create hinge constraint
+            let pivotA, pivotB, axisA, axisB;
+            
+            if (type === 'sideLeft') {
+                pivotA = new CANNON.Vec3(0, 0, paddleDepth/2);
+                pivotB = new CANNON.Vec3(0, 0, 0);
+                axisA = new CANNON.Vec3(0, 1, 0);
+                axisB = new CANNON.Vec3(0, 1, 0);
+            } else if (type === 'bottomLeft') {
+                pivotA = new CANNON.Vec3(paddleWidth/2, 0, 0);
+                pivotB = new CANNON.Vec3(0, 0, 0);
+                axisA = new CANNON.Vec3(0, 1, 0);
+                axisB = new CANNON.Vec3(0, 1, 0);
+            } else { // bottomRight
+                pivotA = new CANNON.Vec3(-paddleWidth/2, 0, 0);
+                pivotB = new CANNON.Vec3(0, 0, 0);
+                axisA = new CANNON.Vec3(0, 1, 0);
+                axisB = new CANNON.Vec3(0, 1, 0);
+            }
+            
+            const constraint = new CANNON.HingeConstraint(paddleBody, fixedBody, {
+                pivotA: pivotA,
+                pivotB: pivotB,
+                axisA: axisA,
+                axisB: axisB
+            });
+            
+            // Set limits to paddle movement
+            const paddleAngle = Math.PI/3;
+            constraint.setLimits(-paddleAngle, paddleAngle);
+            world.addConstraint(constraint);
+            
+            // Return paddle object
+            return {
+                mesh: paddleMesh,
+                body: paddleBody,
+                constraint: constraint,
+                type: type,
+                active: false
+            };
+        }
+
+        function createPlunger() {
+            // Plunger housing (right side channel)
+            const housingGeometry = new THREE.BoxGeometry(3, 3, 10);
+            const housingMesh = new THREE.Mesh(housingGeometry, materials.wall);
+            housingMesh.position.set(12, 2.5, 15);
+            housingMesh.rotation.x = -Math.PI/12;
+            scene.add(housingMesh);
+            
+            // Plunger rod
+            const rodGeometry = new THREE.CylinderGeometry(0.7, 0.7, 3);
+            const rodMesh = new THREE.Mesh(rodGeometry, new THREE.MeshStandardMaterial({ color: 0xdd3333 }));
+            rodMesh.position.set(12, 2, 20); // Start position
+            rodMesh.rotation.x = Math.PI/2 - Math.PI/12;
+            scene.add(rodMesh);
+            
+            // Plunger spring visual (coil)
+            const springMaterial = new THREE.MeshStandardMaterial({ color: 0x999999 });
+            const springCoils = [];
+            
+            for (let i = 0; i < 5; i++) {
+                const springGeometry = new THREE.TorusGeometry(0.9, 0.1, 8, 16);
+                const springCoil = new THREE.Mesh(springGeometry, springMaterial);
+                springCoil.position.set(12, 2, 16 + i * 0.5);
+                springCoil.rotation.x = Math.PI/2 - Math.PI/12;
+                scene.add(springCoil);
+                springCoils.push(springCoil);
+            }
+            
+            // Return plunger object
+            plunger = {
+                rod: rodMesh,
+                spring: springCoils,
+                restPosition: new THREE.Vector3(12, 2, 20),
+                maxPullDistance: 3,
+                currentPosition: 0
+            };
+        }
+
+        function createBall() {
+            // Create ball if it doesn't exist
+            if (ball && ball.mesh) {
+                scene.remove(ball.mesh);
+            }
+            if (ball && ball.body) {
+                world.removeBody(ball.body);
+            }
+            
+            // Ball geometry
+            const ballRadius = 0.6;
+            const ballGeometry = new THREE.SphereGeometry(ballRadius, 32, 32);
+            const ballMesh = new THREE.Mesh(ballGeometry, materials.ball);
+            ballMesh.castShadow = true;
+            scene.add(ballMesh);
+            
+            // Ball physics
+            const ballShape = new CANNON.Sphere(ballRadius);
+            const ballBody = new CANNON.Body({
+                mass: 1,
+                material: physicsMaterials.ball,
+                linearDamping: 0.3, // Add some damping to slow the ball over time
+                angularDamping: 0.3
+            });
+            ballBody.addShape(ballShape);
+            
+            // Position ball at plunger
+            ballBody.position.set(12, 2, 17);
+            world.addBody(ballBody);
+            
+            // Add collision event listener for scoring
+            ballBody.addEventListener('collide', handleBallCollision);
+            
+            // Store ball object
+            ball = {
+                mesh: ballMesh,
+                body: ballBody,
+                radius: ballRadius,
+                launched: false
+            };
+        }
+
+        function handleBallCollision(event) {
+            // Check what the ball hit
+            const otherBody = event.body;
+            
+            // Check for bollard hits
+            for (let i = 0; i < bollards.length; i++) {
+                if (otherBody === bollards[i].body) {
+                    addPoints(config.scoring.bollard, "Bollard Hit");
+                    return;
+                }
+            }
+            
+            // Check for target hits
+            for (let i = 0; i < targets.length; i++) {
+                if (otherBody === targets[i].body && !targets[i].hit) {
+                    targets[i].hit = true;
+                    gameState.targetHits[i] = true;
+                    targets[i].mesh.material.color.set(0xff0000); // Change to red when hit
+                    
+                    addPoints(1000, "Target Hit");
+                    
+                    // Check if all targets hit
+                    if (gameState.targetHits.every(hit => hit)) {
+                        addPoints(config.scoring.allTargets, "ALL TARGETS HIT!");
+                    }
+                    
+                    return;
+                }
+            }
+        }
+
+        function createTargets() {
+            // Create 3 targets
+            const targetPositions = [
+                { x: -8, z: -15 },
+                { x: 0, z: -20 },
+                { x: 8, z: -15 }
+            ];
+            
+            for (let i = 0; i < 3; i++) {
+                // Target geometry
+                const targetGeometry = new THREE.BoxGeometry(2.5, 0.5, 2.5);
+                const targetMesh = new THREE.Mesh(targetGeometry, materials.target);
+                targetMesh.position.set(targetPositions[i].x, 1.5, targetPositions[i].z);
+                targetMesh.rotation.x = -Math.PI/12;
+                targetMesh.castShadow = true;
+                scene.add(targetMesh);
+                
+                // Target physics
+                const targetShape = new CANNON.Box(new CANNON.Vec3(1.25, 0.25, 1.25));
+                const targetBody = new CANNON.Body({
+                    mass: 0, // static
+                    material: physicsMaterials.target
+                });
+                targetBody.addShape(targetShape);
+                targetBody.position.set(targetPositions[i].x, 1.5, targetPositions[i].z);
+                targetBody.quaternion.setFromAxisAngle(
+                    new CANNON.Vec3(1, 0, 0),
+                    -Math.PI/12
+                );
+                world.addBody(targetBody);
+                
+                // Store target
+                targets.push({
+                    mesh: targetMesh,
+                    body: targetBody,
+                    hit: false
+                });
+            }
+        }
+
+        function createBollards() {
+            // Create spring-loaded bollards
+            const bollardPositions = [
+                { x: -10, z: -5 },
+                { x: 0, z: -10 },
+                { x: 10, z: -5 },
+                { x: -7, z: 5 },
+                { x: 7, z: 5 }
+            ];
+            
+            for (const pos of bollardPositions) {
+                // Bollard geometry
+                const bollardRadius = 1;
+                const bollardGeometry = new THREE.CylinderGeometry(bollardRadius, bollardRadius, 2, 16);
+                const bollardMesh = new THREE.Mesh(bollardGeometry, materials.bollard);
+                bollardMesh.position.set(pos.x, 2, pos.z);
+                bollardMesh.rotation.x = -Math.PI/12;
+                bollardMesh.castShadow = true;
+                scene.add(bollardMesh);
+                
+                // Bollard physics
+                const bollardShape = new CANNON.Cylinder(bollardRadius, bollardRadius, 2, 8);
+                const bollardBody = new CANNON.Body({
+                    mass: 0, // static
+                    material: physicsMaterials.bollard
+                });
+                
+                // Rotate shape to match cylinder orientation
+                const quat = new CANNON.Quaternion();
+                quat.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), Math.PI/2);
+                bollardBody.addShape(bollardShape, new CANNON.Vec3(), quat);
+                
+                bollardBody.position.set(pos.x, 2, pos.z);
+                bollardBody.quaternion.setFromAxisAngle(
+                    new CANNON.Vec3(1, 0, 0),
+                    -Math.PI/12
+                );
+                world.addBody(bollardBody);
+                
+                // Store bollard
+                bollards.push({
+                    mesh: bollardMesh,
+                    body: bollardBody
+                });
+            }
+        }
+
+        function createRamp() {
+            // Create a curved ramp that arcs around the back
+            const rampCurve = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(-14, 3, -18),
+                new THREE.Vector3(-10, 4, -22),
+                new THREE.Vector3(0, 4.5, -23),
+                new THREE.Vector3(10, 4, -22),
+                new THREE.Vector3(14, 3, -18)
+            ]);
+            
+            // Create tube geometry for the ramp
+            const rampGeometry = new THREE.TubeGeometry(rampCurve, 20, 1.5, 8, false);
+            const rampMesh = new THREE.Mesh(rampGeometry, materials.ramp);
+            rampMesh.castShadow = true;
+            scene.add(rampMesh);
+            
+            // Create physics bodies for ramp (series of segments)
+            const segments = 10;
+            const rampBodies = [];
+            
+            for (let i = 0; i < segments; i++) {
+                const t1 = i / segments;
+                const t2 = (i + 1) / segments;
+                
+                const point1 = rampCurve.getPoint(t1);
+                const point2 = rampCurve.getPoint(t2);
+                
+                // Calculate direction and length of segment
+                const direction = new THREE.Vector3().subVectors(point2, point1).normalize();
+                const length = point1.distanceTo(point2);
+                
+                // Create body at midpoint
+                const midpoint = new THREE.Vector3().addVectors(
+                    point1,
+                    new THREE.Vector3().subVectors(point2, point1).multiplyScalar(0.5)
+                );
+                
+                const segmentShape = new CANNON.Box(new CANNON.Vec3(1.5, 0.2, length/2));
+                const segmentBody = new CANNON.Body({
+                    mass: 0,
+                    material: physicsMaterials.ramp
+                });
+                segmentBody.addShape(segmentShape);
+                segmentBody.position.set(midpoint.x, midpoint.y, midpoint.z);
+                
+                // Align body with segment direction
+                const cannonDir = new CANNON.Vec3(direction.x, direction.y, direction.z);
+                const cannonUp = new CANNON.Vec3(0, 1, 0);
+                
+                // Find axis and angle for rotation
+                const axis = new CANNON.Vec3();
+                cannonUp.cross(cannonDir, axis);
+                axis.normalize();
+                
+                // Calculate angle
+                const dot = cannonUp.dot(cannonDir);
+                const angle = Math.acos(dot);
+                
+                if (axis.length() > 0.001) {
+                    segmentBody.quaternion.setFromAxisAngle(axis, angle);
+                }
+                
+                world.addBody(segmentBody);
+                rampBodies.push(segmentBody);
+            }
+            
+            // Create entrance and exit detection zones
+            const entranceGeometry = new THREE.BoxGeometry(3, 1, 3);
+            const entranceMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x00ff00, 
+                transparent: true,
+                opacity: 0.3
+            });
+            const entranceMesh = new THREE.Mesh(entranceGeometry, entranceMaterial);
+            entranceMesh.position.set(-14, 3, -18);
+            scene.add(entranceMesh);
+            
+            const exitGeometry = new THREE.BoxGeometry(3, 1, 3);
+            const exitMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0xff0000, 
+                transparent: true,
+                opacity: 0.3
+            });
+            const exitMesh = new THREE.Mesh(exitGeometry, exitMaterial);
+            exitMesh.position.set(14, 3, -18);
+            scene.add(exitMesh);
+            
+            // Store ramp data
+            ramp = {
+                mesh: rampMesh,
+                bodies: rampBodies,
+                entrance: entranceMesh,
+                exit: exitMesh,
+                entrancePoint: new THREE.Vector3(-14, 3, -18),
+                exitPoint: new THREE.Vector3(14
+<script>window.ARCADE_CONTROLS={dpad:{left:'z',up:'m',right:'x',down:'m'},buttons:[{label:'◀',keys:'z'},{label:'▶',keys:'x'},{label:'Plunge',keys:'m'},{label:'Coin',keys:'1'}]};</script>
+<script src="/arcade/controls.js" defer></script>

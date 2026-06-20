@@ -10,7 +10,7 @@
  *   node build-games.mjs --filter 3d  # Build only 3D games
  */
 
-import { readdir, stat, mkdir } from 'fs/promises';
+import { readdir, stat, mkdir, readFile, writeFile } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { existsSync } from 'fs';
@@ -82,12 +82,30 @@ async function buildGame(game) {
 
   try {
     await exportProject(game.json, outDir);
+    await injectArcadeControls(outDir);
     return true;
   } catch (err) {
     console.error(`  FAILED: ${err.message}`);
     if (err.stack) console.error(err.stack);
     return false;
   }
+}
+
+// Inject the Pink Horse Arcade universal controls shim (on-screen touch D-pad +
+// gamepad support) into a freshly exported GDevelop game's index.html, so every
+// game is playable with a touchscreen or controller — no keyboard required.
+async function injectArcadeControls(outDir) {
+  const indexPath = join(outDir, 'index.html');
+  if (!existsSync(indexPath)) return;
+  let html = await readFile(indexPath, 'utf-8');
+  if (html.includes('/arcade/controls.js')) return;
+  const snippet =
+    '\n<script src="/arcade/controls.js" defer></script>\n';
+  html = html.includes('</body>')
+    ? html.replace('</body>', snippet + '</body>')
+    : html + snippet;
+  await writeFile(indexPath, html);
+  console.log('  + injected arcade controls shim');
 }
 
 async function main() {

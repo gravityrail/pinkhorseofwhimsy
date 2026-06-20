@@ -64,6 +64,28 @@ npm run build    # production build -> site/build/  (CI uses this)
 2. Add a card to `GAMES` with just `slug: '<slug>'` (no `href`); the play URL defaults to
    `/arcade/games/<slug>/`.
 
+## Controls (touch + gamepad)
+
+Every game should be playable with **no keyboard** — many are played on a Tesla
+display or tablet, sometimes with a plugged-in controller. The shared shim
+`site/static/arcade/controls.js` provides this universally:
+
+- Renders an on-screen D-pad + face buttons on touch devices.
+- Polls the **Gamepad API** for controllers.
+- Translates both into synthetic `KeyboardEvent`s, so any keyboard-driven game works.
+
+Add it to a game's `index.html` before `</body>`:
+
+```html
+<script>window.ARCADE_CONTROLS = { /* per-game key map, optional */ };</script>
+<script src="/arcade/controls.js" defer></script>
+```
+
+Defaults map the D-pad to arrows **and** WASD, and face buttons to Space / X / Z / Shift.
+See the top of `controls.js` for the full config (custom `dpad`, `buttons`, `start`,
+`disableTouch` for games with their own touch UI like Worm, etc.). GDevelop exports get
+the shim injected automatically by `games/build-games.mjs`.
+
 ## Conventions
 
 - Brand name is **Pink Horse of Whimsy**; the arcade is the **Pink Horse Arcade**.
