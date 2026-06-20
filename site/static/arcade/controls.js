@@ -235,6 +235,48 @@
     if (on) press(keys); else release(keys);
   }
 
+  // ---- escape hatch: release pointer lock / exit fullscreen --------------
+  // First-person games (e.g. Bean Simulator) call requestPointerLock(), which
+  // captures the mouse. On a touchscreen with no keyboard there's no way to hit
+  // Esc to get out, so the browser chrome stops responding. This on-screen
+  // button restores control.
+  var exitBtn = null;
+  function exitCapture(e) {
+    if (e) e.preventDefault();
+    try { if (document.exitPointerLock) document.exitPointerLock(); } catch (_) {}
+    try { if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen(); } catch (_) {}
+    fire("keydown", "Escape");
+    fire("keyup", "Escape");
+    refreshExit();
+  }
+  function makeExitButton() {
+    var b = document.createElement("button");
+    b.id = "phx-exit";
+    b.type = "button";
+    b.textContent = "⎋ Exit";
+    b.setAttribute("aria-label", "Release mouse and exit full screen");
+    b.style.cssText =
+      "position:fixed;top:max(8px,env(safe-area-inset-top));left:max(8px,env(safe-area-inset-left));" +
+      "z-index:2147483600;pointer-events:auto;border:none;border-radius:10px;padding:7px 13px;" +
+      "font:800 14px system-ui,sans-serif;color:#fff;background:rgba(206,58,72,.82);cursor:pointer;" +
+      "box-shadow:0 2px 10px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.2);" +
+      "backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);" +
+      "-webkit-user-select:none;user-select:none;touch-action:manipulation;display:none";
+    b.addEventListener("click", exitCapture);
+    b.addEventListener("touchend", exitCapture);
+    document.body.appendChild(b);
+    return b;
+  }
+  function refreshExit() {
+    if (!exitBtn) return;
+    var locked = !!document.pointerLockElement;
+    var fs = !!document.fullscreenElement;
+    // Always reachable on touch (unless the game opted out of the touch UI),
+    // and always shown whenever the page has actually grabbed pointer/fullscreen.
+    var show = (isTouch && !cfg.disableTouch) || cfg.showOnDesktop || locked || fs;
+    exitBtn.style.display = show ? "block" : "none";
+  }
+
   // ---- public API + boot -------------------------------------------------
   var api = {
     press: press,
@@ -248,6 +290,11 @@
 
   function boot() {
     buildOverlay();
+    exitBtn = makeExitButton();
+    refreshExit();
+    document.addEventListener("pointerlockchange", refreshExit);
+    document.addEventListener("fullscreenchange", refreshExit);
+    api.exitCapture = exitCapture;
     if (!cfg.disableGamepad) {
       window.addEventListener("gamepadconnected", function () {});
       requestAnimationFrame(gamepadLoop);
