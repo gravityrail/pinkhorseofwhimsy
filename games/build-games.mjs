@@ -10,7 +10,7 @@
  *   node build-games.mjs --filter 3d  # Build only 3D games
  */
 
-import { readdir, stat, mkdir, readFile, writeFile } from 'fs/promises';
+import { readdir, stat, mkdir, readFile, writeFile, cp, rm } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { existsSync } from 'fs';
@@ -46,9 +46,19 @@ async function findGames() {
       const gameJson = join(gameDir, 'game.json');
       try {
         await stat(gameJson);
-        games.push({ category, name, dir: gameDir, json: gameJson });
+        games.push({ category, name, dir: gameDir, json: gameJson, kind: 'gdevelop' });
+        continue;
       } catch {
-        // No game.json, skip
+        // No game.json — maybe a plain web game
+      }
+
+      // Plain web games (hand-written HTML5/JS, no GDevelop) ship an index.html
+      // and are copied to the arcade verbatim.
+      try {
+        await stat(join(gameDir, 'index.html'));
+        games.push({ category, name, dir: gameDir, kind: 'web' });
+      } catch {
+        // Neither project type, skip
       }
     }
   }
@@ -58,6 +68,19 @@ async function findGames() {
 
 async function buildGame(game) {
   const outDir = join(ARCADE_DIR, game.name);
+
+  if (game.kind === 'web') {
+    console.log(`\n  Copying web game ${game.category}/${game.name}...`);
+    await rm(outDir, { recursive: true, force: true });
+    await cp(game.dir, outDir, {
+      recursive: true,
+      // Docs and dev clutter stay out of the published build.
+      filter: (src) => !src.endsWith('.md') && !src.includes('node_modules'),
+    });
+    await injectArcadeControls(outDir);
+    return true;
+  }
+
   await mkdir(outDir, { recursive: true });
 
   console.log(`\n  Building ${game.category}/${game.name}...`);

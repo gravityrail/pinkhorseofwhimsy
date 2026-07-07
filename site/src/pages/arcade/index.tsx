@@ -27,6 +27,13 @@ const GAMES: GameCard[] = [
     href: '/worm/',
   },
   {
+    title: 'The Alien from Mars',
+    author: 'Pink Horse of Whimsy',
+    description: 'Pilot a Martian saucer over an endless countryside: beam up cows, chickens, sheep and pigs and mutate them into a rampaging entourage — two-headed fire-breathing steaks, karate pigs, lightning clouds and worse. Outrun the army, and don\'t over-feed your mutants or they blow up into lava!',
+    type: '2D',
+    slug: 'alien-from-mars',
+  },
+  {
     title: 'Pinball',
     author: 'Pink Horse of Whimsy',
     description: 'A physics pinball table built with three.js — flippers, ramps, bumpers and a tilted dot-matrix scoreboard. Insert a coin and rack up a million-point bonus.',
