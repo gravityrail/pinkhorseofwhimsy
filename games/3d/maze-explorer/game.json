@@ -194,6 +194,34 @@
         "metadata": "",
         "name": "ceiling_light.glb",
         "userAdded": true
+      },
+      {
+        "file": "pacman.glb",
+        "kind": "model3D",
+        "metadata": "",
+        "name": "pacman.glb",
+        "userAdded": true
+      },
+      {
+        "file": "gargoyle.glb",
+        "kind": "model3D",
+        "metadata": "",
+        "name": "gargoyle.glb",
+        "userAdded": true
+      },
+      {
+        "file": "beholder.glb",
+        "kind": "model3D",
+        "metadata": "",
+        "name": "beholder.glb",
+        "userAdded": true
+      },
+      {
+        "file": "angel.glb",
+        "kind": "model3D",
+        "metadata": "",
+        "name": "angel.glb",
+        "userAdded": true
       }
     ],
     "resourceFolders": []
@@ -12152,6 +12180,23 @@
           "angle": 0,
           "customSize": true,
           "width": 200,
+          "height": 20,
+          "layer": "",
+          "name": "Wall_stone_wall",
+          "x": 4400,
+          "y": 2780,
+          "zOrder": 1,
+          "z": 0,
+          "depth": 250,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "wall-700"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 200,
           "height": 200,
           "layer": "",
           "name": "Floor_stone_floor",
@@ -12163,7 +12208,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "floor-700"
+          "persistentUuid": "floor-701"
         },
         {
           "angle": 0,
@@ -12180,7 +12225,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "ceil-701"
+          "persistentUuid": "ceil-702"
         },
         {
           "angle": 0,
@@ -12197,7 +12242,24 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "wall-702"
+          "persistentUuid": "wall-703"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 200,
+          "height": 20,
+          "layer": "",
+          "name": "Wall_stone_wall",
+          "x": 4600,
+          "y": 2780,
+          "zOrder": 1,
+          "z": 0,
+          "depth": 250,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "wall-704"
         },
         {
           "angle": 0,
@@ -12214,7 +12276,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "floor-703"
+          "persistentUuid": "floor-705"
         },
         {
           "angle": 0,
@@ -12231,7 +12293,24 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "ceil-704"
+          "persistentUuid": "ceil-706"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 200,
+          "height": 20,
+          "layer": "",
+          "name": "Wall_stone_wall",
+          "x": 4800,
+          "y": 2780,
+          "zOrder": 1,
+          "z": 0,
+          "depth": 250,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "wall-707"
         },
         {
           "angle": 0,
@@ -12248,7 +12327,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "wall-705"
+          "persistentUuid": "wall-708"
         },
         {
           "angle": 0,
@@ -12265,7 +12344,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "floor-706"
+          "persistentUuid": "floor-709"
         },
         {
           "angle": 0,
@@ -12282,7 +12361,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "ceil-707"
+          "persistentUuid": "ceil-710"
         },
         {
           "angle": 0,
@@ -12299,7 +12378,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "wall-708"
+          "persistentUuid": "wall-711"
         },
         {
           "angle": 0,
@@ -12309,57 +12388,6 @@
           "layer": "",
           "name": "Wall_stone_wall",
           "x": 380,
-          "y": 2800,
-          "zOrder": 1,
-          "z": 0,
-          "depth": 250,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": [],
-          "persistentUuid": "wall-709"
-        },
-        {
-          "angle": 0,
-          "customSize": true,
-          "width": 200,
-          "height": 200,
-          "layer": "",
-          "name": "Floor_stone_floor",
-          "x": 1200,
-          "y": 2800,
-          "zOrder": 0,
-          "z": 0,
-          "depth": 20,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": [],
-          "persistentUuid": "floor-710"
-        },
-        {
-          "angle": 0,
-          "customSize": true,
-          "width": 200,
-          "height": 200,
-          "layer": "",
-          "name": "Ceiling_stone_ceiling",
-          "x": 1200,
-          "y": 2800,
-          "zOrder": 0,
-          "z": 250,
-          "depth": 20,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": [],
-          "persistentUuid": "ceil-711"
-        },
-        {
-          "angle": 0,
-          "customSize": true,
-          "width": 20,
-          "height": 200,
-          "layer": "",
-          "name": "Wall_stone_wall",
-          "x": 1200,
           "y": 2800,
           "zOrder": 1,
           "z": 0,
@@ -12376,7 +12404,7 @@
           "height": 200,
           "layer": "",
           "name": "Floor_stone_floor",
-          "x": 1400,
+          "x": 1200,
           "y": 2800,
           "zOrder": 0,
           "z": 0,
@@ -12393,7 +12421,7 @@
           "height": 200,
           "layer": "",
           "name": "Ceiling_stone_ceiling",
-          "x": 1400,
+          "x": 1200,
           "y": 2800,
           "zOrder": 0,
           "z": 250,
@@ -12410,7 +12438,7 @@
           "height": 200,
           "layer": "",
           "name": "Wall_stone_wall",
-          "x": 1580,
+          "x": 1200,
           "y": 2800,
           "zOrder": 1,
           "z": 0,
@@ -12427,10 +12455,10 @@
           "height": 200,
           "layer": "",
           "name": "Floor_stone_floor",
-          "x": 1800,
+          "x": 1400,
           "y": 2800,
           "zOrder": 0,
-          "z": 20,
+          "z": 0,
           "depth": 20,
           "numberProperties": [],
           "stringProperties": [],
@@ -12444,10 +12472,10 @@
           "height": 200,
           "layer": "",
           "name": "Ceiling_stone_ceiling",
-          "x": 1800,
+          "x": 1400,
           "y": 2800,
           "zOrder": 0,
-          "z": 300,
+          "z": 250,
           "depth": 20,
           "numberProperties": [],
           "stringProperties": [],
@@ -12461,11 +12489,11 @@
           "height": 200,
           "layer": "",
           "name": "Wall_stone_wall",
-          "x": 1800,
+          "x": 1580,
           "y": 2800,
           "zOrder": 1,
-          "z": 20,
-          "depth": 280,
+          "z": 0,
+          "depth": 250,
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
@@ -12478,7 +12506,7 @@
           "height": 200,
           "layer": "",
           "name": "Floor_stone_floor",
-          "x": 2000,
+          "x": 1800,
           "y": 2800,
           "zOrder": 0,
           "z": 20,
@@ -12495,7 +12523,7 @@
           "height": 200,
           "layer": "",
           "name": "Ceiling_stone_ceiling",
-          "x": 2000,
+          "x": 1800,
           "y": 2800,
           "zOrder": 0,
           "z": 300,
@@ -12508,6 +12536,57 @@
         {
           "angle": 0,
           "customSize": true,
+          "width": 20,
+          "height": 200,
+          "layer": "",
+          "name": "Wall_stone_wall",
+          "x": 1800,
+          "y": 2800,
+          "zOrder": 1,
+          "z": 20,
+          "depth": 280,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "wall-721"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 200,
+          "height": 200,
+          "layer": "",
+          "name": "Floor_stone_floor",
+          "x": 2000,
+          "y": 2800,
+          "zOrder": 0,
+          "z": 20,
+          "depth": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "floor-722"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 200,
+          "height": 200,
+          "layer": "",
+          "name": "Ceiling_stone_ceiling",
+          "x": 2000,
+          "y": 2800,
+          "zOrder": 0,
+          "z": 300,
+          "depth": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "ceil-723"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
           "width": 200,
           "height": 200,
           "layer": "",
@@ -12520,7 +12599,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "floor-721"
+          "persistentUuid": "floor-724"
         },
         {
           "angle": 0,
@@ -12537,7 +12616,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "ceil-722"
+          "persistentUuid": "ceil-725"
         },
         {
           "angle": 0,
@@ -12554,7 +12633,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "floor-723"
+          "persistentUuid": "floor-726"
         },
         {
           "angle": 0,
@@ -12571,7 +12650,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "ceil-724"
+          "persistentUuid": "ceil-727"
         },
         {
           "angle": 0,
@@ -12588,7 +12667,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "floor-725"
+          "persistentUuid": "floor-728"
         },
         {
           "angle": 0,
@@ -12605,7 +12684,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "ceil-726"
+          "persistentUuid": "ceil-729"
         },
         {
           "angle": 0,
@@ -12622,7 +12701,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "floor-727"
+          "persistentUuid": "floor-730"
         },
         {
           "angle": 0,
@@ -12639,7 +12718,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "ceil-728"
+          "persistentUuid": "ceil-731"
         },
         {
           "angle": 0,
@@ -12656,57 +12735,6 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "wall-729"
-        },
-        {
-          "angle": 0,
-          "customSize": true,
-          "width": 200,
-          "height": 200,
-          "layer": "",
-          "name": "Floor_stone_floor",
-          "x": 3200,
-          "y": 2800,
-          "zOrder": 0,
-          "z": 0,
-          "depth": 20,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": [],
-          "persistentUuid": "floor-730"
-        },
-        {
-          "angle": 0,
-          "customSize": true,
-          "width": 200,
-          "height": 200,
-          "layer": "",
-          "name": "Ceiling_stone_ceiling",
-          "x": 3200,
-          "y": 2800,
-          "zOrder": 0,
-          "z": 250,
-          "depth": 20,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": [],
-          "persistentUuid": "ceil-731"
-        },
-        {
-          "angle": 0,
-          "customSize": true,
-          "width": 20,
-          "height": 200,
-          "layer": "",
-          "name": "Wall_stone_wall",
-          "x": 3200,
-          "y": 2800,
-          "zOrder": 1,
-          "z": 0,
-          "depth": 250,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": [],
           "persistentUuid": "wall-732"
         },
         {
@@ -12716,7 +12744,7 @@
           "height": 200,
           "layer": "",
           "name": "Floor_stone_floor",
-          "x": 3400,
+          "x": 3200,
           "y": 2800,
           "zOrder": 0,
           "z": 0,
@@ -12733,7 +12761,7 @@
           "height": 200,
           "layer": "",
           "name": "Ceiling_stone_ceiling",
-          "x": 3400,
+          "x": 3200,
           "y": 2800,
           "zOrder": 0,
           "z": 250,
@@ -12750,7 +12778,7 @@
           "height": 200,
           "layer": "",
           "name": "Wall_stone_wall",
-          "x": 3580,
+          "x": 3200,
           "y": 2800,
           "zOrder": 1,
           "z": 0,
@@ -12767,7 +12795,7 @@
           "height": 200,
           "layer": "",
           "name": "Floor_stone_floor",
-          "x": 4400,
+          "x": 3400,
           "y": 2800,
           "zOrder": 0,
           "z": 0,
@@ -12784,7 +12812,7 @@
           "height": 200,
           "layer": "",
           "name": "Ceiling_stone_ceiling",
-          "x": 4400,
+          "x": 3400,
           "y": 2800,
           "zOrder": 0,
           "z": 250,
@@ -12801,7 +12829,7 @@
           "height": 200,
           "layer": "",
           "name": "Wall_stone_wall",
-          "x": 4400,
+          "x": 3580,
           "y": 2800,
           "zOrder": 1,
           "z": 0,
@@ -12818,8 +12846,8 @@
           "height": 200,
           "layer": "",
           "name": "Floor_stone_floor",
-          "x": 4600,
-          "y": 2800,
+          "x": 200,
+          "y": 3000,
           "zOrder": 0,
           "z": 0,
           "depth": 20,
@@ -12835,8 +12863,8 @@
           "height": 200,
           "layer": "",
           "name": "Ceiling_stone_ceiling",
-          "x": 4600,
-          "y": 2800,
+          "x": 200,
+          "y": 3000,
           "zOrder": 0,
           "z": 250,
           "depth": 20,
@@ -12848,91 +12876,6 @@
         {
           "angle": 0,
           "customSize": true,
-          "width": 200,
-          "height": 200,
-          "layer": "",
-          "name": "Floor_stone_floor",
-          "x": 4800,
-          "y": 2800,
-          "zOrder": 0,
-          "z": 0,
-          "depth": 20,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": [],
-          "persistentUuid": "floor-741"
-        },
-        {
-          "angle": 0,
-          "customSize": true,
-          "width": 200,
-          "height": 200,
-          "layer": "",
-          "name": "Ceiling_stone_ceiling",
-          "x": 4800,
-          "y": 2800,
-          "zOrder": 0,
-          "z": 250,
-          "depth": 20,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": [],
-          "persistentUuid": "ceil-742"
-        },
-        {
-          "angle": 0,
-          "customSize": true,
-          "width": 20,
-          "height": 200,
-          "layer": "",
-          "name": "Wall_stone_wall",
-          "x": 4980,
-          "y": 2800,
-          "zOrder": 1,
-          "z": 0,
-          "depth": 250,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": [],
-          "persistentUuid": "wall-743"
-        },
-        {
-          "angle": 0,
-          "customSize": true,
-          "width": 200,
-          "height": 200,
-          "layer": "",
-          "name": "Floor_stone_floor",
-          "x": 200,
-          "y": 3000,
-          "zOrder": 0,
-          "z": 0,
-          "depth": 20,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": [],
-          "persistentUuid": "floor-744"
-        },
-        {
-          "angle": 0,
-          "customSize": true,
-          "width": 200,
-          "height": 200,
-          "layer": "",
-          "name": "Ceiling_stone_ceiling",
-          "x": 200,
-          "y": 3000,
-          "zOrder": 0,
-          "z": 250,
-          "depth": 20,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": [],
-          "persistentUuid": "ceil-745"
-        },
-        {
-          "angle": 0,
-          "customSize": true,
           "width": 20,
           "height": 200,
           "layer": "",
@@ -12945,7 +12888,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "wall-746"
+          "persistentUuid": "wall-741"
         },
         {
           "angle": 0,
@@ -12962,7 +12905,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "wall-747"
+          "persistentUuid": "wall-742"
         },
         {
           "angle": 0,
@@ -12979,7 +12922,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "floor-748"
+          "persistentUuid": "floor-743"
         },
         {
           "angle": 0,
@@ -12996,7 +12939,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "ceil-749"
+          "persistentUuid": "ceil-744"
         },
         {
           "angle": 0,
@@ -13013,7 +12956,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "wall-750"
+          "persistentUuid": "wall-745"
         },
         {
           "angle": 0,
@@ -13030,7 +12973,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "wall-751"
+          "persistentUuid": "wall-746"
         },
         {
           "angle": 0,
@@ -13047,7 +12990,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "floor-752"
+          "persistentUuid": "floor-747"
         },
         {
           "angle": 0,
@@ -13064,7 +13007,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "ceil-753"
+          "persistentUuid": "ceil-748"
         },
         {
           "angle": 0,
@@ -13081,7 +13024,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "wall-754"
+          "persistentUuid": "wall-749"
         },
         {
           "angle": 0,
@@ -13098,7 +13041,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "wall-755"
+          "persistentUuid": "wall-750"
         },
         {
           "angle": 0,
@@ -13115,7 +13058,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "floor-756"
+          "persistentUuid": "floor-751"
         },
         {
           "angle": 0,
@@ -13132,7 +13075,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "ceil-757"
+          "persistentUuid": "ceil-752"
         },
         {
           "angle": 0,
@@ -13149,7 +13092,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "wall-758"
+          "persistentUuid": "wall-753"
         },
         {
           "angle": 0,
@@ -13166,7 +13109,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "floor-759"
+          "persistentUuid": "floor-754"
         },
         {
           "angle": 0,
@@ -13183,7 +13126,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "ceil-760"
+          "persistentUuid": "ceil-755"
         },
         {
           "angle": 0,
@@ -13200,7 +13143,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "wall-761"
+          "persistentUuid": "wall-756"
         },
         {
           "angle": 0,
@@ -13210,6 +13153,91 @@
           "layer": "",
           "name": "Floor_stone_floor",
           "x": 1800,
+          "y": 3000,
+          "zOrder": 0,
+          "z": 20,
+          "depth": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "floor-757"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 200,
+          "height": 200,
+          "layer": "",
+          "name": "Ceiling_stone_ceiling",
+          "x": 1800,
+          "y": 3000,
+          "zOrder": 0,
+          "z": 300,
+          "depth": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "ceil-758"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 20,
+          "height": 200,
+          "layer": "",
+          "name": "Wall_stone_wall",
+          "x": 1800,
+          "y": 3000,
+          "zOrder": 1,
+          "z": 20,
+          "depth": 280,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "wall-759"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 200,
+          "height": 200,
+          "layer": "",
+          "name": "Floor_stone_floor",
+          "x": 2000,
+          "y": 3000,
+          "zOrder": 0,
+          "z": 20,
+          "depth": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "floor-760"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 200,
+          "height": 200,
+          "layer": "",
+          "name": "Ceiling_stone_ceiling",
+          "x": 2000,
+          "y": 3000,
+          "zOrder": 0,
+          "z": 300,
+          "depth": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "ceil-761"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 200,
+          "height": 200,
+          "layer": "",
+          "name": "Floor_stone_floor",
+          "x": 2200,
           "y": 3000,
           "zOrder": 0,
           "z": 20,
@@ -13226,7 +13254,7 @@
           "height": 200,
           "layer": "",
           "name": "Ceiling_stone_ceiling",
-          "x": 1800,
+          "x": 2200,
           "y": 3000,
           "zOrder": 0,
           "z": 300,
@@ -13239,91 +13267,6 @@
         {
           "angle": 0,
           "customSize": true,
-          "width": 20,
-          "height": 200,
-          "layer": "",
-          "name": "Wall_stone_wall",
-          "x": 1800,
-          "y": 3000,
-          "zOrder": 1,
-          "z": 20,
-          "depth": 280,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": [],
-          "persistentUuid": "wall-764"
-        },
-        {
-          "angle": 0,
-          "customSize": true,
-          "width": 200,
-          "height": 200,
-          "layer": "",
-          "name": "Floor_stone_floor",
-          "x": 2000,
-          "y": 3000,
-          "zOrder": 0,
-          "z": 20,
-          "depth": 20,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": [],
-          "persistentUuid": "floor-765"
-        },
-        {
-          "angle": 0,
-          "customSize": true,
-          "width": 200,
-          "height": 200,
-          "layer": "",
-          "name": "Ceiling_stone_ceiling",
-          "x": 2000,
-          "y": 3000,
-          "zOrder": 0,
-          "z": 300,
-          "depth": 20,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": [],
-          "persistentUuid": "ceil-766"
-        },
-        {
-          "angle": 0,
-          "customSize": true,
-          "width": 200,
-          "height": 200,
-          "layer": "",
-          "name": "Floor_stone_floor",
-          "x": 2200,
-          "y": 3000,
-          "zOrder": 0,
-          "z": 20,
-          "depth": 20,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": [],
-          "persistentUuid": "floor-767"
-        },
-        {
-          "angle": 0,
-          "customSize": true,
-          "width": 200,
-          "height": 200,
-          "layer": "",
-          "name": "Ceiling_stone_ceiling",
-          "x": 2200,
-          "y": 3000,
-          "zOrder": 0,
-          "z": 300,
-          "depth": 20,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": [],
-          "persistentUuid": "ceil-768"
-        },
-        {
-          "angle": 0,
-          "customSize": true,
           "width": 200,
           "height": 200,
           "layer": "",
@@ -13336,7 +13279,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "floor-769"
+          "persistentUuid": "floor-764"
         },
         {
           "angle": 0,
@@ -13353,7 +13296,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "ceil-770"
+          "persistentUuid": "ceil-765"
         },
         {
           "angle": 0,
@@ -13370,7 +13313,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "floor-771"
+          "persistentUuid": "floor-766"
         },
         {
           "angle": 0,
@@ -13387,7 +13330,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "ceil-772"
+          "persistentUuid": "ceil-767"
         },
         {
           "angle": 0,
@@ -13404,7 +13347,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "floor-773"
+          "persistentUuid": "floor-768"
         },
         {
           "angle": 0,
@@ -13421,7 +13364,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "ceil-774"
+          "persistentUuid": "ceil-769"
         },
         {
           "angle": 0,
@@ -13438,7 +13381,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "wall-775"
+          "persistentUuid": "wall-770"
         },
         {
           "angle": 0,
@@ -13455,7 +13398,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "floor-776"
+          "persistentUuid": "floor-771"
         },
         {
           "angle": 0,
@@ -13472,7 +13415,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "ceil-777"
+          "persistentUuid": "ceil-772"
         },
         {
           "angle": 0,
@@ -13489,7 +13432,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "wall-778"
+          "persistentUuid": "wall-773"
         },
         {
           "angle": 0,
@@ -13506,7 +13449,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "floor-779"
+          "persistentUuid": "floor-774"
         },
         {
           "angle": 0,
@@ -13523,7 +13466,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "ceil-780"
+          "persistentUuid": "ceil-775"
         },
         {
           "angle": 0,
@@ -13540,7 +13483,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "wall-781"
+          "persistentUuid": "wall-776"
         },
         {
           "angle": 0,
@@ -13557,7 +13500,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "floor-782"
+          "persistentUuid": "floor-777"
         },
         {
           "angle": 0,
@@ -13574,7 +13517,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "ceil-783"
+          "persistentUuid": "ceil-778"
         },
         {
           "angle": 0,
@@ -13591,7 +13534,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "wall-784"
+          "persistentUuid": "wall-779"
         },
         {
           "angle": 0,
@@ -13608,7 +13551,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "wall-785"
+          "persistentUuid": "wall-780"
         },
         {
           "angle": 0,
@@ -13625,7 +13568,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "floor-786"
+          "persistentUuid": "floor-781"
         },
         {
           "angle": 0,
@@ -13642,7 +13585,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "ceil-787"
+          "persistentUuid": "ceil-782"
         },
         {
           "angle": 0,
@@ -13659,16 +13602,50 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "wall-788"
+          "persistentUuid": "wall-783"
         },
         {
           "angle": 0,
           "customSize": true,
-          "width": 20,
+          "width": 200,
           "height": 200,
           "layer": "",
+          "name": "Floor_stone_floor",
+          "x": 4200,
+          "y": 3000,
+          "zOrder": 0,
+          "z": 0,
+          "depth": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "floor-784"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 200,
+          "height": 200,
+          "layer": "",
+          "name": "Ceiling_stone_ceiling",
+          "x": 4200,
+          "y": 3000,
+          "zOrder": 0,
+          "z": 250,
+          "depth": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "ceil-785"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 200,
+          "height": 20,
+          "layer": "",
           "name": "Wall_stone_wall",
-          "x": 4180,
+          "x": 4200,
           "y": 3000,
           "zOrder": 1,
           "z": 0,
@@ -13676,7 +13653,24 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "wall-789"
+          "persistentUuid": "wall-786"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 200,
+          "height": 20,
+          "layer": "",
+          "name": "Wall_stone_wall",
+          "x": 4200,
+          "y": 3180,
+          "zOrder": 1,
+          "z": 0,
+          "depth": 250,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "wall-787"
         },
         {
           "angle": 0,
@@ -13693,7 +13687,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "floor-790"
+          "persistentUuid": "floor-788"
         },
         {
           "angle": 0,
@@ -13710,13 +13704,13 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "ceil-791"
+          "persistentUuid": "ceil-789"
         },
         {
           "angle": 0,
           "customSize": true,
-          "width": 20,
-          "height": 200,
+          "width": 200,
+          "height": 20,
           "layer": "",
           "name": "Wall_stone_wall",
           "x": 4400,
@@ -13727,7 +13721,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "wall-792"
+          "persistentUuid": "wall-790"
         },
         {
           "angle": 0,
@@ -13744,7 +13738,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "floor-793"
+          "persistentUuid": "floor-791"
         },
         {
           "angle": 0,
@@ -13761,7 +13755,24 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "ceil-794"
+          "persistentUuid": "ceil-792"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 200,
+          "height": 20,
+          "layer": "",
+          "name": "Wall_stone_wall",
+          "x": 4600,
+          "y": 3000,
+          "zOrder": 1,
+          "z": 0,
+          "depth": 250,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "wall-793"
         },
         {
           "angle": 0,
@@ -13778,7 +13789,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "floor-795"
+          "persistentUuid": "floor-794"
         },
         {
           "angle": 0,
@@ -13795,7 +13806,24 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "ceil-796"
+          "persistentUuid": "ceil-795"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 200,
+          "height": 20,
+          "layer": "",
+          "name": "Wall_stone_wall",
+          "x": 4800,
+          "y": 3000,
+          "zOrder": 1,
+          "z": 0,
+          "depth": 250,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "wall-796"
         },
         {
           "angle": 0,
@@ -20268,6 +20296,23 @@
         {
           "angle": 0,
           "customSize": true,
+          "width": 30,
+          "height": 25,
+          "depth": 50,
+          "layer": "",
+          "name": "Sconce",
+          "x": 4685,
+          "y": 2775,
+          "z": 150,
+          "zOrder": 3,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "sconce-144"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
           "width": 25,
           "height": 30,
           "depth": 50,
@@ -20280,7 +20325,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-144"
+          "persistentUuid": "sconce-145"
         },
         {
           "angle": 0,
@@ -20291,23 +20336,6 @@
           "layer": "",
           "name": "CeilingLight",
           "x": 2070,
-          "y": 2870,
-          "z": 295,
-          "zOrder": 3,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": [],
-          "persistentUuid": "clight-145"
-        },
-        {
-          "angle": 0,
-          "customSize": true,
-          "width": 60,
-          "height": 60,
-          "depth": 4,
-          "layer": "",
-          "name": "CeilingLight",
-          "x": 2470,
           "y": 2870,
           "z": 295,
           "zOrder": 3,
@@ -20324,7 +20352,7 @@
           "depth": 4,
           "layer": "",
           "name": "CeilingLight",
-          "x": 2870,
+          "x": 2470,
           "y": 2870,
           "z": 295,
           "zOrder": 3,
@@ -20336,19 +20364,19 @@
         {
           "angle": 0,
           "customSize": true,
-          "width": 25,
-          "height": 30,
-          "depth": 50,
+          "width": 60,
+          "height": 60,
+          "depth": 4,
           "layer": "",
-          "name": "Sconce",
-          "x": 3200,
-          "y": 2885,
-          "z": 150,
+          "name": "CeilingLight",
+          "x": 2870,
+          "y": 2870,
+          "z": 295,
           "zOrder": 3,
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-148"
+          "persistentUuid": "clight-148"
         },
         {
           "angle": 0,
@@ -20358,7 +20386,7 @@
           "depth": 50,
           "layer": "",
           "name": "Sconce",
-          "x": 4400,
+          "x": 3200,
           "y": 2885,
           "z": 150,
           "zOrder": 3,
@@ -20375,23 +20403,6 @@
           "depth": 50,
           "layer": "",
           "name": "Sconce",
-          "x": 4975,
-          "y": 2885,
-          "z": 150,
-          "zOrder": 3,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": [],
-          "persistentUuid": "sconce-150"
-        },
-        {
-          "angle": 0,
-          "customSize": true,
-          "width": 25,
-          "height": 30,
-          "depth": 50,
-          "layer": "",
-          "name": "Sconce",
           "x": 200,
           "y": 3085,
           "z": 150,
@@ -20399,7 +20410,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-151"
+          "persistentUuid": "sconce-150"
         },
         {
           "angle": 0,
@@ -20416,7 +20427,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-152"
+          "persistentUuid": "sconce-151"
         },
         {
           "angle": 0,
@@ -20433,7 +20444,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-153"
+          "persistentUuid": "sconce-152"
         },
         {
           "angle": 0,
@@ -20450,7 +20461,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-154"
+          "persistentUuid": "sconce-153"
         },
         {
           "angle": 0,
@@ -20467,7 +20478,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-155"
+          "persistentUuid": "sconce-154"
         },
         {
           "angle": 0,
@@ -20478,6 +20489,23 @@
           "layer": "",
           "name": "CeilingLight",
           "x": 1870,
+          "y": 3070,
+          "z": 295,
+          "zOrder": 3,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "clight-155"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 60,
+          "height": 60,
+          "depth": 4,
+          "layer": "",
+          "name": "CeilingLight",
+          "x": 2270,
           "y": 3070,
           "z": 295,
           "zOrder": 3,
@@ -20494,23 +20522,6 @@
           "depth": 4,
           "layer": "",
           "name": "CeilingLight",
-          "x": 2270,
-          "y": 3070,
-          "z": 295,
-          "zOrder": 3,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": [],
-          "persistentUuid": "clight-157"
-        },
-        {
-          "angle": 0,
-          "customSize": true,
-          "width": 60,
-          "height": 60,
-          "depth": 4,
-          "layer": "",
-          "name": "CeilingLight",
           "x": 2670,
           "y": 3070,
           "z": 295,
@@ -20518,7 +20529,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "clight-158"
+          "persistentUuid": "clight-157"
         },
         {
           "angle": 0,
@@ -20535,7 +20546,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-159"
+          "persistentUuid": "sconce-158"
         },
         {
           "angle": 0,
@@ -20552,7 +20563,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-160"
+          "persistentUuid": "sconce-159"
         },
         {
           "angle": 0,
@@ -20569,7 +20580,58 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
+          "persistentUuid": "sconce-160"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 30,
+          "height": 25,
+          "depth": 50,
+          "layer": "",
+          "name": "Sconce",
+          "x": 4285,
+          "y": 3000,
+          "z": 150,
+          "zOrder": 3,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
           "persistentUuid": "sconce-161"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 30,
+          "height": 25,
+          "depth": 50,
+          "layer": "",
+          "name": "Sconce",
+          "x": 4285,
+          "y": 3175,
+          "z": 150,
+          "zOrder": 3,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "sconce-162"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 30,
+          "height": 25,
+          "depth": 50,
+          "layer": "",
+          "name": "Sconce",
+          "x": 4685,
+          "y": 3000,
+          "z": 150,
+          "zOrder": 3,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "sconce-163"
         },
         {
           "angle": 0,
@@ -20586,7 +20648,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-162"
+          "persistentUuid": "sconce-164"
         },
         {
           "angle": 0,
@@ -20603,7 +20665,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-163"
+          "persistentUuid": "sconce-165"
         },
         {
           "angle": 0,
@@ -20620,7 +20682,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-164"
+          "persistentUuid": "sconce-166"
         },
         {
           "angle": 0,
@@ -20637,7 +20699,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-165"
+          "persistentUuid": "sconce-167"
         },
         {
           "angle": 0,
@@ -20654,7 +20716,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-166"
+          "persistentUuid": "sconce-168"
         },
         {
           "angle": 0,
@@ -20671,7 +20733,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "clight-167"
+          "persistentUuid": "clight-169"
         },
         {
           "angle": 0,
@@ -20688,7 +20750,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "clight-168"
+          "persistentUuid": "clight-170"
         },
         {
           "angle": 0,
@@ -20705,7 +20767,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "clight-169"
+          "persistentUuid": "clight-171"
         },
         {
           "angle": 0,
@@ -20722,7 +20784,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-170"
+          "persistentUuid": "sconce-172"
         },
         {
           "angle": 0,
@@ -20739,7 +20801,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-171"
+          "persistentUuid": "sconce-173"
         },
         {
           "angle": 0,
@@ -20756,7 +20818,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-172"
+          "persistentUuid": "sconce-174"
         },
         {
           "angle": 0,
@@ -20773,7 +20835,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-173"
+          "persistentUuid": "sconce-175"
         },
         {
           "angle": 0,
@@ -20790,7 +20852,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-174"
+          "persistentUuid": "sconce-176"
         },
         {
           "angle": 0,
@@ -20807,7 +20869,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-175"
+          "persistentUuid": "sconce-177"
         },
         {
           "angle": 0,
@@ -20824,7 +20886,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-176"
+          "persistentUuid": "sconce-178"
         },
         {
           "angle": 0,
@@ -20841,7 +20903,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "clight-177"
+          "persistentUuid": "clight-179"
         },
         {
           "angle": 0,
@@ -20858,7 +20920,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "clight-178"
+          "persistentUuid": "clight-180"
         },
         {
           "angle": 0,
@@ -20875,7 +20937,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "clight-179"
+          "persistentUuid": "clight-181"
         },
         {
           "angle": 0,
@@ -20892,7 +20954,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-180"
+          "persistentUuid": "sconce-182"
         },
         {
           "angle": 0,
@@ -20909,7 +20971,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-181"
+          "persistentUuid": "sconce-183"
         },
         {
           "angle": 0,
@@ -20926,7 +20988,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-182"
+          "persistentUuid": "sconce-184"
         },
         {
           "angle": 0,
@@ -20943,7 +21005,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-183"
+          "persistentUuid": "sconce-185"
         },
         {
           "angle": 0,
@@ -20960,7 +21022,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-184"
+          "persistentUuid": "sconce-186"
         },
         {
           "angle": 0,
@@ -20977,7 +21039,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-185"
+          "persistentUuid": "sconce-187"
         },
         {
           "angle": 0,
@@ -20994,7 +21056,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-186"
+          "persistentUuid": "sconce-188"
         },
         {
           "angle": 0,
@@ -21011,7 +21073,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-187"
+          "persistentUuid": "sconce-189"
         },
         {
           "angle": 0,
@@ -21028,7 +21090,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-188"
+          "persistentUuid": "sconce-190"
         },
         {
           "angle": 0,
@@ -21045,7 +21107,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-189"
+          "persistentUuid": "sconce-191"
         },
         {
           "angle": 0,
@@ -21062,7 +21124,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-190"
+          "persistentUuid": "sconce-192"
         },
         {
           "angle": 0,
@@ -21079,7 +21141,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-191"
+          "persistentUuid": "sconce-193"
         },
         {
           "angle": 0,
@@ -21096,40 +21158,6 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-192"
-        },
-        {
-          "angle": 0,
-          "customSize": true,
-          "width": 30,
-          "height": 25,
-          "depth": 50,
-          "layer": "",
-          "name": "Sconce",
-          "x": 2285,
-          "y": 3800,
-          "z": 150,
-          "zOrder": 3,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": [],
-          "persistentUuid": "sconce-193"
-        },
-        {
-          "angle": 0,
-          "customSize": true,
-          "width": 30,
-          "height": 25,
-          "depth": 50,
-          "layer": "",
-          "name": "Sconce",
-          "x": 2285,
-          "y": 3975,
-          "z": 150,
-          "zOrder": 3,
-          "numberProperties": [],
-          "stringProperties": [],
-          "initialVariables": [],
           "persistentUuid": "sconce-194"
         },
         {
@@ -21140,7 +21168,7 @@
           "depth": 50,
           "layer": "",
           "name": "Sconce",
-          "x": 2685,
+          "x": 2285,
           "y": 3800,
           "z": 150,
           "zOrder": 3,
@@ -21157,7 +21185,7 @@
           "depth": 50,
           "layer": "",
           "name": "Sconce",
-          "x": 2685,
+          "x": 2285,
           "y": 3975,
           "z": 150,
           "zOrder": 3,
@@ -21174,7 +21202,7 @@
           "depth": 50,
           "layer": "",
           "name": "Sconce",
-          "x": 3085,
+          "x": 2685,
           "y": 3800,
           "z": 150,
           "zOrder": 3,
@@ -21191,7 +21219,7 @@
           "depth": 50,
           "layer": "",
           "name": "Sconce",
-          "x": 3085,
+          "x": 2685,
           "y": 3975,
           "z": 150,
           "zOrder": 3,
@@ -21203,13 +21231,13 @@
         {
           "angle": 0,
           "customSize": true,
-          "width": 25,
-          "height": 30,
+          "width": 30,
+          "height": 25,
           "depth": 50,
           "layer": "",
           "name": "Sconce",
-          "x": 3175,
-          "y": 3885,
+          "x": 3085,
+          "y": 3800,
           "z": 150,
           "zOrder": 3,
           "numberProperties": [],
@@ -21225,7 +21253,7 @@
           "depth": 50,
           "layer": "",
           "name": "Sconce",
-          "x": 3485,
+          "x": 3085,
           "y": 3975,
           "z": 150,
           "zOrder": 3,
@@ -21242,7 +21270,7 @@
           "depth": 50,
           "layer": "",
           "name": "Sconce",
-          "x": 3400,
+          "x": 3175,
           "y": 3885,
           "z": 150,
           "zOrder": 3,
@@ -21259,7 +21287,7 @@
           "depth": 50,
           "layer": "",
           "name": "Sconce",
-          "x": 3885,
+          "x": 3485,
           "y": 3975,
           "z": 150,
           "zOrder": 3,
@@ -21267,6 +21295,40 @@
           "stringProperties": [],
           "initialVariables": [],
           "persistentUuid": "sconce-202"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 25,
+          "height": 30,
+          "depth": 50,
+          "layer": "",
+          "name": "Sconce",
+          "x": 3400,
+          "y": 3885,
+          "z": 150,
+          "zOrder": 3,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "sconce-203"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 30,
+          "height": 25,
+          "depth": 50,
+          "layer": "",
+          "name": "Sconce",
+          "x": 3885,
+          "y": 3975,
+          "z": 150,
+          "zOrder": 3,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "sconce-204"
         },
         {
           "angle": 0,
@@ -21283,7 +21345,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-203"
+          "persistentUuid": "sconce-205"
         },
         {
           "angle": 0,
@@ -21300,7 +21362,7 @@
           "numberProperties": [],
           "stringProperties": [],
           "initialVariables": [],
-          "persistentUuid": "sconce-204"
+          "persistentUuid": "sconce-206"
         },
         {
           "angle": 0,
@@ -21794,6 +21856,74 @@
           "stringProperties": [],
           "initialVariables": [],
           "persistentUuid": "barrel-28"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 80,
+          "height": 80,
+          "depth": 60,
+          "layer": "",
+          "name": "Pacman",
+          "x": 2460,
+          "y": 660,
+          "z": 0,
+          "zOrder": 2,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "pacman-29"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 70,
+          "height": 70,
+          "depth": 90,
+          "layer": "",
+          "name": "Gargoyle",
+          "x": 1465,
+          "y": 2665,
+          "z": 0,
+          "zOrder": 2,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "gargoyle-30"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 100,
+          "height": 100,
+          "depth": 100,
+          "layer": "",
+          "name": "Beholder",
+          "x": 2450,
+          "y": 3250,
+          "z": 30,
+          "zOrder": 2,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "beholder-31"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "width": 120,
+          "height": 120,
+          "depth": 120,
+          "layer": "",
+          "name": "Angel",
+          "x": 2440,
+          "y": 840,
+          "z": 0,
+          "zOrder": 2,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "angel-32"
         }
       ],
       "objects": [
@@ -22541,6 +22671,206 @@
         },
         {
           "assetStoreId": "",
+          "name": "Pacman",
+          "type": "Scene3D::Model3DObject",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Physics3D",
+              "type": "Physics3D::Physics3DBehavior",
+              "content": {
+                "object3D": "",
+                "bodyType": "Static",
+                "bullet": false,
+                "fixedRotation": false,
+                "shape": "Box",
+                "meshShapeResourceName": "",
+                "shapeOrientation": "Z",
+                "shapeDimensionA": 0,
+                "shapeDimensionB": 0,
+                "shapeDimensionC": 0,
+                "shapeOffsetX": 0,
+                "shapeOffsetY": 0,
+                "shapeOffsetZ": 0,
+                "massCenterOffsetX": 0,
+                "massCenterOffsetY": 0,
+                "massCenterOffsetZ": 0,
+                "massOverride": 0,
+                "density": 1,
+                "friction": 0.5,
+                "restitution": 0,
+                "linearDamping": 0.1,
+                "angularDamping": 0.1,
+                "gravityScale": 1,
+                "layers": 17,
+                "masks": 17
+              }
+            }
+          ],
+          "content": {
+            "width": 100,
+            "height": 100,
+            "depth": 100,
+            "rotationX": 90,
+            "rotationY": 0,
+            "rotationZ": 0,
+            "keepAspectRatio": false,
+            "modelResourceName": "pacman.glb",
+            "materialType": "KeepOriginal",
+            "originLocation": "BottomCenterZ",
+            "centerLocation": "ObjectCenter",
+            "animations": [],
+            "isCastingShadow": true,
+            "isReceivingShadow": true,
+            "crossfadeDuration": 0
+          }
+        },
+        {
+          "assetStoreId": "",
+          "name": "Gargoyle",
+          "type": "Scene3D::Model3DObject",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Physics3D",
+              "type": "Physics3D::Physics3DBehavior",
+              "content": {
+                "object3D": "",
+                "bodyType": "Static",
+                "bullet": false,
+                "fixedRotation": false,
+                "shape": "Box",
+                "meshShapeResourceName": "",
+                "shapeOrientation": "Z",
+                "shapeDimensionA": 0,
+                "shapeDimensionB": 0,
+                "shapeDimensionC": 0,
+                "shapeOffsetX": 0,
+                "shapeOffsetY": 0,
+                "shapeOffsetZ": 0,
+                "massCenterOffsetX": 0,
+                "massCenterOffsetY": 0,
+                "massCenterOffsetZ": 0,
+                "massOverride": 0,
+                "density": 1,
+                "friction": 0.5,
+                "restitution": 0,
+                "linearDamping": 0.1,
+                "angularDamping": 0.1,
+                "gravityScale": 1,
+                "layers": 17,
+                "masks": 17
+              }
+            }
+          ],
+          "content": {
+            "width": 100,
+            "height": 100,
+            "depth": 100,
+            "rotationX": 90,
+            "rotationY": 0,
+            "rotationZ": 0,
+            "keepAspectRatio": false,
+            "modelResourceName": "gargoyle.glb",
+            "materialType": "KeepOriginal",
+            "originLocation": "BottomCenterZ",
+            "centerLocation": "ObjectCenter",
+            "animations": [],
+            "isCastingShadow": true,
+            "isReceivingShadow": true,
+            "crossfadeDuration": 0
+          }
+        },
+        {
+          "assetStoreId": "",
+          "name": "Beholder",
+          "type": "Scene3D::Model3DObject",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "content": {
+            "width": 100,
+            "height": 100,
+            "depth": 100,
+            "rotationX": 90,
+            "rotationY": 0,
+            "rotationZ": 0,
+            "keepAspectRatio": false,
+            "modelResourceName": "beholder.glb",
+            "materialType": "KeepOriginal",
+            "originLocation": "BottomCenterZ",
+            "centerLocation": "ObjectCenter",
+            "animations": [],
+            "isCastingShadow": true,
+            "isReceivingShadow": true,
+            "crossfadeDuration": 0
+          }
+        },
+        {
+          "assetStoreId": "",
+          "name": "Angel",
+          "type": "Scene3D::Model3DObject",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Physics3D",
+              "type": "Physics3D::Physics3DBehavior",
+              "content": {
+                "object3D": "",
+                "bodyType": "Static",
+                "bullet": false,
+                "fixedRotation": false,
+                "shape": "Box",
+                "meshShapeResourceName": "",
+                "shapeOrientation": "Z",
+                "shapeDimensionA": 0,
+                "shapeDimensionB": 0,
+                "shapeDimensionC": 0,
+                "shapeOffsetX": 0,
+                "shapeOffsetY": 0,
+                "shapeOffsetZ": 0,
+                "massCenterOffsetX": 0,
+                "massCenterOffsetY": 0,
+                "massCenterOffsetZ": 0,
+                "massOverride": 0,
+                "density": 1,
+                "friction": 0.5,
+                "restitution": 0,
+                "linearDamping": 0.1,
+                "angularDamping": 0.1,
+                "gravityScale": 1,
+                "layers": 17,
+                "masks": 17
+              }
+            }
+          ],
+          "content": {
+            "width": 100,
+            "height": 100,
+            "depth": 100,
+            "rotationX": 90,
+            "rotationY": 0,
+            "rotationZ": 0,
+            "keepAspectRatio": false,
+            "modelResourceName": "angel.glb",
+            "materialType": "KeepOriginal",
+            "originLocation": "BottomCenterZ",
+            "centerLocation": "ObjectCenter",
+            "animations": [],
+            "isCastingShadow": true,
+            "isReceivingShadow": true,
+            "crossfadeDuration": 0
+          }
+        },
+        {
+          "assetStoreId": "",
           "name": "Sconce",
           "type": "Scene3D::Model3DObject",
           "updateIfNotVisible": false,
@@ -22750,6 +23080,18 @@
           },
           {
             "objectName": "Computer"
+          },
+          {
+            "objectName": "Pacman"
+          },
+          {
+            "objectName": "Gargoyle"
+          },
+          {
+            "objectName": "Beholder"
+          },
+          {
+            "objectName": "Angel"
           },
           {
             "objectName": "Sconce"
@@ -23150,6 +23492,13 @@
               ]
             }
           ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": "var dt = runtimeScene.getTimeManager().getElapsedTime() / 1000;\nif (!runtimeScene.__orbitTime) runtimeScene.__orbitTime = 0;\nruntimeScene.__orbitTime += dt;\nvar t = runtimeScene.__orbitTime;\nvar objs = runtimeScene.getObjects(\"Beholder\");\nif (objs.length > 0) {\n  var o = objs[0];\n  var angle = t * 0.13 * Math.PI * 2;\n  o.setX(2400 + 250 * Math.cos(angle) - o.getWidth() / 2);\n  o.setY(3100 + 250 * Math.sin(angle) - o.getHeight() / 2);\n  o.setZ(80 + 40 * Math.abs(Math.sin(t * 0.5 * Math.PI * 2)));\n  var deg = (angle * 180 / Math.PI);\n  o.setAngle(deg);\n}",
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": false
         },
         {
           "type": "BuiltinCommonInstructions::Standard",

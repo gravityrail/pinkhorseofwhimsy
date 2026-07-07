@@ -62,7 +62,7 @@ If you prefer to set up manually via the RunPod console:
 
 1. Create a GPU pod:
    - **GPU**: RTX 4090 (24GB)
-   - **Image**: `runpod/pytorch:1.0.3-cu1281-torch260-ubuntu2204`
+   - **Image**: `runpod/pytorch:0.7.0-cu1241-torch260-ubuntu2204`
    - **Container Disk**: 80GB
    - **Volume**: 50GB at `/runpod-volume`
    - **Expose HTTP Ports**: `8000`

@@ -49,7 +49,7 @@ def health():
     return jsonify({
         'status': 'ok',
         'gpu': torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'none',
-        'vram_gb': round(torch.cuda.get_device_properties(0).total_mem / 1e9, 1) if torch.cuda.is_available() else 0,
+        'vram_gb': round(torch.cuda.get_device_properties(0).total_memory / 1e9, 1) if torch.cuda.is_available() else 0,
     })
 
 
@@ -76,7 +76,10 @@ def generate():
 
         # Run pipeline
         pipe = get_pipeline()
-        mesh = pipe.run(image, resolution=resolution)[0]
+        # Map resolution to max_num_tokens
+        res_to_tokens = {512: 12288, 1024: 49152, 1536: 110592}
+        max_tokens = res_to_tokens.get(resolution, 49152)
+        mesh = pipe.run(image, max_num_tokens=max_tokens)[0]
 
         # Simplify mesh
         max_faces = min(faces, 16777216)  # nvdiffrast limit
@@ -102,7 +105,7 @@ def generate():
 
         # Save to temp file and send
         with tempfile.NamedTemporaryFile(suffix='.glb', delete=False) as f:
-            glb.export(f.name, extension_webp=True)
+            glb.export(f.name, extension_webp=False)
             tmp_path = f.name
 
         print(f"Done! GLB exported ({os.path.getsize(tmp_path)} bytes)")

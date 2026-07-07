@@ -162,6 +162,52 @@
       "materialType": "KeepOriginal",
       "stackable": true,
       "castShadow": true
+    },
+    "pacman": {
+      "model": "pacman.glb",
+      "collision": "cylinder",
+      "radius": 40,
+      "height": 60,
+      "materialType": "KeepOriginal",
+      "castShadow": true,
+      "yUpModel": true
+    },
+    "gargoyle": {
+      "model": "gargoyle.glb",
+      "collision": "cylinder",
+      "radius": 35,
+      "height": 90,
+      "materialType": "KeepOriginal",
+      "castShadow": true,
+      "yUpModel": true
+    },
+    "beholder": {
+      "model": "beholder.glb",
+      "collision": "cylinder",
+      "radius": 50,
+      "height": 100,
+      "materialType": "KeepOriginal",
+      "castShadow": true,
+      "yUpModel": true,
+      "light": { "color": "#ff2222", "intensity": 0.5, "radius": 350 },
+      "orbit": {
+        "centerGx": 12.0, "centerGy": 15.5,
+        "radius": 250,
+        "speed": 0.13,
+        "bobHeight": 40,
+        "bobSpeed": 0.5,
+        "baseZ": 80
+      }
+    },
+    "angel": {
+      "model": "angel.glb",
+      "collision": "cylinder",
+      "radius": 60,
+      "height": 120,
+      "materialType": "KeepOriginal",
+      "castShadow": true,
+      "yUpModel": true,
+      "light": { "color": "#ffffaa", "intensity": 1.0, "radius": 500 }
     }
   },
 
@@ -182,8 +228,8 @@
     "#....#..........##..#....#",
     "#.####..#......#.####..#.#",
     "#.......#TTTTTT#.........#",
-    "#.####..#TTTTTT#..####...#",
-    "#.#..#..#TTTTTT#..#..#...#",
+    "#.####..#TTTTTT#..########",
+    "#.#..#..#TTTTTT#..#......#",
     "#.#..#...TTTTTT...#..#...#",
     "#.####..#TTTTTT#..####...#",
     "#.......########.........#",
@@ -246,7 +292,13 @@
 
     { "prop": "barrel", "gx": 5.5, "gy": 19.3 },
     { "prop": "crate", "gx": 19.5, "gy": 19.5, "stack": 1 },
-    { "prop": "barrel", "gx": 20.3, "gy": 19.3 }
+    { "prop": "barrel", "gx": 20.3, "gy": 19.3 },
+
+    { "prop": "pacman", "gx": 12.5, "gy": 3.5 },
+    { "prop": "gargoyle", "gx": 7.5, "gy": 13.5 },
+    { "prop": "beholder", "gx": 12.5, "gy": 16.5 },
+
+    { "prop": "angel", "gx": 12.5, "gy": 4.5 }
   ],
 
   "spawn": { "gx": 1.5, "gy": 1.5, "angle": 90 },

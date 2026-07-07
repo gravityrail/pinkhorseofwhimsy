@@ -381,7 +381,7 @@ function makeModel3DObject(name, glbFile, materialType = 'KeepOriginal', opts = 
     behaviors: opts.behaviors || [],
     content: {
       width: 100, height: 100, depth: 100,
-      rotationX: 0, rotationY: 0, rotationZ: 0,
+      rotationX: opts.rotationX || 0, rotationY: opts.rotationY || 0, rotationZ: opts.rotationZ || 0,
       keepAspectRatio: false,
       modelResourceName: glbFile,
       materialType,
@@ -552,6 +552,19 @@ function generateProps(level) {
         x: p.gx * cs - 45, y: p.gy * cs - 30, z: floorH,
         width: 90, height: 60, depth: 120,
       });
+    } else {
+      // Generic prop from catalog — use collision dimensions from level.json
+      const def = level.props?.[p.prop];
+      if (def) {
+        const w = def.width || def.radius * 2 || 80;
+        const d = def.depth || def.radius * 2 || 80;
+        const h = def.height || 80;
+        props.push({
+          type: p.prop, id: `${p.prop}-${uid++}`,
+          x: p.gx * cs - w / 2, y: p.gy * cs - d / 2, z: floorH,
+          width: w, height: d, depth: h,
+        });
+      }
     }
   }
 
@@ -700,6 +713,54 @@ function generateEvents(level) {
       { type: { value: 'Physics3D::PhysicsCharacter3D::SimulateJumpKey' }, parameters: ['Player', 'PhysicsCharacter3D'] },
     ],
   });
+
+  // Orbiting props (e.g., beholder circling a room)
+  if (level.props) {
+    const orbitProps = [];
+    for (const [propName, def] of Object.entries(level.props)) {
+      if (def.orbit) orbitProps.push({ name: capitalize(propName), orbit: def.orbit });
+    }
+
+    if (orbitProps.length > 0) {
+      // Build JS code to orbit all props with bobbing
+      const jsLines = [];
+      jsLines.push('var dt = runtimeScene.getTimeManager().getElapsedTime() / 1000;');
+      jsLines.push('if (!runtimeScene.__orbitTime) runtimeScene.__orbitTime = 0;');
+      jsLines.push('runtimeScene.__orbitTime += dt;');
+      jsLines.push('var t = runtimeScene.__orbitTime;');
+
+      for (const { name, orbit } of orbitProps) {
+        const cx = orbit.centerGx * cs;
+        const cy = orbit.centerGy * cs;
+        const r = orbit.radius;
+        const speed = orbit.speed;
+        const bobH = orbit.bobHeight;
+        const bobSpeed = orbit.bobSpeed;
+        const baseZ = orbit.baseZ || 0;
+
+        jsLines.push(`var objs = runtimeScene.getObjects("${name}");`);
+        jsLines.push(`if (objs.length > 0) {`);
+        jsLines.push(`  var o = objs[0];`);
+        jsLines.push(`  var angle = t * ${speed} * Math.PI * 2;`);
+        jsLines.push(`  o.setX(${cx} + ${r} * Math.cos(angle) - o.getWidth() / 2);`);
+        jsLines.push(`  o.setY(${cy} + ${r} * Math.sin(angle) - o.getHeight() / 2);`);
+        jsLines.push(`  o.setZ(${baseZ} + ${bobH} * Math.abs(Math.sin(t * ${bobSpeed} * Math.PI * 2)));`);
+        // Face direction of travel: tangent to circle
+        // Tangent of CCW orbit = orbit angle + 90° in math, but GDevelop angles are CW
+        jsLines.push(`  var deg = (angle * 180 / Math.PI);`);
+        jsLines.push(`  o.setAngle(deg);`);
+        jsLines.push(`}`);
+      }
+
+      events.push({
+        type: 'BuiltinCommonInstructions::JsCode',
+        inlineCode: jsLines.join('\n'),
+        parameterObjects: '',
+        useStrict: true,
+        eventsSheetExpanded: false,
+      });
+    }
+  }
 
   // All lights are steady — no flickering (point lights from level areas provide ambient glow)
 
@@ -907,6 +968,18 @@ function compile(level) {
     behaviors: [makeStaticPhysicsBody()],
     animations: [{ name: 'blink', source: 'blink', loop: true }],
   });
+  const pacmanObj = makeModel3DObject('Pacman', 'pacman.glb', 'KeepOriginal', {
+    behaviors: [makeStaticPhysicsBody()], rotationX: 90,
+  });
+  const gargoyleObj = makeModel3DObject('Gargoyle', 'gargoyle.glb', 'KeepOriginal', {
+    behaviors: [makeStaticPhysicsBody()], rotationX: 90,
+  });
+  const beholderObj = makeModel3DObject('Beholder', 'beholder.glb', 'KeepOriginal', {
+    rotationX: 90,
+  });
+  const angelObj = makeModel3DObject('Angel', 'angel.glb', 'KeepOriginal', {
+    behaviors: [makeStaticPhysicsBody()], rotationX: 90,
+  });
   // Light fixtures: emissive materials baked into GLB
   const sconceObj = makeEmissiveModel3DObject('Sconce', 'sconce.glb');
   const ceilingLightObj = makeEmissiveModel3DObject('CeilingLight', 'ceiling_light.glb');
@@ -929,7 +1002,7 @@ function compile(level) {
 
   const allObjects = [
     ...objectDefs.values(), playerObj, hudObj, gemObj,
-    barrelObj, crateObj, computerObj,
+    barrelObj, crateObj, computerObj, pacmanObj, gargoyleObj, beholderObj, angelObj,
     sconceObj, ceilingLightObj,
     ...minimapObjects,
   ];
@@ -1084,7 +1157,7 @@ function compile(level) {
   }
 
   // 3D model resources (GLB files for props)
-  const modelFiles = ['barrel.glb', 'crate.glb', 'computer.glb', 'sconce.glb', 'ceiling_light.glb'];
+  const modelFiles = ['barrel.glb', 'crate.glb', 'computer.glb', 'sconce.glb', 'ceiling_light.glb', 'pacman.glb', 'gargoyle.glb', 'beholder.glb', 'angel.glb'];
   for (const file of modelFiles) {
     resources.push({
       file, kind: 'model3D', metadata: '', name: file,

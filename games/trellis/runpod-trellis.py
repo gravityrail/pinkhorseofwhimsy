@@ -87,8 +87,16 @@ else
 
     cd $WORKDIR
 
-    # Pre-download model weights
-    python3 -c "from trellis2.pipelines import Trellis2ImageTo3DPipeline; Trellis2ImageTo3DPipeline.from_pretrained('microsoft/TRELLIS.2-4B')"
+    # Pre-download model weights (HF_TOKEN is set via environment)
+    python3 -c "
+from huggingface_hub import login
+import os
+token = os.environ.get('HF_TOKEN', '')
+if token: login(token=token)
+from trellis2.pipelines import Trellis2ImageTo3DPipeline
+Trellis2ImageTo3DPipeline.from_pretrained('microsoft/TRELLIS.2-4B')
+print('Model weights downloaded')
+"
 
     touch /workspace/.trellis-ready
     echo "=== Setup complete ==="
@@ -202,7 +210,7 @@ def cmd_start(args):
             return
         else:
             print(f"Pod exists but status={status}. Resuming...")
-            runpod.resume_pod(pod['id'])
+            runpod.resume_pod(pod['id'], gpu_count=pod.get('gpuCount', 1))
             pod_id = pod['id']
     else:
         # Load SSH public key if available

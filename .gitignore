@@ -16,3 +16,6 @@ games/gdexport/.cache/
 
 # RunPod state (contains pod IDs, not secrets but session-specific)
 games/trellis/.runpod-state.json
+
+# Claude Code local session settings
+.claude/settings.local.json

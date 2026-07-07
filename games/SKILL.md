@@ -309,12 +309,23 @@ See `games/3d/maze-explorer/generate-props.mjs`. Key notes:
 - GLB Z axis maps to game vertical (up)
 - Scale animations on child nodes simulate blinking/toggling
 
-**AI-generated (detailed assets):** Use TRELLIS.2 (image → 3D with PBR textures).
-See `games/trellis/SETUP.md` for RunPod setup. Quick usage:
+**AI-generated (detailed assets):** Full pipeline: Gemini image gen → TRELLIS.2 (image → 3D with PBR textures).
+See `games/trellis/SETUP.md` for RunPod setup. The `/generate-prop` skill automates this.
+
+Quick usage:
 ```bash
 cd games/trellis
-python3 runpod-trellis.py generate --image statue.png --output ../3d/maze-explorer/statue.glb
+# Full pipeline: text → image → GLB
+node generate-prop.mjs --prompt "a rusty iron barrel" --output barrel.glb --image-output barrel.png
+# Or from existing image:
+node generate-prop.mjs --image barrel.png --output barrel.glb
+# Or just the TRELLIS.2 step:
+python3 runpod-trellis.py generate --image barrel.png --output barrel.glb
 ```
+
+Requirements: `GOOGLE_GEMINI_API_KEY`, `HF_TOKEN`, `RUNPOD_API_KEY` in `.env`.
+Gemini model: `gemini-3.1-flash-image-preview`. TRELLIS.2 runs on RunPod RTX 4090.
+Note: `transformers<5` required (v5+ breaks RMBG-2.0 background removal model).
 
 ### GDevelop 3D Coordinate Mapping
 
@@ -355,6 +366,7 @@ games/
       *.glb                 # 3D prop models (barrel, crate, computer, sconce, etc.)
       *.png                 # Textures (wall, floor, ceiling, minimap)
   trellis/
+    generate-prop.mjs       # Full pipeline: text prompt → Gemini image → TRELLIS.2 GLB
     runpod-trellis.py       # RunPod pod manager (start/setup/generate/stop)
     generate-model.mjs      # Image-to-3D via HuggingFace or RunPod
     server.py               # Flask API server (runs on the pod)
