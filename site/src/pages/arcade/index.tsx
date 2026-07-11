@@ -19,6 +19,14 @@ interface GameCard {
 // and output to site/static/arcade/games/<slug>/
 const GAMES: GameCard[] = [
   {
+    title: 'Bean Quiz',
+    author: 'Pink Horse of Whimsy',
+    description: 'A bouncy quiz show for 1-5 players, hosted by The Bean (a mohawked chihuahua-terrier) and her sly sidekick Tiger the cat — with real voices! Get a silly name like "Goopy Pine", pick from 12 topics (Minecraft, rockets, Lego, robots, trick math, jokes...), and tap your answers. Perfect for long car trips.',
+    type: '2D',
+    slug: 'bean-quiz',
+    href: '/bean-quiz/',
+  },
+  {
     title: 'Worm',
     author: 'Pink Horse of Whimsy',
     description: 'Burrow through the earth as a 6-segment worm, gobbling treasure across an endless tunnelling world. Dodge the giant birds! Touch-friendly — great on a tablet or car display.',
