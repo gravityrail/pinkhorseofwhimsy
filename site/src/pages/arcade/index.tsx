@@ -58,6 +58,14 @@ const GAMES: GameCard[] = [
     href: '/indigokart/',
   },
   {
+    title: 'Indigo Kart v2',
+    author: 'Pink Horse of Whimsy',
+    description: 'A ground-up rebuild of the kart racer in Three.js — six circuits spanning a sunset island, a neon night city, a rainbow road in orbit above a space station, present-day and 1892 Grass Valley, and a kangaroo-lined outback highway. Seven racers, turbo and repair pickups, sprung four-wheel physics, and a synthesized soundtrack per track. Touch and gamepad friendly.',
+    type: '3D',
+    slug: 'indigokart2',
+    href: '/indigokart2/',
+  },
+  {
     title: 'Bean Simulator',
     author: 'Pink Horse of Whimsy',
     description: 'A first-person romp as "Little Bean", a small fluffy dog exploring a cozy house. Built with Babylon.js — works in the browser and on WebXR headsets.',
@@ -80,6 +88,14 @@ const GAMES: GameCard[] = [
     type: '3D',
     slug: 'vibekart',
     href: '/vibekart/',
+  },
+  {
+    title: 'Star Bean',
+    author: 'Pink Horse of Whimsy',
+    description: 'A cinematic 3D rail shooter — a Star Fox–style adventure starring Space Bean, defender of the Galactic Bean-O-Phone. Blast through enemy waves and boss fights across three missions with cutscenes, voice-over and bloom-lit space combat. Drag or point to steer, tap or press Space to fire.',
+    type: '3D',
+    slug: 'star-bean',
+    href: '/star-bean/',
   },
   {
     title: 'Coin Collector',

@@ -23,8 +23,11 @@ that also serves standalone HTML5 games as static files.
 | `site/static/` | Served at the web root. Anything here is published as-is. |
 | `site/static/worm/` | **Worm** — a single self-contained `index.html` (canvas + Web Audio, no build step). |
 | `site/static/arcade/games/<slug>/` | GDevelop game builds (generated — see below). |
+| `site/static/<slug>/` | Committed static builds of the standalone games (e.g. `indigokart2/`, `star-bean/`, `pinball/`, `vibekart/`). Served as-is. |
 | `site/static/CNAME` | Custom-domain marker for GitHub Pages (`pinkhorseofwhimsy.com`). Keep it. |
 | `games/` | Source + build pipeline (`build-games.mjs`) for the GDevelop example games. |
+| `games/indigo-kart-v2/` | Source for **Indigo Kart v2** — a Vite + Three.js kart racer. `npm run build` → copy to `site/static/indigokart2/`. |
+| `games/star-bean/` | Source for **Star Bean** — a Vite + React + Three.js rail shooter. `npm run build` → copy to `site/static/star-bean/`. |
 | `.github/workflows/deploy.yml` | CI: builds games + site and deploys to GitHub Pages. |
 
 ## Dev / build
@@ -63,6 +66,25 @@ npm run build    # production build -> site/build/  (CI uses this)
    `site/static/arcade/games/<slug>/`.
 2. Add a card to `GAMES` with just `slug: '<slug>'` (no `href`); the play URL defaults to
    `/arcade/games/<slug>/`.
+
+**npm-built game (Vite / Three.js, like Indigo Kart v2 & Star Bean)** — source lives in the
+repo; the built output is committed:
+1. Put the game's source under `games/<name>/` as a self-contained npm project. Set its
+   production base to the hosted sub-path — e.g. `"build": "vite build --base=/<slug>/"` —
+   so bundled asset URLs resolve correctly. (Any runtime asset paths in the game code
+   should use `import.meta.env.BASE_URL` so they follow the base too.)
+2. Build and copy the output into `site/static/<slug>/`:
+   ```bash
+   cd games/<name> && npm install && npm run build
+   rm -rf ../../site/static/<slug> && cp -R dist/. ../../site/static/<slug>/
+   ```
+   Commit the refreshed `site/static/<slug>/` — CI does **not** build these (it only builds
+   the GDevelop games), so the committed build is what ships. Each game's `README.md` has
+   its exact publish steps.
+3. Add a card to `GAMES` with `href: '/<slug>/'`.
+4. For gamepad support, inject `/arcade/controls.js` (see Controls below). Because Vite
+   rewrites root-absolute paths in `index.html` under a non-`/` base, inject the shim from a
+   small runtime `<script type="module">` rather than a static `<script src>` tag.
 
 ## Controls (touch + gamepad)
 
