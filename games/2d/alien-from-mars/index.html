@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>The Alien from Mars</title>
+  <title>The Alien from Mars — Pink Horse Arcade</title>
   <style>
     html, body {
       margin: 0; padding: 0; width: 100%; height: 100%;
@@ -20,30 +20,7 @@
 </head>
 <body>
   <canvas id="game" width="480" height="270"></canvas>
-
-  <script>
-    window.ARCADE_SPLASH = {
-      image: '/arcade/splashes/alien-from-mars.png',
-      title: 'THE ALIEN FROM MARS',
-      subtitle: 'TAP / PRESS START',
-      credit: 'Pink Horse Arcade',
-      music: '/arcade/sfx/alien-music.mp3',
-      musicVolume: 0.4,
-    };
-  </script>
-  <script src="/arcade/splash.js"></script>
-
+  <!-- Splash + controls injected by games/build-games.mjs -->
   <script type="module" src="./js/main.js"></script>
-
-  <script>window.ARCADE_CONTROLS = {
-    dpad: { up:'ArrowUp', down:'ArrowDown', left:'ArrowLeft', right:'ArrowRight' },
-    buttons: [
-      { label:'⚡', keys:' ' },
-      { label:'🛸', keys:'a' },
-    ],
-    start: 'Enter',
-    showOnDesktop: false,
-  };</script>
-  <script src="/arcade/controls.js" defer></script>
 </body>
 </html>

@@ -18,7 +18,7 @@ const w = window as Window & {
 };
 
 w.ARCADE_SPLASH = {
-  image: "/arcade/splashes/star-bean.png",
+  image: "/arcade/splashes/space-bean.png",
   title: "SPACE BEAN",
   subtitle: "TAP / PRESS START",
   credit: "PINK HORSE ARCADE",
@@ -26,8 +26,6 @@ w.ARCADE_SPLASH = {
 w.ARCADE_CONTROLS = {
   disableTouch: true,
   buttons: [
-    { label: "Fire", keys: " " },
-    { label: "Bomb", keys: "Shift" },
     { label: "Fire", keys: " " },
     { label: "Bomb", keys: "Shift" },
   ],

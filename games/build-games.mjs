@@ -236,12 +236,12 @@ async function injectArcadeShell(outDir, gameName) {
   if (!existsSync(indexPath)) return;
   let html = await readFile(indexPath, 'utf-8');
 
-  // Strip prior injections so rebuilds stay clean.
+  // Strip prior injections so rebuilds stay clean (allow whitespace inside <script>).
   html = html
-    .replace(/\n?<script>window\.ARCADE_CONTROLS[\s\S]*?<\/script>\n?/g, '\n')
-    .replace(/\n?<script>window\.ARCADE_SPLASH[\s\S]*?<\/script>\n?/g, '\n')
-    .replace(/\n?<script src="\/arcade\/controls\.js"[^>]*><\/script>\n?/g, '\n')
-    .replace(/\n?<script src="\/arcade\/splash\.js"[^>]*><\/script>\n?/g, '\n');
+    .replace(/\n?<script[^>]*>\s*window\.ARCADE_CONTROLS[\s\S]*?<\/script>\n?/g, '\n')
+    .replace(/\n?<script[^>]*>\s*window\.ARCADE_SPLASH[\s\S]*?<\/script>\n?/g, '\n')
+    .replace(/\n?<script[^>]*src=["']\/arcade\/controls\.js["'][^>]*><\/script>\n?/g, '\n')
+    .replace(/\n?<script[^>]*src=["']\/arcade\/splash\.js["'][^>]*><\/script>\n?/g, '\n');
 
   const cfg = ARCADE_SHELL[gameName] || {};
   const controls = cfg.controls || {};

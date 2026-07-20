@@ -516,28 +516,42 @@ if (!runtimeScene.__fps) {
     musicStarted: false,
     doorOpen: {},
   };
-  // Bind enemy instances (by type, in scene order) to spawn defs of that type
-  var byType = {};
+  // Bind each enemy instance to the nearest unused spawn def of the same type
+  var usedDef = {};
+  var typeNames = {};
   for (var ei = 0; ei < runtimeScene.__fps.enemies.length; ei++) {
-    var def = runtimeScene.__fps.enemies[ei];
-    if (!byType[def.type]) byType[def.type] = [];
-    byType[def.type].push(def);
+    typeNames[runtimeScene.__fps.enemies[ei].type] = true;
   }
-  for (var tName in byType) {
-    if (!byType.hasOwnProperty(tName)) continue;
+  var bindIdx = 0;
+  for (var tName in typeNames) {
+    if (!typeNames.hasOwnProperty(tName)) continue;
     var objs = runtimeScene.getObjects(tName) || [];
-    var defs = byType[tName];
-    for (var j = 0; j < objs.length && j < defs.length; j++) {
-      var id = tName + '_' + j;
+    for (var j = 0; j < objs.length; j++) {
+      var ox = objs[j].getCenterX ? objs[j].getCenterX() : (objs[j].getX() + objs[j].getWidth() / 2);
+      var oy = objs[j].getCenterY ? objs[j].getCenterY() : (objs[j].getY() + objs[j].getHeight() / 2);
+      var bestDi = -1, bestD = 1e15;
+      for (var di = 0; di < runtimeScene.__fps.enemies.length; di++) {
+        if (usedDef[di]) continue;
+        var d0 = runtimeScene.__fps.enemies[di];
+        if (d0.type !== tName) continue;
+        var ddx = d0.gx * ${cs} - ox;
+        var ddy = d0.gy * ${cs} - oy;
+        var dd = ddx * ddx + ddy * ddy;
+        if (dd < bestD) { bestD = dd; bestDi = di; }
+      }
+      if (bestDi < 0) continue;
+      usedDef[bestDi] = true;
+      var def = runtimeScene.__fps.enemies[bestDi];
+      var id = tName + '_' + (bindIdx++);
       objs[j].__enemyId = id;
       runtimeScene.__fps.enemyState[id] = {
-        def: defs[j],
-        hp: defs[j].hp,
+        def: def,
+        hp: def.hp,
         alive: true,
         obj: objs[j],
-        cx: defs[j].gx * ${cs},
-        cy: defs[j].gy * ${cs},
-        wz: defs[j].baseZ || 0,
+        cx: def.gx * ${cs},
+        cy: def.gy * ${cs},
+        wz: def.baseZ || 0,
         atkCd: 0,
         flash: 0,
         wanderT: Math.random() * 3,

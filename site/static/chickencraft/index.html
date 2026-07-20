@@ -46,7 +46,7 @@
     credit: 'Pink Horse of Whimsy'
   };
   window.ARCADE_CONTROLS = {
-    dpad: { up: 'w', down: 's', left: 'a', right: 'd' },
+    dpad: { up: ['w','ArrowUp'], down: ['s','ArrowDown'], left: ['a','ArrowLeft'], right: ['d','ArrowRight'] },
     buttons: [
       { label: 'Jump', keys: ' ' },
       { label: 'Mine', keys: 'e' },
@@ -57,5 +57,6 @@
 </script>
 <script src="/arcade/splash.js"></script>
 <script src="/arcade/controls.js" defer></script>
+
 </body>
 </html>

@@ -290,6 +290,40 @@ Pickups placed in the level.
 ]
 ```
 
+### enemies
+
+Roaming combatants (Model3D, no static physics — driven by combat JsCode).
+
+```jsonc
+[
+  { "type": "beholder", "gx": 12.5, "gy": 15.5,
+    "hp": 120, "speed": 45, "aggro": 700, "damage": 18,
+    "meleeRange": 90, "float": true, "boss": true, "roar": true },
+  { "type": "gargoyle", "gx": 7.5, "gy": 13.5,
+    "hp": 45, "speed": 75, "aggro": 550, "damage": 12 },
+  { "type": "pacman", "gx": 12.5, "gy": 3.5,
+    "hp": 30, "speed": 95, "aggro": 450, "damage": 8 }
+]
+```
+
+- `type`: `beholder` | `gargoyle` | `pacman` (must match a Model3D object / GLB)
+- `hp`, `speed`, `aggro`, `damage`, `meleeRange`: combat tuning
+- `float` / `roar` / `boss`: beholder juice flags
+
+### doors
+
+Locked wall slabs. Player must hold a key and walk near the door to open it.
+
+```jsonc
+[
+  { "id": "treasure-gate", "gx": 12.5, "gy": 12.95,
+    "orientation": "ew", "requiresKey": true,
+    "width": 200, "thickness": 28, "height": 220 }
+]
+```
+
+- `orientation`: `ew` spans X (blocks north–south traffic); `ns` spans Y
+
 ## Compilation Process
 
 The level compiler (`compile-level.mjs`) transforms the level JSON into
