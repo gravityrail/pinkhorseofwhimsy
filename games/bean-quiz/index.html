@@ -761,32 +761,58 @@
     nextTurn();
   }
 
-  /** Swap full-screen stage art for the chosen topic (assets/bg/<id>.png). */
-  function setTopicBg(t) {
+  /**
+   * Stage backdrop helpers.
+   * Resolution order for a question:
+   *   1. q.bg  → assets/bg/<q.bg>.png   (optional explicit id)
+   *   2. assets/bg/q_<questionId>.png   (question-specific art if present)
+   *   3. assets/bg/<topicId>.png        (topic default)
+   *   4. color gradient fallback
+   */
+  function bgUrl(id) { return 'assets/bg/' + id + '.png'; }
+  function applyBgUrl(url, fallbackColor) {
     const el = $('topic-bg');
-    if (!t || !t.id) {
-      clearTopicBg();
-      return;
-    }
-    const url = 'assets/bg/' + t.id + '.png';
-    // Preload then fade in so we don't flash empty purple
     const img = new Image();
     img.onload = () => {
       el.style.backgroundImage = 'url("' + url + '")';
-      // retrigger scale ease
       el.classList.remove('on');
       void el.offsetWidth;
       el.classList.add('on');
       document.body.classList.add('has-topic');
     };
     img.onerror = () => {
-      // Fallback: tinted gradient using topic color
-      el.style.backgroundImage =
-        'radial-gradient(120% 90% at 50% 0%, ' + (t.color || '#7c3aed') + 'cc 0%, #1a0a2e 70%)';
-      el.classList.add('on');
-      document.body.classList.add('has-topic');
+      if (fallbackColor) {
+        el.style.backgroundImage =
+          'radial-gradient(120% 90% at 50% 0%, ' + fallbackColor + 'cc 0%, #1a0a2e 70%)';
+        el.classList.add('on');
+        document.body.classList.add('has-topic');
+      }
     };
     img.src = url;
+  }
+  function setTopicBg(t) {
+    if (!t || !t.id) { clearTopicBg(); return; }
+    applyBgUrl(bgUrl(t.id), t.color || '#7c3aed');
+  }
+  /** Prefer a question-specific plate when we have one; else keep/restore topic art. */
+  function setQuestionBg(q, topic) {
+    const candidates = [];
+    if (q && q.bg) candidates.push(String(q.bg).replace(/\.png$/, ''));
+    if (q && q.id) candidates.push('q_' + q.id);
+    // Try first candidate; on error chain is handled by probing
+    function tryNext(i) {
+      if (i >= candidates.length) {
+        if (topic) setTopicBg(topic);
+        return;
+      }
+      const id = candidates[i];
+      const url = bgUrl(id);
+      const img = new Image();
+      img.onload = () => applyBgUrl(url, topic && topic.color);
+      img.onerror = () => tryNext(i + 1);
+      img.src = url;
+    }
+    tryNext(0);
   }
   function clearTopicBg() {
     const el = $('topic-bg');
@@ -795,6 +821,45 @@
     setTimeout(() => {
       if (!document.body.classList.contains('has-topic')) el.style.backgroundImage = '';
     }, 600);
+  }
+
+  // ── Hurry-up banter while the player stalls ────────────────────────────
+  let hurryTimers = [];
+  let hurryUsed = new Set();
+  function clearHurry() {
+    hurryTimers.forEach(clearTimeout);
+    hurryTimers = [];
+  }
+  function startHurryWatch() {
+    clearHurry();
+    hurryUsed = new Set();
+    // tier 1 ~8s, tier 2 ~16s, tier 3 ~24s, then keep roasting every ~10s
+    const schedule = [
+      { after: 8000, tier: 1 },
+      { after: 16000, tier: 2 },
+      { after: 24000, tier: 3 },
+      { after: 34000, tier: 3 },
+      { after: 44000, tier: 3 },
+      { after: 56000, tier: 3 },
+    ];
+    schedule.forEach(({ after, tier }) => {
+      hurryTimers.push(setTimeout(() => {
+        if (!G.answerable) return; // already answered / locked
+        sayHurry(tier);
+      }, after));
+    });
+  }
+  function sayHurry(tier) {
+    const pool = (DATA.lines.hurry || []).filter(l => l.tier === tier && !hurryUsed.has(l.id));
+    const fallback = (DATA.lines.hurry || []).filter(l => l.tier === tier);
+    const line = pool.length ? rnd(pool) : (fallback.length ? rnd(fallback) : null);
+    if (!line) return;
+    hurryUsed.add(line.id);
+    // Don't skip the room — queue behind whatever is speaking; bubble shows snark.
+    const mood = line.speaker === 'tiger' ? 'smug' : 'think';
+    say(line.id, line.text, line.speaker, mood);
+    if (tier >= 2) propRain(tier >= 3 ? ['⏰', '💀', '🐈', '🦴'] : ['⏰', '💤', '🧶'], 8);
+    if (tier >= 3) stingBanner(rnd(['ANY DAY NOW', 'HELLO??', 'PICK ONE', 'BRAIN.exe']));
   }
 
   function pickQuestion(topic) {
@@ -839,6 +904,8 @@
 
   function askQuestion(p) {
     const q = G.q;
+    clearHurry();
+    setQuestionBg(q, G.topic);
     buildHud();
     $('qcard').classList.toggle('golden', G.golden);
     $('qtext').textContent = q.q;
@@ -860,8 +927,14 @@
       say(g.id, g.text, g.speaker, g.speaker === 'tiger' ? 'smug' : 'cheer');
     }
     if (q.trick) sayLine('trickWarn', 'think');
-    say('q_' + q.id, q.q, 'bean', 'think').then(() => { G.answerable = true; });
-    setTimeout(() => { G.answerable = true; }, 2500); // don't block impatient tappers for long
+    const unlock = () => {
+      if (!G.answerable) {
+        G.answerable = true;
+        startHurryWatch();
+      }
+    };
+    say('q_' + q.id, q.q, 'bean', 'think').then(unlock);
+    setTimeout(unlock, 2500); // don't block impatient tappers for long
   }
 
   $('read-btn').addEventListener('pointerdown', e => {
@@ -883,6 +956,7 @@
   function answer(btn, a, answers) {
     if (!G.answerable) return;
     G.answerable = false;
+    clearHurry();
     skipVoice();
     const p = currentPlayer();
     const pts = G.golden ? 200 : 100;
@@ -916,7 +990,10 @@
 
   $('next-btn').addEventListener('pointerdown', () => {
     skipVoice();
+    clearHurry();
     sfx.stingNext();
+    // Restore topic plate between questions (question art was a one-shot gag)
+    if (G.topic) setTopicBg(G.topic);
     G.turn++;
     if (G.turn >= G.players.length) endRound();
     else nextTurn();

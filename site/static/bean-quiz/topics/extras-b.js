@@ -32,7 +32,7 @@
       { id: 'jok_x9', q: "What kind of music do mummies love?", a: ["Wrap music", "Rock and roll bandages", "Tomb tunes", "Boo-gie woogie"], correct: 0, fact: "WRAP music! They know all the ancient hits." },
       { id: 'jok_x10', q: "Why do cows wear bells?", a: ["Because their horns do not work", "To ring for dinner", "So farmers can find the dance floor", "They like heavy metal"], correct: 0, fact: "Because their HORNS don't work! Honk honk. I mean... moo." },
       { id: 'jok_x11', q: "The more you take, the more you leave behind. What am I?", a: ["Footsteps", "Cookies", "Naps", "Homework"], correct: 0, fact: "Footsteps! The Bean leaves muddy ones all over the couch." },
-      { id: 'jok_x12', q: "What do you call a giant pile of cats?", a: ["A meow-ntain", "A purr-amid", "A fur-nado", "A kitty committee"], correct: 0, fact: "A meow-NTAIN! Tiger dreams of climbing one someday." },
+      { id: 'jok_x12', q: "What do you call a giant pile of cats?", a: ["A meow-ntain", "A purr-amid", "A fur-nado", "A kitty committee"], correct: 0, fact: "A meow-NTAIN! Tiger dreams of climbing one someday.", bg: "q_jok_x12" },
     ]},
 
     { extend: 'whoami', questions: [

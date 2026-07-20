@@ -133,6 +133,28 @@
         { id: 'sting_1', speaker: 'bean', text: "[excited] Next up!" },
         { id: 'sting_2', speaker: 'tiger', text: "[smug] Moving on." },
       ],
+      // Escalating "hurry up" banter while a player stares at the answers.
+      // tier 1 = gentle nudge, 2 = snark, 3 = unhinged absurdist threat-comedy.
+      hurry: [
+        { id: 'hurry_1a', speaker: 'bean',  tier: 1, text: "[eagerly] Anytime now! My tail is doing the suspense wiggle!" },
+        { id: 'hurry_1b', speaker: 'tiger', tier: 1, text: "[yawns] Take your time. I've only got nine lives and you've used three of mine already." },
+        { id: 'hurry_1c', speaker: 'bean',  tier: 1, text: "[whispers] Psst. The answers are the colorful buttons. You're welcome." },
+        { id: 'hurry_1d', speaker: 'tiger', tier: 1, text: "[deadpan] Still thinking? Bold strategy. Cowards choose quickly." },
+        { id: 'hurry_2a', speaker: 'tiger', tier: 2, text: "[sarcastic] If I took this long to respond, you'd probably have me put down." },
+        { id: 'hurry_2b', speaker: 'bean',  tier: 2, text: "[gasps] Should I call nine-one-one? I think this player might be having a seizure." },
+        { id: 'hurry_2c', speaker: 'tiger', tier: 2, text: "[smug] If it helps you answer more quickly, I can use your shins to sharpen my claws." },
+        { id: 'hurry_2d', speaker: 'bean',  tier: 2, text: "[worried] I've seen squirrels make faster life choices. And squirrels are chaos gremlins!" },
+        { id: 'hurry_2e', speaker: 'tiger', tier: 2, text: "[chuckles] At this rate the correct answer will retire and move to Florida." },
+        { id: 'hurry_2f', speaker: 'bean',  tier: 2, text: "[encouraging] It's okay to guess! I once guessed a shoe was food. Commitment!" },
+        { id: 'hurry_3a', speaker: 'tiger', tier: 3, text: "[sinister] I'm drafting your eulogy. Cause of death: overthinking multiple choice." },
+        { id: 'hurry_3b', speaker: 'bean',  tier: 3, text: "[dramatic] BREAKING NEWS: local brain has left the chat. Send snacks and a helicopter." },
+        { id: 'hurry_3c', speaker: 'tiger', tier: 3, text: "[deadpan] I've knocked three invisible vases off the table in the time you've been staring." },
+        { id: 'hurry_3d', speaker: 'bean',  tier: 3, text: "[laughs] Okay I'm going to start chewing the furniture for emotional support!" },
+        { id: 'hurry_3e', speaker: 'tiger', tier: 3, text: "[whispers] Pick something. Anything. I will accept interpretive dance at this point." },
+        { id: 'hurry_3f', speaker: 'bean',  tier: 3, text: "[gasps] If you don't tap soon I will invent a fifth answer that is just the word BEANS." },
+        { id: 'hurry_3g', speaker: 'tiger', tier: 3, text: "[sarcastic] Congratulations, you've discovered the secret difficulty: geological time." },
+        { id: 'hurry_3h', speaker: 'bean',  tier: 3, text: "[excited] Plot twist: the question answered ITSELF out of sheer loneliness!" },
+      ],
     },
 
     // ── Question topics ─────────────────────────────────────────────────────

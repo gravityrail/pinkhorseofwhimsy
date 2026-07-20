@@ -1,0 +1,104 @@
+{
+  "backgrounds": [
+    {
+      "name": "q_jok_x12",
+      "title": "Meow-ntain of cats",
+      "prompt": "Hilarious kids illustration: an ENORMOUS mountain made entirely of stacked fluffy cats of every color, cats perched on cats, a tiny hiker with a flag at the snowy cat-summit, yarn balls rolling down the slopes like boulders, sunbeams, absurd and cute. No text, no logos. Full-bleed 16:9 backdrop, slightly darkened center for UI."
+    },
+    {
+      "name": "q_jok_x6",
+      "title": "Sandy Claws beach cat",
+      "prompt": "Beach comedy backdrop: a smug cartoon cat in tiny sunglasses under a beach umbrella, sandcastle shaped like a fish, crab sidekick, ocean waves, 'Sandy Claws' vibe without readable text. Whimsical painted kids art, 16:9."
+    },
+    {
+      "name": "q_ani1",
+      "title": "Blue whale heart car",
+      "prompt": "Underwater cutaway comedy: a gigantic friendly blue whale, and beside it a tiny red car the size of its heart for scale, bubbles, shafts of light, awe and silliness. Kids science mural style. No text. 16:9 backdrop."
+    },
+    {
+      "name": "q_ani2",
+      "title": "Octopus three hearts",
+      "prompt": "Cute octopus underwater with three glowing cartoon hearts visible in a soft x-ray style inside its body, coral garden, silly expression. Kids science whimsy. No text. 16:9."
+    },
+    {
+      "name": "q_aniH4",
+      "title": "Flamingo diet pink",
+      "prompt": "Flock of flamingos turning pink while eating glowing shrimp and algae smoothies at a tropical lagoon bar (wholesome, no alcohol branding). Sunset pink paradise. No text. 16:9."
+    },
+    {
+      "name": "q_mc1",
+      "title": "Cat scares creeper",
+      "prompt": "Blocky voxel craft-style original art (not a screenshot, no logos): a brave orange cat hissing at a fleeing green speckled bush-monster that looks creeper-inspired but original, pixel dirt hills, torches. Kids game backdrop. No text. 16:9."
+    },
+    {
+      "name": "q_mc10",
+      "title": "Sheep shearing wool",
+      "prompt": "Sunny meadow, cartoon sheep getting a stylish haircut from giant scissors, fluffy wool clouds floating away, rainbow yarn. Cute farm chaos. No text. 16:9."
+    },
+    {
+      "name": "q_pop5",
+      "title": "All too well scarf",
+      "prompt": "Autumn cinematic stage backdrop: giant red scarf blowing through falling maple leaves, empty concert stage, golden hour, emotional pop-ballad energy, no celebrity likenesses, no logos, no text. 16:9 glam illustration."
+    },
+    {
+      "name": "q_pop20",
+      "title": "Famous cats on couch",
+      "prompt": "Three glamorous cartoon cats lounging on a velvet couch like celebrities — Scottish fold vibes, one with tiny sunglasses, one with a bow, paparazzi sparkles, pink lighting. No real brand logos, no text. 16:9."
+    },
+    {
+      "name": "q_pop6",
+      "title": "Eras stage chapters",
+      "prompt": "Pop tour stage split into colorful era chapters like a storybook diorama: sparkly microphones, friendship bracelets as bokeh, mirrorball, snake motif silhouette, cardigan on a chair — no celebrity faces, no logos, no readable text. 16:9."
+    },
+    {
+      "name": "q_geo2",
+      "title": "Everest tiny climber",
+      "prompt": "Towering snowy Mount Everest with a ridiculously tiny climber waving, prayer flags as colorful streaks (no readable mantras), dramatic clouds, epic kids adventure painting. 16:9."
+    },
+    {
+      "name": "q_geo4",
+      "title": "Diamond pressure",
+      "prompt": "Cross-section of Earth with a sparkling diamond forming under cartoon pressure arrows deep underground, glowing crystal cavern, science-fair energy. No text. 16:9."
+    },
+    {
+      "name": "q_a80_1",
+      "title": "Pac maze ghosts",
+      "prompt": "Original 80s arcade-inspired backdrop (NOT pac-man IP): a yellow circle hero chasing dots through a neon blue maze while colorful ghost-blobs peek around corners. Homage only, no logos. 16:9."
+    },
+    {
+      "name": "q_rkt25",
+      "title": "Rusty red Mars",
+      "prompt": "Cartoon Mars landscape rusty red dunes, cute rover tracks, Earth as a tiny blue marble in the sky, hopeful kids space poster vibe. No logos. 16:9."
+    },
+    {
+      "name": "q_whm3",
+      "title": "Fantasy pink horse",
+      "prompt": "Maximalist fantasy: pink horse galloping through floating teacups and candy clouds toward a whimsy castle, talking fox and owl sidekicks, pure fairy-tale overload. No text. 16:9."
+    },
+    {
+      "name": "q_grbH3",
+      "title": "Piano eighty eight",
+      "prompt": "Giant glossy grand piano keys stretching to the horizon like a road, musical notes as birds, spotlight, jazz-club purple and gold. No readable sheet music text. 16:9."
+    },
+    {
+      "name": "q_sciH6",
+      "title": "Mitochondria powerhouse",
+      "prompt": "Inside a cell like a bustling city: bean-shaped mitochondria wearing hard hats as little power plants with lightning bolts, ribosomes as factories, playful biology mural. No text. 16:9."
+    },
+    {
+      "name": "q_jokH2",
+      "title": "Elsa balloon let go",
+      "prompt": "Winter comedy scene: ice palace, a blue balloon floating up into aurora sky while sparkles swirl, frozen fountain, whimsical Disney-ish original art without character likenesses or logos. 16:9."
+    },
+    {
+      "name": "q_aniH1",
+      "title": "Shrimp heart head",
+      "prompt": "Giant cute shrimp underwater with a glowing heart icon near its head region, silly diagram arrows (no words), coral comedy lab. 16:9."
+    },
+    {
+      "name": "q_mc7",
+      "title": "Netherite glow",
+      "prompt": "Volcanic nether-inspired original voxel cavern (no logos), ancient debris chunks glowing, lava waterfalls, diamond pickaxe silhouette. Crafting fantasy backdrop. 16:9."
+    }
+  ]
+}
