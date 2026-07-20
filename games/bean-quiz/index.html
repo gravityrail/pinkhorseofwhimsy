@@ -183,6 +183,25 @@
   .crown { font-size: min(9vh, 64px); animation: pulse 1s ease infinite; }
   .emoji-rain { position: fixed; top: -8vh; font-size: min(5vh, 36px); z-index: 450; pointer-events: none; animation: fall linear forwards; }
   @keyframes fall { to { transform: translateY(120vh) rotate(360deg); } }
+
+  /* screen flash / sting flourishes */
+  #flash { position: fixed; inset: 0; pointer-events: none; z-index: 480; opacity: 0;
+    background: radial-gradient(circle at 50% 40%, rgba(255,255,255,.55), transparent 55%);
+    transition: opacity .15s ease; }
+  #flash.on { opacity: 1; }
+  .screen.on { animation: screenIn .35s cubic-bezier(.2,1.4,.4,1) both; }
+  @keyframes screenIn { from { opacity: 0; transform: scale(1.04) translateY(12px); } to { opacity: 1; transform: none; } }
+  #sting-banner { position: fixed; top: 18%; left: 50%; transform: translateX(-50%) scale(.6);
+    z-index: 470; font-weight: 1000; font-size: min(6vh, 42px); letter-spacing: .08em;
+    text-shadow: 0 3px 0 #4c1d95, 0 0 24px #f0abfc; opacity: 0; pointer-events: none;
+    white-space: nowrap; }
+  #sting-banner.go { animation: stingPop .9s ease 1 forwards; }
+  @keyframes stingPop {
+    0% { opacity: 0; transform: translateX(-50%) scale(.4) rotate(-6deg); }
+    25% { opacity: 1; transform: translateX(-50%) scale(1.15) rotate(2deg); }
+    70% { opacity: 1; transform: translateX(-50%) scale(1) rotate(0); }
+    100% { opacity: 0; transform: translateX(-50%) scale(.9) translateY(-20px); }
+  }
 </style>
 </head>
 <body>
@@ -193,7 +212,7 @@
   <div id="title-bg"></div><div id="title-shade"></div>
   <h1 id="logo">BEAN QUIZ</h1>
   <div id="tagline">starring THE BEAN &amp; TIGER 🐶🐱 — a Pink Horse of Whimsy game show!</div>
-  <div id="title-topics">🕹️ 80s Arcade · 🦄 Pink Horse Whimsy · 🌌 Space Odyssey · rockets, robots, Lego &amp; more!</div>
+  <div id="title-topics">🎤 Pop Stars (Taylor deep cuts!) · 🕹️ 80s Arcade · 🦄 Whimsy · 🌌 Space · harder brains, weirder vibes</div>
   <button class="btn pulse" id="start-btn">TAP TO START!</button>
 </div>
 
@@ -269,11 +288,14 @@
   <button class="util" id="fs-btn">⛶</button>
 </div>
 <canvas id="confetti"></canvas>
+<div id="flash"></div>
+<div id="sting-banner"></div>
 
 <script src="data.js"></script>
 <script src="topics/rockets.js"></script>
 <script src="topics/lego.js"></script>
-<script src="topics/robots.js"></script>
+<script src="topics/pop-stars.js"></script>
+<script src="topics/harder.js"></script>
 <script src="topics/extras-a.js"></script>
 <script src="topics/extras-b.js"></script>
 <script src="topics/arcade-80s.js"></script>
@@ -329,7 +351,96 @@
     whoosh(){ if (muted) return; tone(200, 0, .25, 'sine', .12, 900); },
     tada()  { if (muted) return; [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, i * .07, .5, 'triangle', .22)); },
     drum(cb){ if (muted) { setTimeout(cb, 900); return; } let n = 0; const iv = setInterval(() => { tone(180 + Math.random() * 60, 0, .05, 'square', .12); if (++n > 16) { clearInterval(iv); cb && cb(); } }, 55); },
+    // Musical stings for scene transitions (game-show brass / cartoon hits)
+    stingNext() {
+      if (muted) return;
+      // bright major fanfare blip
+      [392, 494, 587, 784].forEach((f, i) => tone(f, i * .05, .18, 'square', .16));
+      tone(1175, .22, .35, 'triangle', .2);
+    },
+    stingTopic() {
+      if (muted) return;
+      [523, 659, 784].forEach((f, i) => tone(f, i * .06, .2, 'sawtooth', .14));
+      tone(1047, .2, .4, 'triangle', .22);
+      tone(1319, .28, .25, 'sine', .12);
+    },
+    stingCorrect() {
+      if (muted) return;
+      [659, 831, 988, 1319].forEach((f, i) => tone(f, i * .055, .2, 'triangle', .24));
+      tone(1568, .25, .45, 'sine', .18);
+    },
+    stingWrong() {
+      if (muted) return;
+      tone(330, 0, .15, 'square', .14);
+      tone(277, .12, .18, 'square', .14);
+      tone(220, .28, .4, 'sawtooth', .16, 140);
+    },
+    stingRound() {
+      if (muted) return;
+      [440, 554, 659, 880, 1109].forEach((f, i) => tone(f, i * .07, .28, 'triangle', .2));
+    },
+    stingGold() {
+      if (muted) return;
+      [784, 988, 1175, 1568].forEach((f, i) => tone(f, i * .08, .35, 'sine', .22));
+      tone(2093, .35, .5, 'triangle', .15);
+    },
   };
+
+  function flashScreen() {
+    const el = $('flash');
+    el.classList.add('on');
+    setTimeout(() => el.classList.remove('on'), 140);
+  }
+  function stingBanner(txt) {
+    const el = $('sting-banner');
+    el.textContent = txt;
+    el.classList.remove('go');
+    void el.offsetWidth;
+    el.classList.add('go');
+  }
+  function flourish(kind) {
+    // kind: correct | wrong | topic | round | win | start | golden
+    if (kind === 'correct') {
+      sfx.stingCorrect(); flashScreen(); confetti(50, true);
+      propRain(['🦴', '🎾', '⭐', '✨', '🫘'], 18);
+    } else if (kind === 'wrong') {
+      sfx.stingWrong();
+      propRain(['🧶', '💨', '😿'], 10);
+    } else if (kind === 'topic') {
+      sfx.stingTopic(); flashScreen();
+      propRain(['🎤', '⭐', '🦴', '🧶', '🎲'], 16);
+    } else if (kind === 'round') {
+      sfx.stingRound(); confetti(40, false);
+      propRain(['🏆', '🦴', '🧶', '🎉'], 14);
+    } else if (kind === 'win') {
+      sfx.stingRound(); confetti(120, true); confetti(60, false);
+      propRain(['🏆', '👑', '🦴', '🧶', '⭐', '🫘', '🎾'], 36);
+    } else if (kind === 'golden') {
+      sfx.stingGold(); flashScreen();
+      propRain(['🌟', '🫘', '✨', '🥇'], 22);
+    } else if (kind === 'start') {
+      sfx.stingNext(); confetti(60, true);
+      propRain(['🦴', '🧶', '🎾', '🐟'], 20);
+    } else {
+      sfx.stingNext();
+    }
+  }
+  /** Floating prop emojis (bones, wool, balls…) with a bouncy fall. */
+  function propRain(set, n) {
+    n = n || 16;
+    for (let i = 0; i < n; i++) {
+      const e = document.createElement('div');
+      e.className = 'emoji-rain';
+      e.textContent = rnd(set);
+      e.style.left = Math.random() * 96 + 'vw';
+      e.style.fontSize = minFont(3 + Math.random() * 3);
+      e.style.animationDuration = (1.6 + Math.random() * 2.2) + 's';
+      e.style.animationDelay = (Math.random() * .5) + 's';
+      document.body.appendChild(e);
+      setTimeout(() => e.remove(), 5000);
+    }
+  }
+  function minFont(vh) { return 'min(' + vh + 'vh, ' + (vh * 7) + 'px)'; }
 
   // ---------- audio: voice ----------
   const bubble = $('bubble'), charBean = $('char-bean'), charTiger = $('char-tiger');
@@ -364,16 +475,22 @@
       a.play().catch(() => speakFallback(text, speaker).then(res));
     });
   }
+  /** Strip ElevenLabs v3 stage tags like [giggles] for on-screen bubbles / TTS fallback. */
+  function plainText(text) {
+    return String(text || '').replace(/\[[^\]]+\]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
   // say(): queue a spoken line w/ speech bubble + talking animation.
+  // `text` may include [audio tags] for the pre-rendered mp3; bubble shows plainText.
   function say(id, text, speaker, mood) {
+    const shown = plainText(text);
     voQueue = voQueue.then(async () => {
       const who = speaker === 'tiger' ? charTiger : charBean;
       if (speaker === 'bean' && mood) charBean.src = BEAN_ART[mood] || BEAN_ART.idle;
       if (speaker === 'tiger' && mood) charTiger.src = TIGER_ART[mood] || TIGER_ART.idle;
-      bubble.textContent = text;
+      bubble.textContent = shown;
       bubble.className = 'on from-' + (speaker === 'tiger' ? 'tiger' : 'bean');
       who.classList.add('talk');
-      await playClip(id, text, speaker);
+      await playClip(id, shown, speaker);
       who.classList.remove('talk');
       bubble.className = '';
       if (speaker === 'bean') charBean.src = BEAN_ART.idle;
@@ -397,21 +514,58 @@
   const conf = $('confetti'), cctx = conf.getContext('2d');
   let confParts = [];
   function sizeCanvas() { conf.width = innerWidth; conf.height = innerHeight; stars.width = innerWidth; stars.height = innerHeight; }
+  const PROP_SHAPES = ['rect', 'bone', 'wool', 'ball', 'star'];
   function confetti(n, burst) {
     for (let i = 0; i < n; i++) confParts.push({
       x: burst ? innerWidth / 2 : Math.random() * innerWidth, y: burst ? innerHeight / 2 : -20,
       vx: (Math.random() - .5) * (burst ? 18 : 4), vy: burst ? (Math.random() - .8) * 16 : 2 + Math.random() * 3,
-      s: 6 + Math.random() * 8, r: Math.random() * Math.PI, vr: (Math.random() - .5) * .3,
-      c: rnd(['#f43f5e', '#3b82f6', '#22c55e', '#f59e0b', '#a855f7', '#ec4899', '#fbbf24', '#fff']), life: 240,
+      s: 6 + Math.random() * 10, r: Math.random() * Math.PI, vr: (Math.random() - .5) * .35,
+      c: rnd(['#f43f5e', '#3b82f6', '#22c55e', '#f59e0b', '#a855f7', '#ec4899', '#fbbf24', '#fff', '#fda4af', '#c4b5fd']),
+      life: 260,
+      shape: rnd(PROP_SHAPES),
     });
+  }
+  function drawProp(p) {
+    cctx.fillStyle = p.c;
+    const s = p.s;
+    if (p.shape === 'bone') {
+      // dog bone: two knobs + shaft
+      cctx.beginPath();
+      cctx.ellipse(-s * .55, -s * .25, s * .28, s * .28, 0, 0, 7);
+      cctx.ellipse(-s * .55, s * .25, s * .28, s * .28, 0, 0, 7);
+      cctx.ellipse(s * .55, -s * .25, s * .28, s * .28, 0, 0, 7);
+      cctx.ellipse(s * .55, s * .25, s * .28, s * .28, 0, 0, 7);
+      cctx.fill();
+      cctx.fillRect(-s * .55, -s * .18, s * 1.1, s * .36);
+    } else if (p.shape === 'wool') {
+      // ball of wool: fluffy circle + spiral hint
+      cctx.beginPath(); cctx.arc(0, 0, s * .55, 0, 7); cctx.fill();
+      cctx.strokeStyle = 'rgba(255,255,255,.45)'; cctx.lineWidth = 1.5;
+      cctx.beginPath(); cctx.arc(0, 0, s * .28, 0, 4); cctx.stroke();
+    } else if (p.shape === 'ball') {
+      cctx.beginPath(); cctx.arc(0, 0, s * .5, 0, 7); cctx.fill();
+      cctx.fillStyle = 'rgba(255,255,255,.35)';
+      cctx.beginPath(); cctx.arc(-s * .15, -s * .15, s * .15, 0, 7); cctx.fill();
+    } else if (p.shape === 'star') {
+      cctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const a = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+        const r = i % 2 === 0 ? s * .55 : s * .25;
+        cctx[i ? 'lineTo' : 'moveTo'](Math.cos(a) * r, Math.sin(a) * r);
+      }
+      cctx.closePath(); cctx.fill();
+    } else {
+      cctx.fillRect(-s / 2, -s / 4, s, s / 2);
+    }
   }
   function confTick() {
     cctx.clearRect(0, 0, conf.width, conf.height);
     confParts = confParts.filter(p => p.life-- > 0 && p.y < innerHeight + 30);
     for (const p of confParts) {
       p.x += p.vx; p.y += p.vy; p.vy += .18; p.vy *= .99; p.vx *= .99; p.r += p.vr;
-      cctx.save(); cctx.translate(p.x, p.y); cctx.rotate(p.r); cctx.fillStyle = p.c;
-      cctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); cctx.restore();
+      cctx.save(); cctx.translate(p.x, p.y); cctx.rotate(p.r);
+      drawProp(p);
+      cctx.restore();
     }
     requestAnimationFrame(confTick);
   }
@@ -501,11 +655,12 @@
     ac(); // unlock audio
     if ('speechSynthesis' in window) speechSynthesis.getVoices(); // warm voices
     try { navigator.wakeLock && navigator.wakeLock.request('screen').catch(() => {}); } catch {}
-    sfx.tada(); confetti(80, true);
+    flourish('start'); stingBanner('SHOWTIME!');
     show('s-count');
-    const w = DATA.lines.welcome;
-    say(w[0].id, w[0].text, w[0].speaker, 'cheer');
-    say(w[1].id, w[1].text, w[1].speaker, 'smug');
+    // Shuffle welcome trio so we get variety across plays
+    const w = shuffle(DATA.lines.welcome.slice()).slice(0, 3);
+    say(w[0].id, w[0].text, w[0].speaker, w[0].speaker === 'tiger' ? 'smug' : 'cheer');
+    if (w[1]) say(w[1].id, w[1].text, w[1].speaker, w[1].speaker === 'tiger' ? 'smug' : 'cheer');
     sayLine('howMany');
   });
 
@@ -514,7 +669,7 @@
     const b = document.createElement('button');
     b.className = 'count-btn'; b.textContent = n;
     b.addEventListener('pointerdown', () => {
-      skipVoice(); sfx.yay();
+      skipVoice(); flourish('start'); stingBanner(n === 1 ? 'SOLO STAR!' : n + ' PLAYERS!');
       G.players = Array.from({ length: n }, (_, i) => {
         const nm = newName(null);
         return { ...nm, color: COLORS[i], avatar: rnd(AVATARS), score: 0, streak: 0 };
@@ -530,12 +685,13 @@
     countRow.appendChild(b);
   }
 
-  $('names-go').addEventListener('pointerdown', () => { skipVoice(); sfx.whoosh(); show('s-rounds'); });
+  $('names-go').addEventListener('pointerdown', () => { skipVoice(); sfx.stingNext(); flashScreen(); show('s-rounds'); });
 
   document.querySelectorAll('[data-rounds]').forEach(b =>
     b.addEventListener('pointerdown', () => {
       G.rounds = +b.dataset.rounds; G.round = 1;
-      sfx.yay(); startRound();
+      flourish('round'); stingBanner(G.rounds + ' ROUNDS!');
+      startRound();
     }));
 
   function startRound() {
@@ -543,7 +699,9 @@
     const picker = G.players[(G.round - 1) % G.players.length];
     $('topic-title').innerHTML = picker.avatar + ' <span style="color:' + picker.color + '">' + picker.first + ' ' + picker.last + '</span>, pick a topic for Round ' + G.round + '!';
     const grid = $('topic-grid'); grid.innerHTML = '';
-    for (const t of TOPICS) {
+    // Pop Stars first so Taylor fans see the fan-service pack immediately
+    const ordered = [...TOPICS].sort((a, b) => (b.id === 'pop-stars') - (a.id === 'pop-stars'));
+    for (const t of ordered) {
       const b = document.createElement('button');
       b.className = 'tcard'; b.style.setProperty('--tc', t.color);
       b.innerHTML = '<span class="temoji">' + t.emoji + '</span>' + t.name;
@@ -556,11 +714,14 @@
     s.addEventListener('pointerdown', () => chooseTopic(rnd(TOPICS)));
     grid.appendChild(s);
     show('s-topic');
+    sfx.stingNext();
     if (G.round === 1) sayLine('pickTopic');
   }
 
   function chooseTopic(t) {
-    skipVoice(); G.topic = t; sfx.ding();
+    skipVoice(); G.topic = t;
+    flourish('topic');
+    stingBanner(t.emoji + ' ' + t.name.toUpperCase());
     nextTurn();
   }
 
@@ -585,8 +746,8 @@
     $('tb-name').style.setProperty('--pc', p.color);
     $('tb-sub').textContent = 'Round ' + G.round + ' — ' + G.topic.emoji + ' ' + G.topic.name;
     tb.classList.add('on');
-    sfx.whoosh();
-    if (G.turn === 0 && G.round === 1) sayLine('turn');
+    sfx.stingNext(); sfx.whoosh();
+    if (G.turn === 0) sayLine('turn');
     setTimeout(() => { tb.classList.remove('on'); askQuestion(p); }, 1600);
   }
 
@@ -620,7 +781,12 @@
     });
     G.answerable = false;
     show('s-question', true);
-    if (G.golden) { sfx.tada(); emojiRain(['🌟', '🫘', '✨']); const g = DATA.lines.golden[0]; say(g.id, g.text, g.speaker, 'cheer'); }
+    if (G.golden) {
+      flourish('golden');
+      stingBanner('⭐ GOLDEN BEAN ⭐');
+      const g = rnd(DATA.lines.golden);
+      say(g.id, g.text, g.speaker, g.speaker === 'tiger' ? 'smug' : 'cheer');
+    }
     if (q.trick) sayLine('trickWarn', 'think');
     say('q_' + q.id, q.q, 'bean', 'think').then(() => { G.answerable = true; });
     setTimeout(() => { G.answerable = true; }, 2500); // don't block impatient tappers for long
@@ -651,16 +817,23 @@
     document.querySelectorAll('.ans').forEach(b => { if (b !== btn) b.classList.add('dim'); });
     if (a.correct) {
       btn.classList.add('right');
-      sfx.ding(); sfx.yay(); confetti(70, true);
+      sfx.ding(); sfx.yay(); flourish('correct');
       p.score += pts; p.streak++;
       floatPts(btn, '+' + pts);
       sayLine('correct', 'cheer');
-      if (p.streak === 3) { $('zoomies').classList.add('go'); setTimeout(() => $('zoomies').classList.remove('go'), 1700); emojiRain(['🔥', '⚡', '💨']); }
+      if (p.streak === 3) {
+        $('zoomies').classList.add('go');
+        setTimeout(() => $('zoomies').classList.remove('go'), 1700);
+        emojiRain(['🔥', '⚡', '💨', '🦴']);
+        stingBanner('🔥 ZOOMIES 🔥');
+        propRain(['🦴', '🎾', '💨'], 24);
+      }
+      if (p.streak === 5) { stingBanner('UNHINGED STREAK'); propRain(['🧶', '🦴', '⭐'], 28); }
     } else {
       btn.classList.add('wrongpick', 'dim');
       const right = [...document.querySelectorAll('.ans')].find((b, i) => answers[i].correct);
       right.classList.remove('dim'); right.classList.add('right');
-      sfx.womp();
+      sfx.womp(); flourish('wrong');
       p.streak = 0;
       sayLine(G.q.trick ? 'close' : 'wrong', 'aww');
     }
@@ -671,6 +844,7 @@
 
   $('next-btn').addEventListener('pointerdown', () => {
     skipVoice();
+    sfx.stingNext();
     G.turn++;
     if (G.turn >= G.players.length) endRound();
     else nextTurn();
@@ -696,11 +870,12 @@
     if (G.round >= G.rounds) return showFinal();
     boardHtml($('score-board'), false);
     show('s-score');
-    sfx.whoosh();
+    flourish('round');
+    stingBanner('ROUND ' + G.round + ' DONE');
     sayLine('roundEnd');
     G.round++;
   }
-  $('score-next').addEventListener('pointerdown', () => { skipVoice(); startRound(); });
+  $('score-next').addEventListener('pointerdown', () => { skipVoice(); sfx.stingNext(); startRound(); });
 
   function showFinal() {
     const sorted = boardHtml($('final-board'), true);
@@ -710,13 +885,14 @@
       : winners[0].avatar + ' ' + winners[0].first + ' ' + winners[0].last + ' WINS!';
     show('s-final');
     sfx.drum(() => {
-      sfx.tada(); confetti(160, true); confetti(80, false);
-      emojiRain(['🏆', '🎉', '⭐', '🫘', '👑']);
-      const w = DATA.lines.win;
-      say(w[0].id, w[0].text, w[0].speaker, 'cheer');
+      flourish('win');
+      stingBanner('🏆 CHAMPION 🏆');
+      emojiRain(['🏆', '🎉', '⭐', '🫘', '👑', '🦴', '🧶']);
+      const w = shuffle(DATA.lines.win.slice());
+      say(w[0].id, w[0].text, w[0].speaker, w[0].speaker === 'tiger' ? 'smug' : 'cheer');
       if (winners.length === 1) { announceName(winners[0]); }
-      say(w[1].id, w[1].text, w[1].speaker, 'smug');
-      say(w[2].id, w[2].text, w[2].speaker, 'cheer');
+      if (w[1]) say(w[1].id, w[1].text, w[1].speaker, w[1].speaker === 'tiger' ? 'smug' : 'cheer');
+      if (w[2]) say(w[2].id, w[2].text, w[2].speaker, w[2].speaker === 'tiger' ? 'smug' : 'cheer');
     });
   }
 

@@ -25,7 +25,7 @@ const GAMES: GameCard[] = [
     title: 'Bean Quiz',
     author: 'Pink Horse of Whimsy',
     description:
-      'A bouncy quiz show for 1–5 players, hosted by The Bean (mohawked chihuahua-terrier) and Tiger the cat — with real voices and 80s box-art splash. Silly names, brand-new 80s Arcade / Whimsy / Space Odyssey packs plus Minecraft, rockets, Lego, robots, trick math, and jokes. Perfect for car trips.',
+      'A chaotic car-trip quiz show hosted by The Bean and Tiger — musical stings, confetti bones and wool-ball rain, expressive ElevenLabs voices with giggles and zoomies energy. Harder brains across the board, plus Pop Stars (Taylor Swift fan-service deep cuts). Silly names, multiplayer, golden beans. Touch-first.',
     type: '2D',
     slug: 'bean-quiz',
     href: '/bean-quiz/',
