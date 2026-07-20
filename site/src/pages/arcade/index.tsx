@@ -173,22 +173,37 @@ function GameCardComponent({ game }: { game: GameCard }) {
               game.cover && game.screenshot ? '1fr 1fr' : '1fr',
             gap: '0.75rem',
             marginBottom: '1rem',
+            alignItems: 'start',
           }}
         >
           {game.cover && (
-            <a href={playUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'block' }}>
-              <img
-                src={coverUrl}
-                alt={`${game.title} cover art`}
+            <a
+              href={playUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}
+            >
+              {/* Full box art, never cropped — painted titles stay readable */}
+              <div
                 style={{
-                  width: '100%',
-                  aspectRatio: '16 / 9',
-                  objectFit: 'cover',
+                  background: '#0a0a14',
                   borderRadius: '8px',
-                  display: 'block',
                   boxShadow: '0 4px 18px rgba(0,0,0,0.25)',
+                  lineHeight: 0,
                 }}
-              />
+              >
+                <img
+                  src={coverUrl}
+                  alt={`${game.title} cover art`}
+                  style={{
+                    width: '100%',
+                    height: 'auto',
+                    display: 'block',
+                    borderRadius: '8px',
+                    verticalAlign: 'top',
+                  }}
+                />
+              </div>
               <div
                 style={{
                   fontSize: '0.7rem',
@@ -196,6 +211,7 @@ function GameCardComponent({ game }: { game: GameCard }) {
                   textTransform: 'uppercase',
                   opacity: 0.65,
                   marginTop: '0.35rem',
+                  lineHeight: 1.3,
                 }}
               >
                 Cover art
@@ -203,19 +219,32 @@ function GameCardComponent({ game }: { game: GameCard }) {
             </a>
           )}
           {game.screenshot && (
-            <a href={playUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'block' }}>
-              <img
-                src={screenshotUrl}
-                alt={`Screenshot of ${game.title}`}
+            <a
+              href={playUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}
+            >
+              <div
                 style={{
-                  width: '100%',
-                  aspectRatio: '16 / 9',
-                  objectFit: 'cover',
+                  background: '#0a0a14',
                   borderRadius: '8px',
-                  display: 'block',
                   boxShadow: '0 4px 18px rgba(0,0,0,0.25)',
+                  lineHeight: 0,
                 }}
-              />
+              >
+                <img
+                  src={screenshotUrl}
+                  alt={`Screenshot of ${game.title}`}
+                  style={{
+                    width: '100%',
+                    height: 'auto',
+                    display: 'block',
+                    borderRadius: '8px',
+                    verticalAlign: 'top',
+                  }}
+                />
+              </div>
               <div
                 style={{
                   fontSize: '0.7rem',
@@ -223,6 +252,7 @@ function GameCardComponent({ game }: { game: GameCard }) {
                   textTransform: 'uppercase',
                   opacity: 0.65,
                   marginTop: '0.35rem',
+                  lineHeight: 1.3,
                 }}
               >
                 Screenshot
