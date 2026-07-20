@@ -17,8 +17,30 @@
     background: radial-gradient(120% 100% at 50% 0%, #7c3aed 0%, #5b21b6 45%, #3b0764 100%);
     color: #fff; touch-action: manipulation;
   }
+  /* Topic stage backdrops (swap per chosen topic) */
+  #topic-bg {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: center/cover no-repeat #1a0a2e;
+    opacity: 0; transform: scale(1.06);
+    transition: opacity .55s ease, transform 8s ease-out;
+    filter: saturate(1.05);
+  }
+  #topic-bg.on { opacity: 1; transform: scale(1); }
+  #topic-bg-shade {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0;
+    transition: opacity .45s ease;
+    background:
+      linear-gradient(180deg, rgba(20,8,40,.55) 0%, rgba(20,8,40,.28) 35%, rgba(15,5,30,.62) 100%),
+      radial-gradient(ellipse at 50% 30%, transparent 0%, rgba(10,4,24,.45) 75%);
+  }
+  body.has-topic #topic-bg-shade { opacity: 1; }
+  /* Dim default purple when a photo backdrop is up */
+  body.has-topic {
+    background: #12081f;
+  }
+
   /* twinkly stage lights */
-  #stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+  #stars { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
   #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 500; }
 
   .screen { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center;
@@ -85,10 +107,18 @@
   #topic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(28vw, 200px), 1fr));
     gap: min(2vh, 14px); width: min(94vw, 900px); max-height: 62vh; overflow-y: auto; padding: 4px; }
   .tcard { border: none; cursor: pointer; border-radius: 18px; padding: 1.8vh 1vw; color: #fff; font-weight: 900;
-    font-size: min(2.8vh, 20px); background: var(--tc, var(--purple));
-    box-shadow: 0 5px 0 rgba(0,0,0,.3), inset 0 2px 0 rgba(255,255,255,.3); }
+    font-size: min(2.8vh, 20px);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--tc, var(--purple)) 55%, transparent), rgba(20,8,40,.82)),
+      var(--tbg, var(--tc, var(--purple)));
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 5px 0 rgba(0,0,0,.3), inset 0 2px 0 rgba(255,255,255,.3);
+    text-shadow: 0 2px 8px rgba(0,0,0,.75);
+    overflow: hidden; min-height: min(14vh, 110px); }
   .tcard:active { transform: translateY(3px); }
-  .tcard .temoji { font-size: min(5.5vh, 40px); display: block; margin-bottom: .5vh; }
+  .tcard .temoji { font-size: min(5.5vh, 40px); display: block; margin-bottom: .5vh;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,.5)); }
 
   /* ---------- question ---------- */
   #hud { position: fixed; top: max(8px, env(safe-area-inset-top)); left: 0; right: 0; display: none;
@@ -205,6 +235,8 @@
 </style>
 </head>
 <body>
+<div id="topic-bg" aria-hidden="true"></div>
+<div id="topic-bg-shade" aria-hidden="true"></div>
 <canvas id="stars"></canvas>
 
 <!-- TITLE -->
@@ -704,8 +736,11 @@
     for (const t of ordered) {
       const b = document.createElement('button');
       b.className = 'tcard'; b.style.setProperty('--tc', t.color);
+      b.style.setProperty('--tbg', 'url("assets/bg/' + t.id + '.png")');
       b.innerHTML = '<span class="temoji">' + t.emoji + '</span>' + t.name;
       b.addEventListener('pointerdown', () => chooseTopic(t));
+      // Warm-preload full backdrop
+      const pre = new Image(); pre.src = 'assets/bg/' + t.id + '.png';
       grid.appendChild(b);
     }
     const s = document.createElement('button');
@@ -720,9 +755,46 @@
 
   function chooseTopic(t) {
     skipVoice(); G.topic = t;
+    setTopicBg(t);
     flourish('topic');
     stingBanner(t.emoji + ' ' + t.name.toUpperCase());
     nextTurn();
+  }
+
+  /** Swap full-screen stage art for the chosen topic (assets/bg/<id>.png). */
+  function setTopicBg(t) {
+    const el = $('topic-bg');
+    if (!t || !t.id) {
+      clearTopicBg();
+      return;
+    }
+    const url = 'assets/bg/' + t.id + '.png';
+    // Preload then fade in so we don't flash empty purple
+    const img = new Image();
+    img.onload = () => {
+      el.style.backgroundImage = 'url("' + url + '")';
+      // retrigger scale ease
+      el.classList.remove('on');
+      void el.offsetWidth;
+      el.classList.add('on');
+      document.body.classList.add('has-topic');
+    };
+    img.onerror = () => {
+      // Fallback: tinted gradient using topic color
+      el.style.backgroundImage =
+        'radial-gradient(120% 90% at 50% 0%, ' + (t.color || '#7c3aed') + 'cc 0%, #1a0a2e 70%)';
+      el.classList.add('on');
+      document.body.classList.add('has-topic');
+    };
+    img.src = url;
+  }
+  function clearTopicBg() {
+    const el = $('topic-bg');
+    el.classList.remove('on');
+    document.body.classList.remove('has-topic');
+    setTimeout(() => {
+      if (!document.body.classList.contains('has-topic')) el.style.backgroundImage = '';
+    }, 600);
   }
 
   function pickQuestion(topic) {
@@ -900,6 +972,8 @@
     skipVoice();
     G.players.forEach(p => { p.score = 0; p.streak = 0; });
     G.round = 1;
+    G.topic = null;
+    clearTopicBg();
     sfx.yay();
     show('s-rounds');
   });

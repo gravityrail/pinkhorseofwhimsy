@@ -1,0 +1,79 @@
+{
+  "backgrounds": [
+    {
+      "name": "science",
+      "title": "Science",
+      "prompt": "Whimsical kids game-show STAGE BACKDROP for a SCIENCE quiz. Giant friendly microscope, bubbling beakers with glowing green and purple liquids, floating atoms and planets, chalkboard with doodles, starry lab ceiling. Soft bokeh lights. No text, no logos, no people. Painterly cartoon, saturated but slightly dimmed midtones so UI can sit on top."
+    },
+    {
+      "name": "math",
+      "title": "Tricky Math",
+      "prompt": "Playful MATH quiz stage backdrop: oversized golden numbers floating, geometric shapes, abacus, chalk equations gently blurred, blue neon grid floor, confetti of plus/minus signs. Carnival-meets-classroom energy. No readable text blocks, no people. Soft painted illustration."
+    },
+    {
+      "name": "jokes",
+      "title": "Jokes & Riddles",
+      "prompt": "Comedy club meets kids game show backdrop: giant whoopee cushion, rubber chickens, banana peels, spotlight beams, red velvet curtains, laugh-emoji balloons, whoopee confetti. Warm amber and gold. Whimsical painted cartoon. No text, no people faces."
+    },
+    {
+      "name": "whoami",
+      "title": "Who Am I?",
+      "prompt": "Mystery detective game-show backdrop: giant magnifying glass, silhouettes of famous hats (wizard, mustache, crown) as props, purple fog, spotlight, cork board with blank sticky notes, footprints. Mysterious but kid-friendly. No readable text, no real celebrity faces."
+    },
+    {
+      "name": "minecraft",
+      "title": "Minecraft",
+      "prompt": "Blocky voxel fantasy landscape backdrop inspired by sandbox crafting games (original art, not a screenshot): dirt and grass cubes, diamond ore sparkles, creeper-shaped bush silhouette, crafting table glow, sunset sky of cubes. Chunks floating. No logos, no text, no Mojang branding."
+    },
+    {
+      "name": "geography",
+      "title": "Geography & Rocks",
+      "prompt": "Geography quiz stage backdrop: giant glowing globe, stacked colorful gemstones and crystals, mountain range silhouette, ocean waves, treasure map unrolled with blank parchment (no readable writing), warm adventure lighting. Painted kids illustration."
+    },
+    {
+      "name": "animals",
+      "title": "Amazing Animals",
+      "prompt": "Lush safari-meets-ocean kids backdrop: friendly cartoon animals peeking from jungle leaves and coral — lion cub, penguin, octopus tentacle, butterfly swarm — golden hour light, no scary teeth. Soft storybook painting. No text."
+    },
+    {
+      "name": "world",
+      "title": "World & Tech",
+      "prompt": "Futuristic-but-cute tech newsroom backdrop: floating holographic screens (blank/abstract UI only), rockets launching, electric car silhouette, wifi symbols as soft neon, city skyline at dusk, circuit-board floor pattern. No logos, no readable text, no brand names."
+    },
+    {
+      "name": "grabbag",
+      "title": "Silly Grab Bag",
+      "prompt": "Chaotic candy-colored grab-bag carnival backdrop: ice cream sundae mountain, rainbow confetti cannon, rubber duck river, dice, balloons, pinata pieces, toy chest exploding with goodies. Maximalist kids party energy. No text."
+    },
+    {
+      "name": "arcade80s",
+      "title": "80s Arcade",
+      "prompt": "1980s arcade interior backdrop: rows of glowing cabinets with abstract geometric screens (no real game IP), neon pink and cyan, carpet galaxy pattern, ticket roll, joysticks as sculptures, CRT glow haze. Nostalgic painted illustration. No logos or readable marquee text."
+    },
+    {
+      "name": "lego",
+      "title": "Lego Mania",
+      "prompt": "Giant colorful interlocking plastic brick city backdrop (generic bricks, not branded minifigs): red yellow blue studs, brick castle and spaceship builds, brick rain, sunny sky. Toy commercial energy, original art. No logos, no trademarked characters, no text."
+    },
+    {
+      "name": "pop-stars",
+      "title": "Pop Stars",
+      "prompt": "Pop concert game-show backdrop: glittery stage, purple-pink spotlights, microphone stand with sparkles, friendship-bracelet beads as bokeh, mirrorball, confetti cannons, subtle snake motif and star motifs (no celebrity likenesses, no real logos). Swiftie-adjacent vibes without depicting any real person. Glam painted illustration."
+    },
+    {
+      "name": "rockets",
+      "title": "Rockets & Space",
+      "prompt": "Launchpad-at-dusk backdrop: tall cartoon rocket with cheerful fins, exhaust clouds, countdown lights (abstract), planets hanging like ornaments, astronaut helmet reflection (no face), stars. Kids science museum energy. No text, no NASA logo."
+    },
+    {
+      "name": "spaceody",
+      "title": "Space Odyssey",
+      "prompt": "Epic cosmic odyssey backdrop: swirling nebula in pink teal gold, ringed planet, distant space station silhouette, shooting stars, soft aurora. Cinematic but whimsical painted space art. No text, no spacecraft brands."
+    },
+    {
+      "name": "whimsy",
+      "title": "Pink Horse Whimsy",
+      "prompt": "Magical pink horse carnival realm backdrop: a majestic cute pink horse with a flowy mane mid-gallop through cotton-candy clouds, whimsy castle turrets, floating teacups, golden sparkles, rainbow ribbon. Signature Pink Horse of Whimsy fairy-tale energy. No text, no logos."
+    }
+  ]
+}
