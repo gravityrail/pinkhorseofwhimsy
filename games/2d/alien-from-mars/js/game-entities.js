@@ -68,6 +68,10 @@ const ANIMAL_META = {
   chicken: { w: 10, h: 11, hp: 6, spd: 20, sfx: 'cluck', spr: 'chicken' },
   sheep: { w: 17, h: 13, hp: 10, spd: 15, sfx: 'baa', spr: 'sheep' },
   pig: { w: 17, h: 12, hp: 10, spd: 16, sfx: 'oink', spr: 'pig' },
+  goat: { w: 18, h: 15, hp: 12, spd: 18, sfx: 'bleat', spr: 'goat' },
+  duck: { w: 14, h: 12, hp: 7, spd: 22, sfx: 'quack', spr: 'duck' },
+  horse: { w: 26, h: 18, hp: 20, spd: 28, sfx: 'neigh', spr: 'horse' },
+  pink_horse: { w: 26, h: 18, hp: 30, spd: 32, sfx: 'neigh', spr: 'pink_horse' },
 };
 export { ANIMAL_META };
 

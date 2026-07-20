@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indigo Kart</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+        }
+        canvas { 
+            display: block; 
+        }
+        #statusDisplay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #minimap {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+            padding: 10px;
+            width: 150px;
+            height: 150px;
+        }
+        #timeControls {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #clockDisplay {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .timeButtons {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+        .timeButton {
+            background-color: rgba(70, 70, 100, 0.6);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.2s;
+        }
+        .timeButton:hover {
+            background-color: rgba(90, 90, 130, 0.8);
+        }
+        .timeButton.active {
+            background-color: rgba(120, 120, 200, 0.8);
+        }
+        #headlightIndicator {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        #headlightInfo {
+            margin-bottom: 5px;
+        }
+        #headlightToggleButton {
+            width: 150px;
+            padding: 6px 10px;
+            background-color: rgba(60, 60, 100, 0.8);
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        #headlightToggleButton:hover {
+            background-color: rgba(80, 80, 130, 0.9);
+        }
+        #headlightToggleButton:active {
+            transform: scale(0.95);
+        }
+        #headlightToggleButton.active {
+            background-color: rgba(100, 100, 180, 0.9);
+        }
+        .indicator-on {
+            color: yellow;
+            font-weight: bold;
+        }
+        .indicator-off {
+            color: gray;
+        }
+    </style>
+</head>
+<body>
+    <div id="statusDisplay">
+        Status: <span id="trackStatus">On Track</span><br>
+        Speed: <span id="speedStatus">0%</span><br>
+        <div id="airInfo" style="display: none; color: lightblue; margin-top: 3px; font-size: 14px;">Air Time: 0s | Height: 0m</div>
+        <div id="terrainInfo">
+            <div id="slopeIndicator" style="display: flex; align-items: center; margin-top: 5px; font-size: 14px;">
+                Terrain: <span id="slopeLabel">Flat</span>
+                <div id="slopeBar" style="position: relative; width: 80px; height: 12px; background-color: #444; margin-left: 5px; border-radius: 3px; overflow: hidden;">
+                    <div id="slopeMarker" style="position: absolute; width: 4px; height: 12px; background-color: white; left: 40px; top: 0;"></div>
+                    <div id="uphillZone" style="position: absolute; width: 40px; height: 12px; background-color: rgba(255, 100, 100, 0.3); left: 0; top: 0;"></div>
+                    <div id="downhillZone" style="position: absolute; width: 40px; height: 12px; background-color: rgba(100, 255, 100, 0.3); left: 40px; top: 0;"></div>
+                </div>
+            </div>
+            <div style="font-size: 11px; color: #aaa; margin-top: 2px;">Press [S] to visualize slopes</div>
+        </div>
+        <div id="inputDisplay">
+            <div id="throttleBar" style="height: 5px; width: 0%; background-color: green; margin-top: 5px;"></div>
+            <div id="brakeBar" style="height: 5px; width: 0%; background-color: red; margin-top: 2px;"></div>
+        </div>
+        <div id="suspensionDisplay" style="margin-top: 10px; font-size: 12px;">
+            Suspension:<br>
+            <div style="display: flex; justify-content: space-between; margin-top: 2px;">
+                <div id="flSusp" style="width: 30px; height: 10px; background-color: #aaa;"></div>
+                <div id="frSusp" style="width: 30px; height: 10px; background-color: #aaa;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 2px;">
+                <div id="rlSusp" style="width: 30px; height: 10px; background-color: #aaa;"></div>
+                <div id="rrSusp" style="width: 30px; height: 10px; background-color: #aaa;"></div>
+            </div>
+        </div>
+    </div>
+    <canvas id="minimap"></canvas>
+    
+    <!-- Time of day controls -->
+    <div id="timeControls">
+        <div id="clockDisplay">12:00 PM</div>
+        <div class="timeButtons">
+            <button id="timePreset1" class="timeButton">Morning</button>
+            <button id="timePreset2" class="timeButton">Noon</button>
+            <button id="timePreset3" class="timeButton">Dusk</button>
+            <button id="timePreset4" class="timeButton">Twilight</button>
+            <button id="timePreset5" class="timeButton">Night</button>
+        </div>
+        <button id="pauseTimeButton" class="timeButton">⏸️ Pause Time</button>
+    </div>
+    
+    <!-- Headlight indicator with button -->
+    <div id="headlightIndicator">
+        <div id="headlightInfo">
+            Headlights: <span id="headlightStatus" class="indicator-off">OFF</span> [L]
+        </div>
+        <button id="headlightToggleButton" class="timeButton">Toggle Headlights</button>
+    </div>
+    
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <!-- Hidden audio element for engine sound (empty src, will be created dynamically) -->
+    <audio id="engineSound" loop preload="auto"></audio>
+    <script type="module" src="js/main.js"></script>
+
+<script>window.ARCADE_CONTROLS={buttons:[{label:'Gas',keys:' '},{label:'Brake',keys:'Shift'},{label:'Drift',keys:'x'},{label:'Item',keys:'z'}]};</script>
+<script src="/arcade/controls.js" defer></script>
+</body>
+</html>

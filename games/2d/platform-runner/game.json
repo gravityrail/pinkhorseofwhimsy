@@ -1,22 +1,27 @@
 {
   "firstLayout": "Level1",
-  "gdVersion": { "build": 237, "major": 5, "minor": 5, "revision": 0 },
+  "gdVersion": {
+    "build": 237,
+    "major": 5,
+    "minor": 5,
+    "revision": 0
+  },
   "properties": {
     "adaptGameResolutionAtRuntime": true,
     "antialiasingMode": "MSAA",
     "antialisingEnabledOnMobile": false,
     "folderProject": false,
     "orientation": "landscape",
-    "packageName": "com.grassvalley.platformrunner",
+    "packageName": "com.pinkhorse.platformrunner",
     "pixelsRounding": true,
     "projectUuid": "b2c3d4e5-f6a7-8901-bcde-f23456789012",
     "scaleMode": "nearest",
     "sizeOnStartupMode": "adaptWidth",
     "templateSlug": "",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "name": "Platform Runner",
-    "description": "A 2D platformer with enemies and hazards. Example project for Week 3 of the Grass Valley Game Club.",
-    "author": "Grass Valley Game Club",
+    "description": "Dash through 3 action levels — stomp slimes, dodge bats, beat the boss!",
+    "author": "Pink Horse of Whimsy",
     "windowWidth": 800,
     "windowHeight": 600,
     "latestCompilationDirectory": "",
@@ -39,174 +44,6325 @@
       "showGDevelopSplash": false,
       "showProgressBar": true
     },
-    "watermark": { "placement": "bottom-left", "showWatermark": true },
+    "watermark": {
+      "placement": "bottom-left",
+      "showWatermark": false
+    },
     "authorIds": [],
     "authorUsernames": [],
     "categories": [],
-    "playableDevices": ["keyboard"],
+    "playableDevices": [
+      "keyboard",
+      "mobile"
+    ],
     "extensionProperties": [],
-    "platforms": [{ "name": "GDevelop JS platform" }],
+    "platforms": [
+      {
+        "name": "GDevelop JS platform"
+      }
+    ],
     "currentPlatform": "GDevelop JS platform"
   },
   "resources": {
     "resources": [
-      { "file": "runner.png", "kind": "image", "name": "runner.png", "smoothed": false, "userAdded": true },
-      { "file": "spike.png", "kind": "image", "name": "spike.png", "smoothed": false, "userAdded": true },
-      { "file": "ground.png", "kind": "image", "name": "ground.png", "smoothed": false, "userAdded": true },
-      { "file": "enemy.png", "kind": "image", "name": "enemy.png", "smoothed": false, "userAdded": true },
-      { "file": "loading.png", "kind": "image", "name": "loading.png", "smoothed": true, "userAdded": true }
+      {
+        "file": "runner.png",
+        "kind": "image",
+        "name": "runner.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "spike.png",
+        "kind": "image",
+        "name": "spike.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "ground.png",
+        "kind": "image",
+        "name": "ground.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "enemy.png",
+        "kind": "image",
+        "name": "enemy.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "loading.png",
+        "kind": "image",
+        "name": "loading.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "bat.png",
+        "kind": "image",
+        "name": "bat.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "boss.png",
+        "kind": "image",
+        "name": "boss.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "flag.png",
+        "kind": "image",
+        "name": "flag.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "checkpoint.png",
+        "kind": "image",
+        "name": "checkpoint.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "moving-platform.png",
+        "kind": "image",
+        "name": "moving-platform.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "coin-collect.mp3",
+        "kind": "audio",
+        "name": "coin-collect.mp3",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "jump.mp3",
+        "kind": "audio",
+        "name": "jump.mp3",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "enemy-stomp.mp3",
+        "kind": "audio",
+        "name": "enemy-stomp.mp3",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "level-complete.mp3",
+        "kind": "audio",
+        "name": "level-complete.mp3",
+        "smoothed": false,
+        "userAdded": true
+      }
     ],
     "resourceFolders": []
   },
   "objects": [],
-  "objectsFolderStructure": { "folderName": "__ROOT", "children": [] },
+  "objectsFolderStructure": {
+    "folderName": "__ROOT",
+    "children": []
+  },
   "objectsGroups": [],
   "variables": [
-    { "name": "Score", "type": "number", "value": 0 },
-    { "name": "Lives", "type": "number", "value": 3 }
+    {
+      "name": "Score",
+      "type": "number",
+      "value": 0
+    },
+    {
+      "name": "Lives",
+      "type": "number",
+      "value": 3
+    },
+    {
+      "name": "CheckpointX",
+      "type": "number",
+      "value": 64
+    },
+    {
+      "name": "CheckpointY",
+      "type": "number",
+      "value": 472
+    },
+    {
+      "name": "LevelDone",
+      "type": "number",
+      "value": 0
+    },
+    {
+      "name": "Invuln",
+      "type": "number",
+      "value": 0
+    },
+    {
+      "name": "GameOver",
+      "type": "number",
+      "value": 0
+    },
+    {
+      "name": "__hit",
+      "type": "number",
+      "value": 0
+    }
   ],
   "layouts": [
     {
-      "b": 40,
+      "b": 55,
+      "r": 20,
+      "v": 30,
       "disableInputWhenNotFocused": true,
       "mangledName": "Level1",
       "name": "Level1",
-      "r": 20,
-      "v": 60,
       "standardSortMethod": true,
-      "stopSoundsOnStartup": true,
+      "stopSoundsOnStartup": false,
       "title": "",
       "uiSettings": {
-        "grid": true, "gridType": "rectangular", "gridWidth": 32, "gridHeight": 32,
-        "gridOffsetX": 0, "gridOffsetY": 0, "gridColor": 10401023, "gridAlpha": 0.8,
-        "snap": true, "zoomFactor": 1, "windowMask": false
+        "grid": true,
+        "gridType": "rectangular",
+        "gridWidth": 32,
+        "gridHeight": 32,
+        "gridOffsetX": 0,
+        "gridOffsetY": 0,
+        "gridColor": 10401023,
+        "gridAlpha": 0.8,
+        "snap": true,
+        "zoomFactor": 1,
+        "windowMask": false
       },
       "objectsGroups": [
-        { "name": "Platforms", "objects": [{ "name": "Ground" }] },
-        { "name": "Hazards", "objects": [{ "name": "Spike" }] }
+        {
+          "name": "Platforms",
+          "objects": [
+            {
+              "name": "Ground"
+            },
+            {
+              "name": "Platform"
+            },
+            {
+              "name": "MovingPlatform"
+            }
+          ]
+        },
+        {
+          "name": "Hazards",
+          "objects": [
+            {
+              "name": "Spike"
+            }
+          ]
+        },
+        {
+          "name": "Foes",
+          "objects": [
+            {
+              "name": "Enemy"
+            },
+            {
+              "name": "Bat"
+            },
+            {
+              "name": "Boss"
+            }
+          ]
+        }
       ],
       "variables": [],
       "instances": [
-        { "angle": 0, "customSize": true, "height": 64, "width": 800, "layer": "", "name": "Ground", "x": 0, "y": 536, "zOrder": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "g1" },
-        { "angle": 0, "customSize": true, "height": 32, "width": 192, "layer": "", "name": "Ground", "x": 150, "y": 420, "zOrder": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "g2" },
-        { "angle": 0, "customSize": true, "height": 32, "width": 192, "layer": "", "name": "Ground", "x": 480, "y": 340, "zOrder": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "g3" },
-        { "angle": 0, "customSize": true, "height": 32, "width": 128, "layer": "", "name": "Ground", "x": 300, "y": 220, "zOrder": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "g4" },
-        { "angle": 0, "customSize": true, "height": 64, "width": 64, "layer": "", "name": "Player", "x": 64, "y": 472, "zOrder": 2, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "p1" },
-        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Spike", "x": 350, "y": 504, "zOrder": 1, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "s1" },
-        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Spike", "x": 600, "y": 504, "zOrder": 1, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "s2" },
-        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Enemy", "x": 500, "y": 500, "zOrder": 1, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "e1" },
-        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "ScoreText", "x": 16, "y": 16, "zOrder": 10, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "st1" },
-        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "LivesText", "x": 600, "y": 16, "zOrder": 10, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "lt1" }
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 64,
+          "width": 1600,
+          "layer": "",
+          "name": "Ground",
+          "x": 0,
+          "y": 536,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "ground-55"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 160,
+          "layer": "",
+          "name": "Platform",
+          "x": 220,
+          "y": 420,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-56"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 160,
+          "layer": "",
+          "name": "Platform",
+          "x": 480,
+          "y": 340,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-57"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 128,
+          "layer": "",
+          "name": "Platform",
+          "x": 760,
+          "y": 400,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-58"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 160,
+          "layer": "",
+          "name": "Platform",
+          "x": 1000,
+          "y": 300,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-59"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 192,
+          "layer": "",
+          "name": "Platform",
+          "x": 1280,
+          "y": 380,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-60"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 360,
+          "y": 504,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s1-0"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 620,
+          "y": 504,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s1-1"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 900,
+          "y": 504,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s1-2"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 1180,
+          "y": 504,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s1-3"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Enemy",
+          "x": 500,
+          "y": 500,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [
+            {
+              "name": "range",
+              "type": "number",
+              "value": 50
+            }
+          ],
+          "persistentUuid": "e1a"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Enemy",
+          "x": 1100,
+          "y": 500,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [
+            {
+              "name": "range",
+              "type": "number",
+              "value": 70
+            }
+          ],
+          "persistentUuid": "e1b"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 48,
+          "width": 48,
+          "layer": "",
+          "name": "Player",
+          "x": 48,
+          "y": 472,
+          "zOrder": 5,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "player-61"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Checkpoint",
+          "x": 800,
+          "y": 496,
+          "zOrder": 2,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "checkpoint-62"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Flag",
+          "x": 1500,
+          "y": 472,
+          "zOrder": 3,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "flag-63"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "ScoreText",
+          "x": 16,
+          "y": 12,
+          "zOrder": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "scoretext-64"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "LivesText",
+          "x": 620,
+          "y": 12,
+          "zOrder": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "livestext-65"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "LevelText",
+          "x": 16,
+          "y": 42,
+          "zOrder": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "leveltext-66"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "MessageText",
+          "x": 300,
+          "y": 250,
+          "zOrder": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "messagetext-67"
+        }
       ],
       "objects": [
         {
-          "assetStoreId": "", "name": "Player", "type": "Sprite",
-          "updateIfNotVisible": false, "variables": [], "effects": [],
+          "assetStoreId": "",
+          "name": "Player",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
           "behaviors": [
             {
-              "name": "PlatformCharacter", "type": "PlatformBehavior::PlatformerObjectBehavior",
-              "acceleration": 1500, "deceleration": 1500, "gravity": 1200,
-              "jumpSpeed": 850, "ladderClimbingSpeed": 150, "maxFallingSpeed": 700,
-              "maxSpeed": 450, "slopeMaxAngle": 60, "canGrabPlatforms": false,
-              "ignoreDefaultControls": false, "canGoDownFromJumpthru": true, "useLegacyTrajectory": false
+              "name": "PlatformCharacter",
+              "type": "PlatformBehavior::PlatformerObjectBehavior",
+              "acceleration": 1500,
+              "deceleration": 1500,
+              "gravity": 1200,
+              "jumpSpeed": 880,
+              "ladderClimbingSpeed": 150,
+              "maxFallingSpeed": 750,
+              "maxSpeed": 460,
+              "slopeMaxAngle": 60,
+              "canGrabPlatforms": false,
+              "ignoreDefaultControls": false,
+              "canGoDownFromJumpthru": true,
+              "useLegacyTrajectory": false
             }
           ],
-          "animations": [{ "name": "run", "useMultipleDirections": false, "directions": [{ "looping": true, "timeBetweenFrames": 0.08, "sprites": [{ "hasCustomCollisionMask": false, "image": "runner.png", "points": [], "originPoint": { "name": "origine", "x": 0, "y": 0 }, "centerPoint": { "automatic": true, "name": "centre", "x": 0, "y": 0 }, "customCollisionMask": [] }] }] }]
+          "animations": [
+            {
+              "name": "run",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "runner.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         },
         {
-          "assetStoreId": "", "name": "Ground", "type": "TiledSpriteObject::TiledSprite",
-          "updateIfNotVisible": false, "variables": [], "effects": [],
-          "behaviors": [{ "name": "Platform", "type": "PlatformBehavior::PlatformBehavior", "canBeGrabbed": false, "platformType": "NormalPlatform" }],
-          "width": 800, "height": 64, "texture": "ground.png"
+          "assetStoreId": "",
+          "name": "Ground",
+          "type": "TiledSpriteObject::TiledSprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Platform",
+              "type": "PlatformBehavior::PlatformBehavior",
+              "canBeGrabbed": false,
+              "platformType": "NormalPlatform"
+            }
+          ],
+          "width": 800,
+          "height": 64,
+          "texture": "ground.png"
         },
         {
-          "assetStoreId": "", "name": "Spike", "type": "Sprite",
-          "updateIfNotVisible": false, "variables": [], "effects": [], "behaviors": [],
-          "animations": [{ "name": "idle", "useMultipleDirections": false, "directions": [{ "looping": false, "timeBetweenFrames": 0.08, "sprites": [{ "hasCustomCollisionMask": false, "image": "spike.png", "points": [], "originPoint": { "name": "origine", "x": 0, "y": 0 }, "centerPoint": { "automatic": true, "name": "centre", "x": 0, "y": 0 }, "customCollisionMask": [] }] }] }]
+          "assetStoreId": "",
+          "name": "Platform",
+          "type": "TiledSpriteObject::TiledSprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Platform",
+              "type": "PlatformBehavior::PlatformBehavior",
+              "canBeGrabbed": false,
+              "platformType": "NormalPlatform"
+            }
+          ],
+          "width": 192,
+          "height": 32,
+          "texture": "ground.png"
         },
         {
-          "assetStoreId": "", "name": "Enemy", "type": "Sprite",
-          "updateIfNotVisible": false, "variables": [], "effects": [], "behaviors": [],
-          "animations": [{ "name": "idle", "useMultipleDirections": false, "directions": [{ "looping": true, "timeBetweenFrames": 0.08, "sprites": [{ "hasCustomCollisionMask": false, "image": "enemy.png", "points": [], "originPoint": { "name": "origine", "x": 0, "y": 0 }, "centerPoint": { "automatic": true, "name": "centre", "x": 0, "y": 0 }, "customCollisionMask": [] }] }] }]
+          "assetStoreId": "",
+          "name": "MovingPlatform",
+          "type": "TiledSpriteObject::TiledSprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Platform",
+              "type": "PlatformBehavior::PlatformBehavior",
+              "canBeGrabbed": false,
+              "platformType": "NormalPlatform"
+            }
+          ],
+          "width": 128,
+          "height": 24,
+          "texture": "moving-platform.png"
         },
         {
-          "assetStoreId": "", "name": "ScoreText", "type": "TextObject::Text",
-          "updateIfNotVisible": false, "variables": [], "effects": [], "behaviors": [],
-          "characterSize": 28, "font": "", "textAlignment": "left",
-          "color": { "b": 255, "g": 255, "r": 255 }, "string": "Score: 0",
-          "bold": true, "italic": false, "underlined": false, "smoothed": true,
-          "isOutlineEnabled": true, "outlineColor": { "b": 0, "g": 0, "r": 0 }, "outlineThickness": 2,
-          "isShadowEnabled": false, "shadowColor": { "b": 0, "g": 0, "r": 0 },
-          "shadowOpacity": 127, "shadowDistance": 1, "shadowAngle": 90, "shadowBlurRadius": 1
+          "assetStoreId": "",
+          "name": "Spike",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "spike.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         },
         {
-          "assetStoreId": "", "name": "LivesText", "type": "TextObject::Text",
-          "updateIfNotVisible": false, "variables": [], "effects": [], "behaviors": [],
-          "characterSize": 28, "font": "", "textAlignment": "right",
-          "color": { "b": 100, "g": 100, "r": 255 }, "string": "Lives: 3",
-          "bold": true, "italic": false, "underlined": false, "smoothed": true,
-          "isOutlineEnabled": true, "outlineColor": { "b": 0, "g": 0, "r": 0 }, "outlineThickness": 2,
-          "isShadowEnabled": false, "shadowColor": { "b": 0, "g": 0, "r": 0 },
-          "shadowOpacity": 127, "shadowDistance": 1, "shadowAngle": 90, "shadowBlurRadius": 1
+          "assetStoreId": "",
+          "name": "Enemy",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [
+            {
+              "name": "dir",
+              "type": "number",
+              "value": 1
+            },
+            {
+              "name": "hp",
+              "type": "number",
+              "value": 1
+            }
+          ],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "enemy.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Bat",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [
+            {
+              "name": "dir",
+              "type": "number",
+              "value": 1
+            },
+            {
+              "name": "baseY",
+              "type": "number",
+              "value": 0
+            }
+          ],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "fly",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "bat.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Boss",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [
+            {
+              "name": "dir",
+              "type": "number",
+              "value": 1
+            },
+            {
+              "name": "hp",
+              "type": "number",
+              "value": 3
+            }
+          ],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "boss.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Flag",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "wave",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "flag.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Checkpoint",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "checkpoint.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "ScoreText",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 26,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "string": "Score: 0",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        },
+        {
+          "assetStoreId": "",
+          "name": "LivesText",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 26,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 120,
+            "b": 120
+          },
+          "string": "Lives: 3",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        },
+        {
+          "assetStoreId": "",
+          "name": "LevelText",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 22,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 180,
+            "g": 220,
+            "b": 255
+          },
+          "string": "Level 1",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        },
+        {
+          "assetStoreId": "",
+          "name": "MessageText",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 36,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 255,
+            "b": 120
+          },
+          "string": "",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        },
+        {
+          "assetStoreId": "",
+          "name": "ScorePopup",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 20,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 220,
+            "b": 80
+          },
+          "string": "+100",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
         }
       ],
       "objectsFolderStructure": {
         "folderName": "__ROOT",
         "children": [
-          { "objectName": "Player" }, { "objectName": "Ground" }, { "objectName": "Spike" },
-          { "objectName": "Enemy" }, { "objectName": "ScoreText" }, { "objectName": "LivesText" }
+          {
+            "objectName": "Player"
+          },
+          {
+            "objectName": "Ground"
+          },
+          {
+            "objectName": "Platform"
+          },
+          {
+            "objectName": "MovingPlatform"
+          },
+          {
+            "objectName": "Spike"
+          },
+          {
+            "objectName": "Enemy"
+          },
+          {
+            "objectName": "Bat"
+          },
+          {
+            "objectName": "Boss"
+          },
+          {
+            "objectName": "Flag"
+          },
+          {
+            "objectName": "Checkpoint"
+          },
+          {
+            "objectName": "ScoreText"
+          },
+          {
+            "objectName": "LivesText"
+          },
+          {
+            "objectName": "LevelText"
+          },
+          {
+            "objectName": "MessageText"
+          },
+          {
+            "objectName": "ScorePopup"
+          }
         ]
       },
       "events": [
         {
           "type": "BuiltinCommonInstructions::Standard",
-          "conditions": [{ "type": { "value": "DepartScene" }, "parameters": [""] }],
+          "conditions": [
+            {
+              "type": {
+                "value": "DepartScene"
+              },
+              "parameters": [
+                ""
+              ]
+            }
+          ],
           "actions": [
-            { "type": { "value": "SetNumberVariable" }, "parameters": ["Score", "=", "0"] },
-            { "type": { "value": "SetNumberVariable" }, "parameters": ["Lives", "=", "3"] },
-            { "type": { "value": "TextObject::String" }, "parameters": ["ScoreText", "=", "\"Score: 0\""] },
-            { "type": { "value": "TextObject::String" }, "parameters": ["LivesText", "=", "\"Lives: 3\""] }
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Lives",
+                "=",
+                "3"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Score",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointX",
+                "=",
+                "48"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointY",
+                "=",
+                "472"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Invuln",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "GameOver",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScoreText",
+                "=",
+                "\"Score: \" + ToString(GlobalVariable(Score))"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "LivesText",
+                "=",
+                "\"Lives: \" + ToString(GlobalVariable(Lives))"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "LevelText",
+                "=",
+                "\"Level 1\""
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Hide"
+              },
+              "parameters": [
+                "ScorePopup"
+              ]
+            },
+            {
+              "type": {
+                "value": "Hide"
+              },
+              "parameters": [
+                "MessageText"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": "var dt = runtimeScene.getScene().getTimeManager().getElapsedTime() / 1000;\nif (!runtimeScene.__t) runtimeScene.__t = 0;\nruntimeScene.__t += dt;\nvar t = runtimeScene.__t;\nvar vars = runtimeScene.getGame().getVariables();\n// also try scene vars fallback\nfunction gVar(name) {\n  var v = runtimeScene.getGame().getVariables().get(name);\n  return v;\n}\nvar inv = gVar(\"Invuln\");\nif (inv.getAsNumber() > 0) inv.sub(dt);\n\nvar players = runtimeScene.getObjects(\"Player\");\nvar p = players[0];\nvar halfW = 400, halfH = 300;\nvar levelW = 1600, levelH = 600;\nif (p) {\n  var camX = Math.max(halfW, Math.min(levelW - halfW, p.getCenterXInScene()));\n  var camY = Math.max(halfH, Math.min(levelH - halfH, p.getCenterYInScene()));\n  var layer = runtimeScene.getLayer(\"\");\n  layer.setCameraX(camX, 0);\n  layer.setCameraY(camY, 0);\n  function pin(name, ox, oy) {\n    var arr = runtimeScene.getObjects(name);\n    for (var i = 0; i < arr.length; i++) {\n      arr[i].setX(camX - halfW + ox);\n      arr[i].setY(camY - halfH + oy);\n    }\n  }\n  pin(\"ScoreText\", 16, 12);\n  pin(\"LivesText\", 620, 12);\n  pin(\"LevelText\", 16, 42);\n  pin(\"MessageText\", halfW - 100, halfH - 50);\n  // blink when invulnerable\n  if (inv.getAsNumber() > 0) {\n    p.hide(Math.floor(t * 12) % 2 === 0);\n  } else {\n    p.hide(false);\n  }\n}\n\n// Moving platforms: store home on first frame via object var homeX/homeY/range/axis\nvar mps = runtimeScene.getObjects(\"MovingPlatform\");\nfor (var i = 0; i < mps.length; i++) {\n  var m = mps[i];\n  var mv = m.getVariables();\n  if (!mv.has(\"init\")) {\n    mv.get(\"init\").setNumber(1);\n    mv.get(\"homeX\").setNumber(m.getX());\n    mv.get(\"homeY\").setNumber(m.getY());\n    if (!mv.has(\"range\")) mv.get(\"range\").setNumber(80);\n    if (!mv.has(\"axis\")) mv.get(\"axis\").setNumber(0); // 0=x, 1=y\n    if (!mv.has(\"speed\")) mv.get(\"speed\").setNumber(1.2);\n  }\n  var homeX = mv.get(\"homeX\").getAsNumber();\n  var homeY = mv.get(\"homeY\").getAsNumber();\n  var range = mv.get(\"range\").getAsNumber();\n  var axis = mv.get(\"axis\").getAsNumber();\n  var speed = mv.get(\"speed\").getAsNumber();\n  var phase = t * speed + i * 1.3;\n  if (axis < 0.5) m.setX(homeX + Math.sin(phase) * range);\n  else m.setY(homeY + Math.sin(phase) * range);\n}\n\n// Enemy slime patrol\nvar enemies = runtimeScene.getObjects(\"Enemy\");\nfor (var i = 0; i < enemies.length; i++) {\n  var e = enemies[i];\n  var ev = e.getVariables();\n  if (!ev.has(\"init\")) {\n    ev.get(\"init\").setNumber(1);\n    ev.get(\"homeX\").setNumber(e.getX());\n    if (!ev.has(\"range\")) ev.get(\"range\").setNumber(60);\n    if (!ev.has(\"dir\")) ev.get(\"dir\").setNumber(1);\n    if (!ev.has(\"spd\")) ev.get(\"spd\").setNumber(70);\n  }\n  var dir = ev.get(\"dir\").getAsNumber();\n  var spd = ev.get(\"spd\").getAsNumber();\n  var homeX = ev.get(\"homeX\").getAsNumber();\n  var range = ev.get(\"range\").getAsNumber();\n  e.setX(e.getX() + dir * spd * dt);\n  if (e.getX() > homeX + range) { ev.get(\"dir\").setNumber(-1); }\n  if (e.getX() < homeX - range) { ev.get(\"dir\").setNumber(1); }\n}\n\n// Bats: sine fly\nvar bats = runtimeScene.getObjects(\"Bat\");\nfor (var i = 0; i < bats.length; i++) {\n  var b = bats[i];\n  var bv = b.getVariables();\n  if (!bv.has(\"init\")) {\n    bv.get(\"init\").setNumber(1);\n    bv.get(\"homeX\").setNumber(b.getX());\n    bv.get(\"homeY\").setNumber(b.getY());\n    if (!bv.has(\"range\")) bv.get(\"range\").setNumber(90);\n  }\n  var hx = bv.get(\"homeX\").getAsNumber();\n  var hy = bv.get(\"homeY\").getAsNumber();\n  var rng = bv.get(\"range\").getAsNumber();\n  b.setX(hx + Math.sin(t * 1.4 + i) * rng);\n  b.setY(hy + Math.cos(t * 2.1 + i * 0.7) * 28);\n}\n\n// Boss patrol slower + larger range\nvar bosses = runtimeScene.getObjects(\"Boss\");\nfor (var i = 0; i < bosses.length; i++) {\n  var bo = bosses[i];\n  var bov = bo.getVariables();\n  if (!bov.has(\"init\")) {\n    bov.get(\"init\").setNumber(1);\n    bov.get(\"homeX\").setNumber(bo.getX());\n    if (!bov.has(\"range\")) bov.get(\"range\").setNumber(120);\n    if (!bov.has(\"dir\")) bov.get(\"dir\").setNumber(1);\n    if (!bov.has(\"hp\")) bov.get(\"hp\").setNumber(3);\n    if (!bov.has(\"spd\")) bov.get(\"spd\").setNumber(55);\n  }\n  var dir = bov.get(\"dir\").getAsNumber();\n  var spd = bov.get(\"spd\").getAsNumber();\n  var homeX = bov.get(\"homeX\").getAsNumber();\n  var range = bov.get(\"range\").getAsNumber();\n  // enrage when low hp\n  if (bov.get(\"hp\").getAsNumber() <= 1) spd *= 1.6;\n  bo.setX(bo.getX() + dir * spd * dt);\n  if (bo.getX() > homeX + range) bov.get(\"dir\").setNumber(-1);\n  if (bo.getX() < homeX - range) bov.get(\"dir\").setNumber(1);\n}\n\n// Score popups\nvar pops = runtimeScene.getObjects(\"ScorePopup\");\nfor (var i = pops.length - 1; i >= 0; i--) {\n  var o = pops[i];\n  var age = o.getVariables().get(\"age\");\n  age.add(dt);\n  o.setY(o.getY() - 55 * dt);\n  if (age.getAsNumber() > 0.75) o.deleteFromScene(runtimeScene);\n}",
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": false
+        },
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": "var players = runtimeScene.getObjects(\"Player\");\nif (!players.length) return;\nvar p = players[0];\nvar inv = runtimeScene.getGame().getVariables().get(\"Invuln\").getAsNumber();\nvar score = runtimeScene.getGame().getVariables().get(\"Score\");\nvar falling = p.getBehavior(\"PlatformCharacter\").isFalling();\nvar pBottom = p.getY() + p.getHeight();\nvar pPrevBottom = pBottom; // approximate\n\nfunction tryStomp(list, points, sfx) {\n  for (var i = list.length - 1; i >= 0; i--) {\n    var e = list[i];\n    if (!p.isCollidingWith(e)) continue;\n    var eTop = e.getY();\n    var eMid = e.getY() + e.getHeight() * 0.45;\n    // stomp if player bottom is near top of enemy and falling\n    if (falling && pBottom <= eMid + 8 && p.getY() < eTop) {\n      var hp = e.getVariables().get(\"hp\");\n      hp.sub(1);\n      // bounce player\n      p.getBehavior(\"PlatformCharacter\").setCanJump();\n      p.getBehavior(\"PlatformCharacter\").simulateJumpKey();\n      try {\n        var a = new Audio(\"/arcade/sfx/\" + (sfx || \"enemy-stomp\") + \".mp3\");\n        a.volume = 0.55; a.play();\n      } catch (err) {}\n      if (hp.getAsNumber() <= 0) {\n        score.add(points);\n        // popup\n        var popup = runtimeScene.createObject(\"ScorePopup\");\n        if (popup) {\n          popup.setPosition(e.getX(), e.getY() - 10);\n          popup.setString(\"+\" + points);\n          popup.getVariables().get(\"age\").setNumber(0);\n        }\n        e.deleteFromScene(runtimeScene);\n      } else {\n        // flash boss - knock back slightly\n        e.setX(e.getX() + (e.getX() < p.getX() ? -20 : 20));\n      }\n    } else if (inv <= 0) {\n      // side hit - damage\n      runtimeScene.getGame().getVariables().get(\"__hit\").setNumber(1);\n    }\n  }\n}\nruntimeScene.getGame().getVariables().get(\"__hit\").setNumber(0);\ntryStomp(runtimeScene.getObjects(\"Enemy\"), 100, \"enemy-stomp\");\ntryStomp(runtimeScene.getObjects(\"Bat\"), 150, \"enemy-stomp\");\ntryStomp(runtimeScene.getObjects(\"Boss\"), 300, \"enemy-stomp\");",
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": false
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "__hit",
+                "=",
+                "1"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "__hit",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Lives",
+                "-",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "LivesText",
+                "=",
+                "\"Lives: \" + ToString(GlobalVariable(Lives))"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Invuln",
+                "=",
+                "1.5"
+              ]
+            },
+            {
+              "type": {
+                "value": "MettreXY"
+              },
+              "parameters": [
+                "Player",
+                "=",
+                "GlobalVariable(CheckpointX)",
+                "=",
+                "GlobalVariable(CheckpointY)"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "jump.mp3",
+                "",
+                "50",
+                "0.5"
+              ]
+            }
           ]
         },
         {
           "type": "BuiltinCommonInstructions::Standard",
-          "conditions": [{ "type": { "value": "CollisionNP" }, "parameters": ["Player", "Spike", "", "", ""] }],
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Spike",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "Invuln",
+                "<=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "GameOver",
+                "=",
+                "0"
+              ]
+            }
+          ],
           "actions": [
-            { "type": { "value": "SetNumberVariable" }, "parameters": ["Lives", "-", "1"] },
-            { "type": { "value": "TextObject::String" }, "parameters": ["LivesText", "=", "\"Lives: \" + ToString(Variable(Lives))"] },
-            { "type": { "value": "MettreXY" }, "parameters": ["Player", "=", "64", "=", "472"] }
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Lives",
+                "-",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "LivesText",
+                "=",
+                "\"Lives: \" + ToString(GlobalVariable(Lives))"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Invuln",
+                "=",
+                "1.5"
+              ]
+            },
+            {
+              "type": {
+                "value": "MettreXY"
+              },
+              "parameters": [
+                "Player",
+                "=",
+                "GlobalVariable(CheckpointX)",
+                "=",
+                "GlobalVariable(CheckpointY)"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "jump.mp3",
+                "",
+                "50",
+                "0.5"
+              ]
+            }
           ]
         },
         {
           "type": "BuiltinCommonInstructions::Standard",
-          "conditions": [{ "type": { "value": "CollisionNP" }, "parameters": ["Player", "Enemy", "", "", ""] }],
+          "conditions": [
+            {
+              "type": {
+                "value": "PosY"
+              },
+              "parameters": [
+                "Player",
+                ">",
+                "680"
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "GameOver",
+                "=",
+                "0"
+              ]
+            }
+          ],
           "actions": [
-            { "type": { "value": "SetNumberVariable" }, "parameters": ["Lives", "-", "1"] },
-            { "type": { "value": "TextObject::String" }, "parameters": ["LivesText", "=", "\"Lives: \" + ToString(Variable(Lives))"] },
-            { "type": { "value": "MettreXY" }, "parameters": ["Player", "=", "64", "=", "472"] }
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Lives",
+                "-",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "LivesText",
+                "=",
+                "\"Lives: \" + ToString(GlobalVariable(Lives))"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Invuln",
+                "=",
+                "1.2"
+              ]
+            },
+            {
+              "type": {
+                "value": "MettreXY"
+              },
+              "parameters": [
+                "Player",
+                "=",
+                "GlobalVariable(CheckpointX)",
+                "=",
+                "GlobalVariable(CheckpointY)"
+              ]
+            }
           ]
         },
         {
           "type": "BuiltinCommonInstructions::Standard",
-          "conditions": [{ "type": { "value": "NumberVariable" }, "parameters": ["Lives", "<=", "0"] }],
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Checkpoint",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "BuiltinCommonInstructions::Once"
+              },
+              "parameters": []
+            }
+          ],
           "actions": [
-            { "type": { "value": "TextObject::String" }, "parameters": ["ScoreText", "=", "\"GAME OVER! Score: \" + ToString(Variable(Score))"] }
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointX",
+                "=",
+                "Checkpoint.X()"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointY",
+                "=",
+                "Checkpoint.Y() - 40"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "coin-collect.mp3",
+                "",
+                "40",
+                "0.7"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"Checkpoint!\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Show"
+              },
+              "parameters": [
+                "MessageText",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "ResetTimer"
+              },
+              "parameters": [
+                "",
+                "\"msg\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CompareTimer"
+              },
+              "parameters": [
+                "",
+                "\"msg\"",
+                ">=",
+                "1.2"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "Hide"
+              },
+              "parameters": [
+                "MessageText"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "Lives",
+                "<=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "GameOver",
+                "=",
+                "0"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "GameOver",
+                "=",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"GAME OVER\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Show"
+              },
+              "parameters": [
+                "MessageText",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "ResetTimer"
+              },
+              "parameters": [
+                "",
+                "\"gameover\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "GameOver",
+                "=",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "CompareTimer"
+              },
+              "parameters": [
+                "",
+                "\"gameover\"",
+                ">=",
+                "2.5"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Score",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Lives",
+                "=",
+                "3"
+              ]
+            },
+            {
+              "type": {
+                "value": "Scene"
+              },
+              "parameters": [
+                "",
+                "\"Level1\"",
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Flag",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "GameOver",
+                "=",
+                "0"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Score",
+                "+",
+                "500"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScoreText",
+                "=",
+                "\"Score: \" + ToString(GlobalVariable(Score))"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "level-complete.mp3",
+                "",
+                "85",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"Level clear!\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Show"
+              },
+              "parameters": [
+                "MessageText",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "ResetTimer"
+              },
+              "parameters": [
+                "",
+                "\"levelend\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "CompareTimer"
+              },
+              "parameters": [
+                "",
+                "\"levelend\"",
+                ">=",
+                "1.5"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "Scene"
+              },
+              "parameters": [
+                "",
+                "\"Level2\"",
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "PlatformBehavior::IsJumping"
+              },
+              "parameters": [
+                "Player",
+                "PlatformCharacter"
+              ]
+            },
+            {
+              "type": {
+                "value": "BuiltinCommonInstructions::Once"
+              },
+              "parameters": []
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "jump.mp3",
+                "",
+                "30",
+                "1"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [],
+          "actions": [
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScoreText",
+                "=",
+                "\"Score: \" + ToString(GlobalVariable(Score))"
+              ]
+            }
           ]
         }
       ],
       "layers": [
         {
-          "ambientLightColorB": 200, "ambientLightColorG": 200, "ambientLightColorR": 200,
-          "camera3DFarPlaneDistance": 10000, "camera3DFieldOfView": 45, "camera3DNearPlaneDistance": 3,
-          "followBaseLayerCamera": false, "isLightingLayer": false, "isLocked": false,
-          "name": "", "renderingType": "", "visibility": true,
-          "cameras": [{ "defaultSize": true, "defaultViewport": true, "height": 0, "viewportBottom": 1, "viewportLeft": 0, "viewportRight": 1, "viewportTop": 0, "width": 0 }],
+          "ambientLightColorB": 200,
+          "ambientLightColorG": 200,
+          "ambientLightColorR": 200,
+          "camera3DFarPlaneDistance": 10000,
+          "camera3DFieldOfView": 45,
+          "camera3DNearPlaneDistance": 3,
+          "followBaseLayerCamera": false,
+          "isLightingLayer": false,
+          "isLocked": false,
+          "name": "",
+          "renderingType": "",
+          "visibility": true,
+          "cameras": [
+            {
+              "defaultSize": true,
+              "defaultViewport": true,
+              "height": 0,
+              "viewportBottom": 1,
+              "viewportLeft": 0,
+              "viewportRight": 1,
+              "viewportTop": 0,
+              "width": 0
+            }
+          ],
           "effects": []
         }
       ],
       "behaviorsSharedData": [
-        { "name": "PlatformCharacter", "type": "PlatformBehavior::PlatformerObjectBehavior" },
-        { "name": "Platform", "type": "PlatformBehavior::PlatformBehavior" }
+        {
+          "name": "PlatformCharacter",
+          "type": "PlatformBehavior::PlatformerObjectBehavior"
+        },
+        {
+          "name": "Platform",
+          "type": "PlatformBehavior::PlatformBehavior"
+        }
+      ]
+    },
+    {
+      "b": 50,
+      "r": 30,
+      "v": 20,
+      "disableInputWhenNotFocused": true,
+      "mangledName": "Level2",
+      "name": "Level2",
+      "standardSortMethod": true,
+      "stopSoundsOnStartup": false,
+      "title": "",
+      "uiSettings": {
+        "grid": true,
+        "gridType": "rectangular",
+        "gridWidth": 32,
+        "gridHeight": 32,
+        "gridOffsetX": 0,
+        "gridOffsetY": 0,
+        "gridColor": 10401023,
+        "gridAlpha": 0.8,
+        "snap": true,
+        "zoomFactor": 1,
+        "windowMask": false
+      },
+      "objectsGroups": [
+        {
+          "name": "Platforms",
+          "objects": [
+            {
+              "name": "Ground"
+            },
+            {
+              "name": "Platform"
+            },
+            {
+              "name": "MovingPlatform"
+            }
+          ]
+        },
+        {
+          "name": "Hazards",
+          "objects": [
+            {
+              "name": "Spike"
+            }
+          ]
+        },
+        {
+          "name": "Foes",
+          "objects": [
+            {
+              "name": "Enemy"
+            },
+            {
+              "name": "Bat"
+            },
+            {
+              "name": "Boss"
+            }
+          ]
+        }
+      ],
+      "variables": [],
+      "instances": [
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 64,
+          "width": 400,
+          "layer": "",
+          "name": "Ground",
+          "x": 0,
+          "y": 636,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "ground-68"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 64,
+          "width": 400,
+          "layer": "",
+          "name": "Ground",
+          "x": 700,
+          "y": 636,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "ground-69"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 64,
+          "width": 500,
+          "layer": "",
+          "name": "Ground",
+          "x": 1500,
+          "y": 636,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "ground-70"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 450,
+          "y": 604,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s2a"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 520,
+          "y": 604,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s2b"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 590,
+          "y": 604,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s2c"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 1180,
+          "y": 604,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s2d"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 1280,
+          "y": 604,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s2e"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 1380,
+          "y": 604,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s2f"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 128,
+          "layer": "",
+          "name": "Platform",
+          "x": 420,
+          "y": 500,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-71"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 24,
+          "width": 128,
+          "layer": "",
+          "name": "MovingPlatform",
+          "x": 560,
+          "y": 420,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [
+            {
+              "name": "range",
+              "type": "number",
+              "value": 70
+            },
+            {
+              "name": "axis",
+              "type": "number",
+              "value": 0
+            },
+            {
+              "name": "speed",
+              "type": "number",
+              "value": 1.4
+            }
+          ],
+          "persistentUuid": "movingplatform-72"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 160,
+          "layer": "",
+          "name": "Platform",
+          "x": 900,
+          "y": 480,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-73"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 24,
+          "width": 128,
+          "layer": "",
+          "name": "MovingPlatform",
+          "x": 1200,
+          "y": 400,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [
+            {
+              "name": "range",
+              "type": "number",
+              "value": 60
+            },
+            {
+              "name": "axis",
+              "type": "number",
+              "value": 1
+            },
+            {
+              "name": "speed",
+              "type": "number",
+              "value": 1.6
+            }
+          ],
+          "persistentUuid": "movingplatform-74"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 128,
+          "layer": "",
+          "name": "Platform",
+          "x": 1450,
+          "y": 360,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-75"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 160,
+          "layer": "",
+          "name": "Platform",
+          "x": 1700,
+          "y": 480,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-76"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Enemy",
+          "x": 800,
+          "y": 600,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [
+            {
+              "name": "range",
+              "type": "number",
+              "value": 80
+            }
+          ],
+          "persistentUuid": "e2a"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Enemy",
+          "x": 1600,
+          "y": 600,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [
+            {
+              "name": "range",
+              "type": "number",
+              "value": 60
+            }
+          ],
+          "persistentUuid": "e2b"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Bat",
+          "x": 600,
+          "y": 280,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [
+            {
+              "name": "range",
+              "type": "number",
+              "value": 100
+            }
+          ],
+          "persistentUuid": "b2a"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Bat",
+          "x": 1300,
+          "y": 260,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [
+            {
+              "name": "range",
+              "type": "number",
+              "value": 80
+            }
+          ],
+          "persistentUuid": "b2b"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 48,
+          "width": 48,
+          "layer": "",
+          "name": "Player",
+          "x": 48,
+          "y": 572,
+          "zOrder": 5,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "player-77"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Checkpoint",
+          "x": 950,
+          "y": 596,
+          "zOrder": 2,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "checkpoint-78"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Flag",
+          "x": 1900,
+          "y": 572,
+          "zOrder": 3,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "flag-79"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "ScoreText",
+          "x": 16,
+          "y": 12,
+          "zOrder": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "scoretext-80"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "LivesText",
+          "x": 620,
+          "y": 12,
+          "zOrder": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "livestext-81"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "LevelText",
+          "x": 16,
+          "y": 42,
+          "zOrder": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "leveltext-82"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "MessageText",
+          "x": 300,
+          "y": 250,
+          "zOrder": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "messagetext-83"
+        }
+      ],
+      "objects": [
+        {
+          "assetStoreId": "",
+          "name": "Player",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "PlatformCharacter",
+              "type": "PlatformBehavior::PlatformerObjectBehavior",
+              "acceleration": 1500,
+              "deceleration": 1500,
+              "gravity": 1200,
+              "jumpSpeed": 880,
+              "ladderClimbingSpeed": 150,
+              "maxFallingSpeed": 750,
+              "maxSpeed": 460,
+              "slopeMaxAngle": 60,
+              "canGrabPlatforms": false,
+              "ignoreDefaultControls": false,
+              "canGoDownFromJumpthru": true,
+              "useLegacyTrajectory": false
+            }
+          ],
+          "animations": [
+            {
+              "name": "run",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "runner.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Ground",
+          "type": "TiledSpriteObject::TiledSprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Platform",
+              "type": "PlatformBehavior::PlatformBehavior",
+              "canBeGrabbed": false,
+              "platformType": "NormalPlatform"
+            }
+          ],
+          "width": 800,
+          "height": 64,
+          "texture": "ground.png"
+        },
+        {
+          "assetStoreId": "",
+          "name": "Platform",
+          "type": "TiledSpriteObject::TiledSprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Platform",
+              "type": "PlatformBehavior::PlatformBehavior",
+              "canBeGrabbed": false,
+              "platformType": "NormalPlatform"
+            }
+          ],
+          "width": 192,
+          "height": 32,
+          "texture": "ground.png"
+        },
+        {
+          "assetStoreId": "",
+          "name": "MovingPlatform",
+          "type": "TiledSpriteObject::TiledSprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Platform",
+              "type": "PlatformBehavior::PlatformBehavior",
+              "canBeGrabbed": false,
+              "platformType": "NormalPlatform"
+            }
+          ],
+          "width": 128,
+          "height": 24,
+          "texture": "moving-platform.png"
+        },
+        {
+          "assetStoreId": "",
+          "name": "Spike",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "spike.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Enemy",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [
+            {
+              "name": "dir",
+              "type": "number",
+              "value": 1
+            },
+            {
+              "name": "hp",
+              "type": "number",
+              "value": 1
+            }
+          ],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "enemy.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Bat",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [
+            {
+              "name": "dir",
+              "type": "number",
+              "value": 1
+            },
+            {
+              "name": "baseY",
+              "type": "number",
+              "value": 0
+            }
+          ],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "fly",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "bat.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Boss",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [
+            {
+              "name": "dir",
+              "type": "number",
+              "value": 1
+            },
+            {
+              "name": "hp",
+              "type": "number",
+              "value": 3
+            }
+          ],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "boss.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Flag",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "wave",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "flag.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Checkpoint",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "checkpoint.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "ScoreText",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 26,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "string": "Score: 0",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        },
+        {
+          "assetStoreId": "",
+          "name": "LivesText",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 26,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 120,
+            "b": 120
+          },
+          "string": "Lives: 3",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        },
+        {
+          "assetStoreId": "",
+          "name": "LevelText",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 22,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 180,
+            "g": 220,
+            "b": 255
+          },
+          "string": "Level 1",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        },
+        {
+          "assetStoreId": "",
+          "name": "MessageText",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 36,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 255,
+            "b": 120
+          },
+          "string": "",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        },
+        {
+          "assetStoreId": "",
+          "name": "ScorePopup",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 20,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 220,
+            "b": 80
+          },
+          "string": "+100",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        }
+      ],
+      "objectsFolderStructure": {
+        "folderName": "__ROOT",
+        "children": [
+          {
+            "objectName": "Player"
+          },
+          {
+            "objectName": "Ground"
+          },
+          {
+            "objectName": "Platform"
+          },
+          {
+            "objectName": "MovingPlatform"
+          },
+          {
+            "objectName": "Spike"
+          },
+          {
+            "objectName": "Enemy"
+          },
+          {
+            "objectName": "Bat"
+          },
+          {
+            "objectName": "Boss"
+          },
+          {
+            "objectName": "Flag"
+          },
+          {
+            "objectName": "Checkpoint"
+          },
+          {
+            "objectName": "ScoreText"
+          },
+          {
+            "objectName": "LivesText"
+          },
+          {
+            "objectName": "LevelText"
+          },
+          {
+            "objectName": "MessageText"
+          },
+          {
+            "objectName": "ScorePopup"
+          }
+        ]
+      },
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "DepartScene"
+              },
+              "parameters": [
+                ""
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointX",
+                "=",
+                "48"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointY",
+                "=",
+                "572"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Invuln",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "GameOver",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScoreText",
+                "=",
+                "\"Score: \" + ToString(GlobalVariable(Score))"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "LivesText",
+                "=",
+                "\"Lives: \" + ToString(GlobalVariable(Lives))"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "LevelText",
+                "=",
+                "\"Level 2\""
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Hide"
+              },
+              "parameters": [
+                "ScorePopup"
+              ]
+            },
+            {
+              "type": {
+                "value": "Hide"
+              },
+              "parameters": [
+                "MessageText"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": "var dt = runtimeScene.getScene().getTimeManager().getElapsedTime() / 1000;\nif (!runtimeScene.__t) runtimeScene.__t = 0;\nruntimeScene.__t += dt;\nvar t = runtimeScene.__t;\nvar vars = runtimeScene.getGame().getVariables();\n// also try scene vars fallback\nfunction gVar(name) {\n  var v = runtimeScene.getGame().getVariables().get(name);\n  return v;\n}\nvar inv = gVar(\"Invuln\");\nif (inv.getAsNumber() > 0) inv.sub(dt);\n\nvar players = runtimeScene.getObjects(\"Player\");\nvar p = players[0];\nvar halfW = 400, halfH = 300;\nvar levelW = 2000, levelH = 700;\nif (p) {\n  var camX = Math.max(halfW, Math.min(levelW - halfW, p.getCenterXInScene()));\n  var camY = Math.max(halfH, Math.min(levelH - halfH, p.getCenterYInScene()));\n  var layer = runtimeScene.getLayer(\"\");\n  layer.setCameraX(camX, 0);\n  layer.setCameraY(camY, 0);\n  function pin(name, ox, oy) {\n    var arr = runtimeScene.getObjects(name);\n    for (var i = 0; i < arr.length; i++) {\n      arr[i].setX(camX - halfW + ox);\n      arr[i].setY(camY - halfH + oy);\n    }\n  }\n  pin(\"ScoreText\", 16, 12);\n  pin(\"LivesText\", 620, 12);\n  pin(\"LevelText\", 16, 42);\n  pin(\"MessageText\", halfW - 100, halfH - 50);\n  // blink when invulnerable\n  if (inv.getAsNumber() > 0) {\n    p.hide(Math.floor(t * 12) % 2 === 0);\n  } else {\n    p.hide(false);\n  }\n}\n\n// Moving platforms: store home on first frame via object var homeX/homeY/range/axis\nvar mps = runtimeScene.getObjects(\"MovingPlatform\");\nfor (var i = 0; i < mps.length; i++) {\n  var m = mps[i];\n  var mv = m.getVariables();\n  if (!mv.has(\"init\")) {\n    mv.get(\"init\").setNumber(1);\n    mv.get(\"homeX\").setNumber(m.getX());\n    mv.get(\"homeY\").setNumber(m.getY());\n    if (!mv.has(\"range\")) mv.get(\"range\").setNumber(80);\n    if (!mv.has(\"axis\")) mv.get(\"axis\").setNumber(0); // 0=x, 1=y\n    if (!mv.has(\"speed\")) mv.get(\"speed\").setNumber(1.2);\n  }\n  var homeX = mv.get(\"homeX\").getAsNumber();\n  var homeY = mv.get(\"homeY\").getAsNumber();\n  var range = mv.get(\"range\").getAsNumber();\n  var axis = mv.get(\"axis\").getAsNumber();\n  var speed = mv.get(\"speed\").getAsNumber();\n  var phase = t * speed + i * 1.3;\n  if (axis < 0.5) m.setX(homeX + Math.sin(phase) * range);\n  else m.setY(homeY + Math.sin(phase) * range);\n}\n\n// Enemy slime patrol\nvar enemies = runtimeScene.getObjects(\"Enemy\");\nfor (var i = 0; i < enemies.length; i++) {\n  var e = enemies[i];\n  var ev = e.getVariables();\n  if (!ev.has(\"init\")) {\n    ev.get(\"init\").setNumber(1);\n    ev.get(\"homeX\").setNumber(e.getX());\n    if (!ev.has(\"range\")) ev.get(\"range\").setNumber(60);\n    if (!ev.has(\"dir\")) ev.get(\"dir\").setNumber(1);\n    if (!ev.has(\"spd\")) ev.get(\"spd\").setNumber(70);\n  }\n  var dir = ev.get(\"dir\").getAsNumber();\n  var spd = ev.get(\"spd\").getAsNumber();\n  var homeX = ev.get(\"homeX\").getAsNumber();\n  var range = ev.get(\"range\").getAsNumber();\n  e.setX(e.getX() + dir * spd * dt);\n  if (e.getX() > homeX + range) { ev.get(\"dir\").setNumber(-1); }\n  if (e.getX() < homeX - range) { ev.get(\"dir\").setNumber(1); }\n}\n\n// Bats: sine fly\nvar bats = runtimeScene.getObjects(\"Bat\");\nfor (var i = 0; i < bats.length; i++) {\n  var b = bats[i];\n  var bv = b.getVariables();\n  if (!bv.has(\"init\")) {\n    bv.get(\"init\").setNumber(1);\n    bv.get(\"homeX\").setNumber(b.getX());\n    bv.get(\"homeY\").setNumber(b.getY());\n    if (!bv.has(\"range\")) bv.get(\"range\").setNumber(90);\n  }\n  var hx = bv.get(\"homeX\").getAsNumber();\n  var hy = bv.get(\"homeY\").getAsNumber();\n  var rng = bv.get(\"range\").getAsNumber();\n  b.setX(hx + Math.sin(t * 1.4 + i) * rng);\n  b.setY(hy + Math.cos(t * 2.1 + i * 0.7) * 28);\n}\n\n// Boss patrol slower + larger range\nvar bosses = runtimeScene.getObjects(\"Boss\");\nfor (var i = 0; i < bosses.length; i++) {\n  var bo = bosses[i];\n  var bov = bo.getVariables();\n  if (!bov.has(\"init\")) {\n    bov.get(\"init\").setNumber(1);\n    bov.get(\"homeX\").setNumber(bo.getX());\n    if (!bov.has(\"range\")) bov.get(\"range\").setNumber(120);\n    if (!bov.has(\"dir\")) bov.get(\"dir\").setNumber(1);\n    if (!bov.has(\"hp\")) bov.get(\"hp\").setNumber(3);\n    if (!bov.has(\"spd\")) bov.get(\"spd\").setNumber(55);\n  }\n  var dir = bov.get(\"dir\").getAsNumber();\n  var spd = bov.get(\"spd\").getAsNumber();\n  var homeX = bov.get(\"homeX\").getAsNumber();\n  var range = bov.get(\"range\").getAsNumber();\n  // enrage when low hp\n  if (bov.get(\"hp\").getAsNumber() <= 1) spd *= 1.6;\n  bo.setX(bo.getX() + dir * spd * dt);\n  if (bo.getX() > homeX + range) bov.get(\"dir\").setNumber(-1);\n  if (bo.getX() < homeX - range) bov.get(\"dir\").setNumber(1);\n}\n\n// Score popups\nvar pops = runtimeScene.getObjects(\"ScorePopup\");\nfor (var i = pops.length - 1; i >= 0; i--) {\n  var o = pops[i];\n  var age = o.getVariables().get(\"age\");\n  age.add(dt);\n  o.setY(o.getY() - 55 * dt);\n  if (age.getAsNumber() > 0.75) o.deleteFromScene(runtimeScene);\n}",
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": false
+        },
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": "var players = runtimeScene.getObjects(\"Player\");\nif (!players.length) return;\nvar p = players[0];\nvar inv = runtimeScene.getGame().getVariables().get(\"Invuln\").getAsNumber();\nvar score = runtimeScene.getGame().getVariables().get(\"Score\");\nvar falling = p.getBehavior(\"PlatformCharacter\").isFalling();\nvar pBottom = p.getY() + p.getHeight();\nvar pPrevBottom = pBottom; // approximate\n\nfunction tryStomp(list, points, sfx) {\n  for (var i = list.length - 1; i >= 0; i--) {\n    var e = list[i];\n    if (!p.isCollidingWith(e)) continue;\n    var eTop = e.getY();\n    var eMid = e.getY() + e.getHeight() * 0.45;\n    // stomp if player bottom is near top of enemy and falling\n    if (falling && pBottom <= eMid + 8 && p.getY() < eTop) {\n      var hp = e.getVariables().get(\"hp\");\n      hp.sub(1);\n      // bounce player\n      p.getBehavior(\"PlatformCharacter\").setCanJump();\n      p.getBehavior(\"PlatformCharacter\").simulateJumpKey();\n      try {\n        var a = new Audio(\"/arcade/sfx/\" + (sfx || \"enemy-stomp\") + \".mp3\");\n        a.volume = 0.55; a.play();\n      } catch (err) {}\n      if (hp.getAsNumber() <= 0) {\n        score.add(points);\n        // popup\n        var popup = runtimeScene.createObject(\"ScorePopup\");\n        if (popup) {\n          popup.setPosition(e.getX(), e.getY() - 10);\n          popup.setString(\"+\" + points);\n          popup.getVariables().get(\"age\").setNumber(0);\n        }\n        e.deleteFromScene(runtimeScene);\n      } else {\n        // flash boss - knock back slightly\n        e.setX(e.getX() + (e.getX() < p.getX() ? -20 : 20));\n      }\n    } else if (inv <= 0) {\n      // side hit - damage\n      runtimeScene.getGame().getVariables().get(\"__hit\").setNumber(1);\n    }\n  }\n}\nruntimeScene.getGame().getVariables().get(\"__hit\").setNumber(0);\ntryStomp(runtimeScene.getObjects(\"Enemy\"), 100, \"enemy-stomp\");\ntryStomp(runtimeScene.getObjects(\"Bat\"), 150, \"enemy-stomp\");\ntryStomp(runtimeScene.getObjects(\"Boss\"), 300, \"enemy-stomp\");",
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": false
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "__hit",
+                "=",
+                "1"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "__hit",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Lives",
+                "-",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "LivesText",
+                "=",
+                "\"Lives: \" + ToString(GlobalVariable(Lives))"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Invuln",
+                "=",
+                "1.5"
+              ]
+            },
+            {
+              "type": {
+                "value": "MettreXY"
+              },
+              "parameters": [
+                "Player",
+                "=",
+                "GlobalVariable(CheckpointX)",
+                "=",
+                "GlobalVariable(CheckpointY)"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "jump.mp3",
+                "",
+                "50",
+                "0.5"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Spike",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "Invuln",
+                "<=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "GameOver",
+                "=",
+                "0"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Lives",
+                "-",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "LivesText",
+                "=",
+                "\"Lives: \" + ToString(GlobalVariable(Lives))"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Invuln",
+                "=",
+                "1.5"
+              ]
+            },
+            {
+              "type": {
+                "value": "MettreXY"
+              },
+              "parameters": [
+                "Player",
+                "=",
+                "GlobalVariable(CheckpointX)",
+                "=",
+                "GlobalVariable(CheckpointY)"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "jump.mp3",
+                "",
+                "50",
+                "0.5"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "PosY"
+              },
+              "parameters": [
+                "Player",
+                ">",
+                "780"
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "GameOver",
+                "=",
+                "0"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Lives",
+                "-",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "LivesText",
+                "=",
+                "\"Lives: \" + ToString(GlobalVariable(Lives))"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Invuln",
+                "=",
+                "1.2"
+              ]
+            },
+            {
+              "type": {
+                "value": "MettreXY"
+              },
+              "parameters": [
+                "Player",
+                "=",
+                "GlobalVariable(CheckpointX)",
+                "=",
+                "GlobalVariable(CheckpointY)"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Checkpoint",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "BuiltinCommonInstructions::Once"
+              },
+              "parameters": []
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointX",
+                "=",
+                "Checkpoint.X()"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointY",
+                "=",
+                "Checkpoint.Y() - 40"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "coin-collect.mp3",
+                "",
+                "40",
+                "0.7"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"Checkpoint!\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Show"
+              },
+              "parameters": [
+                "MessageText",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "ResetTimer"
+              },
+              "parameters": [
+                "",
+                "\"msg\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CompareTimer"
+              },
+              "parameters": [
+                "",
+                "\"msg\"",
+                ">=",
+                "1.2"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "Hide"
+              },
+              "parameters": [
+                "MessageText"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "Lives",
+                "<=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "GameOver",
+                "=",
+                "0"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "GameOver",
+                "=",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"GAME OVER\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Show"
+              },
+              "parameters": [
+                "MessageText",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "ResetTimer"
+              },
+              "parameters": [
+                "",
+                "\"gameover\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "GameOver",
+                "=",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "CompareTimer"
+              },
+              "parameters": [
+                "",
+                "\"gameover\"",
+                ">=",
+                "2.5"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Score",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Lives",
+                "=",
+                "3"
+              ]
+            },
+            {
+              "type": {
+                "value": "Scene"
+              },
+              "parameters": [
+                "",
+                "\"Level1\"",
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Flag",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "GameOver",
+                "=",
+                "0"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Score",
+                "+",
+                "500"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScoreText",
+                "=",
+                "\"Score: \" + ToString(GlobalVariable(Score))"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "level-complete.mp3",
+                "",
+                "85",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"Level clear!\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Show"
+              },
+              "parameters": [
+                "MessageText",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "ResetTimer"
+              },
+              "parameters": [
+                "",
+                "\"levelend\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "CompareTimer"
+              },
+              "parameters": [
+                "",
+                "\"levelend\"",
+                ">=",
+                "1.5"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "Scene"
+              },
+              "parameters": [
+                "",
+                "\"Level3\"",
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "PlatformBehavior::IsJumping"
+              },
+              "parameters": [
+                "Player",
+                "PlatformCharacter"
+              ]
+            },
+            {
+              "type": {
+                "value": "BuiltinCommonInstructions::Once"
+              },
+              "parameters": []
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "jump.mp3",
+                "",
+                "30",
+                "1"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [],
+          "actions": [
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScoreText",
+                "=",
+                "\"Score: \" + ToString(GlobalVariable(Score))"
+              ]
+            }
+          ]
+        }
+      ],
+      "layers": [
+        {
+          "ambientLightColorB": 200,
+          "ambientLightColorG": 200,
+          "ambientLightColorR": 200,
+          "camera3DFarPlaneDistance": 10000,
+          "camera3DFieldOfView": 45,
+          "camera3DNearPlaneDistance": 3,
+          "followBaseLayerCamera": false,
+          "isLightingLayer": false,
+          "isLocked": false,
+          "name": "",
+          "renderingType": "",
+          "visibility": true,
+          "cameras": [
+            {
+              "defaultSize": true,
+              "defaultViewport": true,
+              "height": 0,
+              "viewportBottom": 1,
+              "viewportLeft": 0,
+              "viewportRight": 1,
+              "viewportTop": 0,
+              "width": 0
+            }
+          ],
+          "effects": []
+        }
+      ],
+      "behaviorsSharedData": [
+        {
+          "name": "PlatformCharacter",
+          "type": "PlatformBehavior::PlatformerObjectBehavior"
+        },
+        {
+          "name": "Platform",
+          "type": "PlatformBehavior::PlatformBehavior"
+        }
+      ]
+    },
+    {
+      "b": 40,
+      "r": 40,
+      "v": 15,
+      "disableInputWhenNotFocused": true,
+      "mangledName": "Level3",
+      "name": "Level3",
+      "standardSortMethod": true,
+      "stopSoundsOnStartup": false,
+      "title": "",
+      "uiSettings": {
+        "grid": true,
+        "gridType": "rectangular",
+        "gridWidth": 32,
+        "gridHeight": 32,
+        "gridOffsetX": 0,
+        "gridOffsetY": 0,
+        "gridColor": 10401023,
+        "gridAlpha": 0.8,
+        "snap": true,
+        "zoomFactor": 1,
+        "windowMask": false
+      },
+      "objectsGroups": [
+        {
+          "name": "Platforms",
+          "objects": [
+            {
+              "name": "Ground"
+            },
+            {
+              "name": "Platform"
+            },
+            {
+              "name": "MovingPlatform"
+            }
+          ]
+        },
+        {
+          "name": "Hazards",
+          "objects": [
+            {
+              "name": "Spike"
+            }
+          ]
+        },
+        {
+          "name": "Foes",
+          "objects": [
+            {
+              "name": "Enemy"
+            },
+            {
+              "name": "Bat"
+            },
+            {
+              "name": "Boss"
+            }
+          ]
+        }
+      ],
+      "variables": [],
+      "instances": [
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 64,
+          "width": 500,
+          "layer": "",
+          "name": "Ground",
+          "x": 0,
+          "y": 636,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "ground-84"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 64,
+          "width": 300,
+          "layer": "",
+          "name": "Ground",
+          "x": 700,
+          "y": 636,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "ground-85"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 64,
+          "width": 300,
+          "layer": "",
+          "name": "Ground",
+          "x": 1200,
+          "y": 636,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "ground-86"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 64,
+          "width": 600,
+          "layer": "",
+          "name": "Ground",
+          "x": 1800,
+          "y": 636,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "ground-87"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 520,
+          "y": 604,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s3a-0"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 556,
+          "y": 604,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s3a-1"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 592,
+          "y": 604,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s3a-2"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 628,
+          "y": 604,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s3a-3"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 664,
+          "y": 604,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s3a-4"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 1020,
+          "y": 604,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s3b-0"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 1060,
+          "y": 604,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s3b-1"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 1100,
+          "y": 604,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s3b-2"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 1140,
+          "y": 604,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s3b-3"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 1520,
+          "y": 604,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s3c-0"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 1560,
+          "y": 604,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s3c-1"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Spike",
+          "x": 1600,
+          "y": 604,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "s3c-2"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 128,
+          "layer": "",
+          "name": "Platform",
+          "x": 200,
+          "y": 500,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-88"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 128,
+          "layer": "",
+          "name": "Platform",
+          "x": 400,
+          "y": 400,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-89"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 24,
+          "width": 128,
+          "layer": "",
+          "name": "MovingPlatform",
+          "x": 600,
+          "y": 340,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [
+            {
+              "name": "range",
+              "type": "number",
+              "value": 90
+            },
+            {
+              "name": "axis",
+              "type": "number",
+              "value": 0
+            },
+            {
+              "name": "speed",
+              "type": "number",
+              "value": 1.5
+            }
+          ],
+          "persistentUuid": "movingplatform-90"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 128,
+          "layer": "",
+          "name": "Platform",
+          "x": 850,
+          "y": 420,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-91"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 24,
+          "width": 112,
+          "layer": "",
+          "name": "MovingPlatform",
+          "x": 1050,
+          "y": 320,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [
+            {
+              "name": "range",
+              "type": "number",
+              "value": 50
+            },
+            {
+              "name": "axis",
+              "type": "number",
+              "value": 1
+            },
+            {
+              "name": "speed",
+              "type": "number",
+              "value": 1.8
+            }
+          ],
+          "persistentUuid": "movingplatform-92"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 160,
+          "layer": "",
+          "name": "Platform",
+          "x": 1300,
+          "y": 400,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-93"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 24,
+          "width": 128,
+          "layer": "",
+          "name": "MovingPlatform",
+          "x": 1550,
+          "y": 360,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [
+            {
+              "name": "range",
+              "type": "number",
+              "value": 70
+            },
+            {
+              "name": "axis",
+              "type": "number",
+              "value": 0
+            },
+            {
+              "name": "speed",
+              "type": "number",
+              "value": 1.7
+            }
+          ],
+          "persistentUuid": "movingplatform-94"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 128,
+          "layer": "",
+          "name": "Platform",
+          "x": 1750,
+          "y": 480,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-95"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Enemy",
+          "x": 300,
+          "y": 600,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [
+            {
+              "name": "range",
+              "type": "number",
+              "value": 70
+            },
+            {
+              "name": "spd",
+              "type": "number",
+              "value": 90
+            }
+          ],
+          "persistentUuid": "e3a"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Enemy",
+          "x": 800,
+          "y": 600,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [
+            {
+              "name": "range",
+              "type": "number",
+              "value": 50
+            }
+          ],
+          "persistentUuid": "e3b"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Enemy",
+          "x": 1400,
+          "y": 600,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [
+            {
+              "name": "range",
+              "type": "number",
+              "value": 60
+            }
+          ],
+          "persistentUuid": "e3c"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Bat",
+          "x": 500,
+          "y": 240,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [
+            {
+              "name": "range",
+              "type": "number",
+              "value": 110
+            }
+          ],
+          "persistentUuid": "b3a"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Bat",
+          "x": 1000,
+          "y": 220,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [
+            {
+              "name": "range",
+              "type": "number",
+              "value": 90
+            }
+          ],
+          "persistentUuid": "b3b"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Bat",
+          "x": 1500,
+          "y": 200,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [
+            {
+              "name": "range",
+              "type": "number",
+              "value": 100
+            }
+          ],
+          "persistentUuid": "b3c"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Boss",
+          "x": 2000,
+          "y": 560,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [
+            {
+              "name": "hp",
+              "type": "number",
+              "value": 3
+            },
+            {
+              "name": "range",
+              "type": "number",
+              "value": 140
+            },
+            {
+              "name": "spd",
+              "type": "number",
+              "value": 50
+            }
+          ],
+          "persistentUuid": "boss"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 48,
+          "width": 48,
+          "layer": "",
+          "name": "Player",
+          "x": 48,
+          "y": 572,
+          "zOrder": 5,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "player-96"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Checkpoint",
+          "x": 1320,
+          "y": 360,
+          "zOrder": 2,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "checkpoint-97"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Checkpoint",
+          "x": 1850,
+          "y": 596,
+          "zOrder": 2,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "cp3b"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Flag",
+          "x": 2280,
+          "y": 572,
+          "zOrder": 3,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "flag-98"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "ScoreText",
+          "x": 16,
+          "y": 12,
+          "zOrder": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "scoretext-99"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "LivesText",
+          "x": 620,
+          "y": 12,
+          "zOrder": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "livestext-100"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "LevelText",
+          "x": 16,
+          "y": 42,
+          "zOrder": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "leveltext-101"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "MessageText",
+          "x": 300,
+          "y": 250,
+          "zOrder": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "messagetext-102"
+        }
+      ],
+      "objects": [
+        {
+          "assetStoreId": "",
+          "name": "Player",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "PlatformCharacter",
+              "type": "PlatformBehavior::PlatformerObjectBehavior",
+              "acceleration": 1500,
+              "deceleration": 1500,
+              "gravity": 1200,
+              "jumpSpeed": 880,
+              "ladderClimbingSpeed": 150,
+              "maxFallingSpeed": 750,
+              "maxSpeed": 460,
+              "slopeMaxAngle": 60,
+              "canGrabPlatforms": false,
+              "ignoreDefaultControls": false,
+              "canGoDownFromJumpthru": true,
+              "useLegacyTrajectory": false
+            }
+          ],
+          "animations": [
+            {
+              "name": "run",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "runner.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Ground",
+          "type": "TiledSpriteObject::TiledSprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Platform",
+              "type": "PlatformBehavior::PlatformBehavior",
+              "canBeGrabbed": false,
+              "platformType": "NormalPlatform"
+            }
+          ],
+          "width": 800,
+          "height": 64,
+          "texture": "ground.png"
+        },
+        {
+          "assetStoreId": "",
+          "name": "Platform",
+          "type": "TiledSpriteObject::TiledSprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Platform",
+              "type": "PlatformBehavior::PlatformBehavior",
+              "canBeGrabbed": false,
+              "platformType": "NormalPlatform"
+            }
+          ],
+          "width": 192,
+          "height": 32,
+          "texture": "ground.png"
+        },
+        {
+          "assetStoreId": "",
+          "name": "MovingPlatform",
+          "type": "TiledSpriteObject::TiledSprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Platform",
+              "type": "PlatformBehavior::PlatformBehavior",
+              "canBeGrabbed": false,
+              "platformType": "NormalPlatform"
+            }
+          ],
+          "width": 128,
+          "height": 24,
+          "texture": "moving-platform.png"
+        },
+        {
+          "assetStoreId": "",
+          "name": "Spike",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "spike.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Enemy",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [
+            {
+              "name": "dir",
+              "type": "number",
+              "value": 1
+            },
+            {
+              "name": "hp",
+              "type": "number",
+              "value": 1
+            }
+          ],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "enemy.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Bat",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [
+            {
+              "name": "dir",
+              "type": "number",
+              "value": 1
+            },
+            {
+              "name": "baseY",
+              "type": "number",
+              "value": 0
+            }
+          ],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "fly",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "bat.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Boss",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [
+            {
+              "name": "dir",
+              "type": "number",
+              "value": 1
+            },
+            {
+              "name": "hp",
+              "type": "number",
+              "value": 3
+            }
+          ],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "boss.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Flag",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "wave",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "flag.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Checkpoint",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "checkpoint.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "ScoreText",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 26,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "string": "Score: 0",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        },
+        {
+          "assetStoreId": "",
+          "name": "LivesText",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 26,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 120,
+            "b": 120
+          },
+          "string": "Lives: 3",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        },
+        {
+          "assetStoreId": "",
+          "name": "LevelText",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 22,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 180,
+            "g": 220,
+            "b": 255
+          },
+          "string": "Level 1",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        },
+        {
+          "assetStoreId": "",
+          "name": "MessageText",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 36,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 255,
+            "b": 120
+          },
+          "string": "",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        },
+        {
+          "assetStoreId": "",
+          "name": "ScorePopup",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 20,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 220,
+            "b": 80
+          },
+          "string": "+100",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        }
+      ],
+      "objectsFolderStructure": {
+        "folderName": "__ROOT",
+        "children": [
+          {
+            "objectName": "Player"
+          },
+          {
+            "objectName": "Ground"
+          },
+          {
+            "objectName": "Platform"
+          },
+          {
+            "objectName": "MovingPlatform"
+          },
+          {
+            "objectName": "Spike"
+          },
+          {
+            "objectName": "Enemy"
+          },
+          {
+            "objectName": "Bat"
+          },
+          {
+            "objectName": "Boss"
+          },
+          {
+            "objectName": "Flag"
+          },
+          {
+            "objectName": "Checkpoint"
+          },
+          {
+            "objectName": "ScoreText"
+          },
+          {
+            "objectName": "LivesText"
+          },
+          {
+            "objectName": "LevelText"
+          },
+          {
+            "objectName": "MessageText"
+          },
+          {
+            "objectName": "ScorePopup"
+          }
+        ]
+      },
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "DepartScene"
+              },
+              "parameters": [
+                ""
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointX",
+                "=",
+                "48"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointY",
+                "=",
+                "572"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Invuln",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "GameOver",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScoreText",
+                "=",
+                "\"Score: \" + ToString(GlobalVariable(Score))"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "LivesText",
+                "=",
+                "\"Lives: \" + ToString(GlobalVariable(Lives))"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "LevelText",
+                "=",
+                "\"Level 3\""
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Hide"
+              },
+              "parameters": [
+                "ScorePopup"
+              ]
+            },
+            {
+              "type": {
+                "value": "Hide"
+              },
+              "parameters": [
+                "MessageText"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": "var dt = runtimeScene.getScene().getTimeManager().getElapsedTime() / 1000;\nif (!runtimeScene.__t) runtimeScene.__t = 0;\nruntimeScene.__t += dt;\nvar t = runtimeScene.__t;\nvar vars = runtimeScene.getGame().getVariables();\n// also try scene vars fallback\nfunction gVar(name) {\n  var v = runtimeScene.getGame().getVariables().get(name);\n  return v;\n}\nvar inv = gVar(\"Invuln\");\nif (inv.getAsNumber() > 0) inv.sub(dt);\n\nvar players = runtimeScene.getObjects(\"Player\");\nvar p = players[0];\nvar halfW = 400, halfH = 300;\nvar levelW = 2400, levelH = 700;\nif (p) {\n  var camX = Math.max(halfW, Math.min(levelW - halfW, p.getCenterXInScene()));\n  var camY = Math.max(halfH, Math.min(levelH - halfH, p.getCenterYInScene()));\n  var layer = runtimeScene.getLayer(\"\");\n  layer.setCameraX(camX, 0);\n  layer.setCameraY(camY, 0);\n  function pin(name, ox, oy) {\n    var arr = runtimeScene.getObjects(name);\n    for (var i = 0; i < arr.length; i++) {\n      arr[i].setX(camX - halfW + ox);\n      arr[i].setY(camY - halfH + oy);\n    }\n  }\n  pin(\"ScoreText\", 16, 12);\n  pin(\"LivesText\", 620, 12);\n  pin(\"LevelText\", 16, 42);\n  pin(\"MessageText\", halfW - 100, halfH - 50);\n  // blink when invulnerable\n  if (inv.getAsNumber() > 0) {\n    p.hide(Math.floor(t * 12) % 2 === 0);\n  } else {\n    p.hide(false);\n  }\n}\n\n// Moving platforms: store home on first frame via object var homeX/homeY/range/axis\nvar mps = runtimeScene.getObjects(\"MovingPlatform\");\nfor (var i = 0; i < mps.length; i++) {\n  var m = mps[i];\n  var mv = m.getVariables();\n  if (!mv.has(\"init\")) {\n    mv.get(\"init\").setNumber(1);\n    mv.get(\"homeX\").setNumber(m.getX());\n    mv.get(\"homeY\").setNumber(m.getY());\n    if (!mv.has(\"range\")) mv.get(\"range\").setNumber(80);\n    if (!mv.has(\"axis\")) mv.get(\"axis\").setNumber(0); // 0=x, 1=y\n    if (!mv.has(\"speed\")) mv.get(\"speed\").setNumber(1.2);\n  }\n  var homeX = mv.get(\"homeX\").getAsNumber();\n  var homeY = mv.get(\"homeY\").getAsNumber();\n  var range = mv.get(\"range\").getAsNumber();\n  var axis = mv.get(\"axis\").getAsNumber();\n  var speed = mv.get(\"speed\").getAsNumber();\n  var phase = t * speed + i * 1.3;\n  if (axis < 0.5) m.setX(homeX + Math.sin(phase) * range);\n  else m.setY(homeY + Math.sin(phase) * range);\n}\n\n// Enemy slime patrol\nvar enemies = runtimeScene.getObjects(\"Enemy\");\nfor (var i = 0; i < enemies.length; i++) {\n  var e = enemies[i];\n  var ev = e.getVariables();\n  if (!ev.has(\"init\")) {\n    ev.get(\"init\").setNumber(1);\n    ev.get(\"homeX\").setNumber(e.getX());\n    if (!ev.has(\"range\")) ev.get(\"range\").setNumber(60);\n    if (!ev.has(\"dir\")) ev.get(\"dir\").setNumber(1);\n    if (!ev.has(\"spd\")) ev.get(\"spd\").setNumber(70);\n  }\n  var dir = ev.get(\"dir\").getAsNumber();\n  var spd = ev.get(\"spd\").getAsNumber();\n  var homeX = ev.get(\"homeX\").getAsNumber();\n  var range = ev.get(\"range\").getAsNumber();\n  e.setX(e.getX() + dir * spd * dt);\n  if (e.getX() > homeX + range) { ev.get(\"dir\").setNumber(-1); }\n  if (e.getX() < homeX - range) { ev.get(\"dir\").setNumber(1); }\n}\n\n// Bats: sine fly\nvar bats = runtimeScene.getObjects(\"Bat\");\nfor (var i = 0; i < bats.length; i++) {\n  var b = bats[i];\n  var bv = b.getVariables();\n  if (!bv.has(\"init\")) {\n    bv.get(\"init\").setNumber(1);\n    bv.get(\"homeX\").setNumber(b.getX());\n    bv.get(\"homeY\").setNumber(b.getY());\n    if (!bv.has(\"range\")) bv.get(\"range\").setNumber(90);\n  }\n  var hx = bv.get(\"homeX\").getAsNumber();\n  var hy = bv.get(\"homeY\").getAsNumber();\n  var rng = bv.get(\"range\").getAsNumber();\n  b.setX(hx + Math.sin(t * 1.4 + i) * rng);\n  b.setY(hy + Math.cos(t * 2.1 + i * 0.7) * 28);\n}\n\n// Boss patrol slower + larger range\nvar bosses = runtimeScene.getObjects(\"Boss\");\nfor (var i = 0; i < bosses.length; i++) {\n  var bo = bosses[i];\n  var bov = bo.getVariables();\n  if (!bov.has(\"init\")) {\n    bov.get(\"init\").setNumber(1);\n    bov.get(\"homeX\").setNumber(bo.getX());\n    if (!bov.has(\"range\")) bov.get(\"range\").setNumber(120);\n    if (!bov.has(\"dir\")) bov.get(\"dir\").setNumber(1);\n    if (!bov.has(\"hp\")) bov.get(\"hp\").setNumber(3);\n    if (!bov.has(\"spd\")) bov.get(\"spd\").setNumber(55);\n  }\n  var dir = bov.get(\"dir\").getAsNumber();\n  var spd = bov.get(\"spd\").getAsNumber();\n  var homeX = bov.get(\"homeX\").getAsNumber();\n  var range = bov.get(\"range\").getAsNumber();\n  // enrage when low hp\n  if (bov.get(\"hp\").getAsNumber() <= 1) spd *= 1.6;\n  bo.setX(bo.getX() + dir * spd * dt);\n  if (bo.getX() > homeX + range) bov.get(\"dir\").setNumber(-1);\n  if (bo.getX() < homeX - range) bov.get(\"dir\").setNumber(1);\n}\n\n// Score popups\nvar pops = runtimeScene.getObjects(\"ScorePopup\");\nfor (var i = pops.length - 1; i >= 0; i--) {\n  var o = pops[i];\n  var age = o.getVariables().get(\"age\");\n  age.add(dt);\n  o.setY(o.getY() - 55 * dt);\n  if (age.getAsNumber() > 0.75) o.deleteFromScene(runtimeScene);\n}",
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": false
+        },
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": "var players = runtimeScene.getObjects(\"Player\");\nif (!players.length) return;\nvar p = players[0];\nvar inv = runtimeScene.getGame().getVariables().get(\"Invuln\").getAsNumber();\nvar score = runtimeScene.getGame().getVariables().get(\"Score\");\nvar falling = p.getBehavior(\"PlatformCharacter\").isFalling();\nvar pBottom = p.getY() + p.getHeight();\nvar pPrevBottom = pBottom; // approximate\n\nfunction tryStomp(list, points, sfx) {\n  for (var i = list.length - 1; i >= 0; i--) {\n    var e = list[i];\n    if (!p.isCollidingWith(e)) continue;\n    var eTop = e.getY();\n    var eMid = e.getY() + e.getHeight() * 0.45;\n    // stomp if player bottom is near top of enemy and falling\n    if (falling && pBottom <= eMid + 8 && p.getY() < eTop) {\n      var hp = e.getVariables().get(\"hp\");\n      hp.sub(1);\n      // bounce player\n      p.getBehavior(\"PlatformCharacter\").setCanJump();\n      p.getBehavior(\"PlatformCharacter\").simulateJumpKey();\n      try {\n        var a = new Audio(\"/arcade/sfx/\" + (sfx || \"enemy-stomp\") + \".mp3\");\n        a.volume = 0.55; a.play();\n      } catch (err) {}\n      if (hp.getAsNumber() <= 0) {\n        score.add(points);\n        // popup\n        var popup = runtimeScene.createObject(\"ScorePopup\");\n        if (popup) {\n          popup.setPosition(e.getX(), e.getY() - 10);\n          popup.setString(\"+\" + points);\n          popup.getVariables().get(\"age\").setNumber(0);\n        }\n        e.deleteFromScene(runtimeScene);\n      } else {\n        // flash boss - knock back slightly\n        e.setX(e.getX() + (e.getX() < p.getX() ? -20 : 20));\n      }\n    } else if (inv <= 0) {\n      // side hit - damage\n      runtimeScene.getGame().getVariables().get(\"__hit\").setNumber(1);\n    }\n  }\n}\nruntimeScene.getGame().getVariables().get(\"__hit\").setNumber(0);\ntryStomp(runtimeScene.getObjects(\"Enemy\"), 100, \"enemy-stomp\");\ntryStomp(runtimeScene.getObjects(\"Bat\"), 150, \"enemy-stomp\");\ntryStomp(runtimeScene.getObjects(\"Boss\"), 300, \"enemy-stomp\");",
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": false
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "__hit",
+                "=",
+                "1"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "__hit",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Lives",
+                "-",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "LivesText",
+                "=",
+                "\"Lives: \" + ToString(GlobalVariable(Lives))"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Invuln",
+                "=",
+                "1.5"
+              ]
+            },
+            {
+              "type": {
+                "value": "MettreXY"
+              },
+              "parameters": [
+                "Player",
+                "=",
+                "GlobalVariable(CheckpointX)",
+                "=",
+                "GlobalVariable(CheckpointY)"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "jump.mp3",
+                "",
+                "50",
+                "0.5"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Spike",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "Invuln",
+                "<=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "GameOver",
+                "=",
+                "0"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Lives",
+                "-",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "LivesText",
+                "=",
+                "\"Lives: \" + ToString(GlobalVariable(Lives))"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Invuln",
+                "=",
+                "1.5"
+              ]
+            },
+            {
+              "type": {
+                "value": "MettreXY"
+              },
+              "parameters": [
+                "Player",
+                "=",
+                "GlobalVariable(CheckpointX)",
+                "=",
+                "GlobalVariable(CheckpointY)"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "jump.mp3",
+                "",
+                "50",
+                "0.5"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "PosY"
+              },
+              "parameters": [
+                "Player",
+                ">",
+                "780"
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "GameOver",
+                "=",
+                "0"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Lives",
+                "-",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "LivesText",
+                "=",
+                "\"Lives: \" + ToString(GlobalVariable(Lives))"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Invuln",
+                "=",
+                "1.2"
+              ]
+            },
+            {
+              "type": {
+                "value": "MettreXY"
+              },
+              "parameters": [
+                "Player",
+                "=",
+                "GlobalVariable(CheckpointX)",
+                "=",
+                "GlobalVariable(CheckpointY)"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Checkpoint",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "BuiltinCommonInstructions::Once"
+              },
+              "parameters": []
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointX",
+                "=",
+                "Checkpoint.X()"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointY",
+                "=",
+                "Checkpoint.Y() - 40"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "coin-collect.mp3",
+                "",
+                "40",
+                "0.7"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"Checkpoint!\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Show"
+              },
+              "parameters": [
+                "MessageText",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "ResetTimer"
+              },
+              "parameters": [
+                "",
+                "\"msg\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CompareTimer"
+              },
+              "parameters": [
+                "",
+                "\"msg\"",
+                ">=",
+                "1.2"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "Hide"
+              },
+              "parameters": [
+                "MessageText"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "Lives",
+                "<=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "GameOver",
+                "=",
+                "0"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "GameOver",
+                "=",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"GAME OVER\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Show"
+              },
+              "parameters": [
+                "MessageText",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "ResetTimer"
+              },
+              "parameters": [
+                "",
+                "\"gameover\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "GameOver",
+                "=",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "CompareTimer"
+              },
+              "parameters": [
+                "",
+                "\"gameover\"",
+                ">=",
+                "2.5"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Score",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Lives",
+                "=",
+                "3"
+              ]
+            },
+            {
+              "type": {
+                "value": "Scene"
+              },
+              "parameters": [
+                "",
+                "\"Level1\"",
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Flag",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "GameOver",
+                "=",
+                "0"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Score",
+                "+",
+                "500"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScoreText",
+                "=",
+                "\"Score: \" + ToString(GlobalVariable(Score))"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "level-complete.mp3",
+                "",
+                "85",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"YOU WIN!\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Show"
+              },
+              "parameters": [
+                "MessageText",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "ResetTimer"
+              },
+              "parameters": [
+                "",
+                "\"levelend\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "CompareTimer"
+              },
+              "parameters": [
+                "",
+                "\"levelend\"",
+                ">=",
+                "4"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Score",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Lives",
+                "=",
+                "3"
+              ]
+            },
+            {
+              "type": {
+                "value": "Scene"
+              },
+              "parameters": [
+                "",
+                "\"Level1\"",
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "PlatformBehavior::IsJumping"
+              },
+              "parameters": [
+                "Player",
+                "PlatformCharacter"
+              ]
+            },
+            {
+              "type": {
+                "value": "BuiltinCommonInstructions::Once"
+              },
+              "parameters": []
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "jump.mp3",
+                "",
+                "30",
+                "1"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [],
+          "actions": [
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScoreText",
+                "=",
+                "\"Score: \" + ToString(GlobalVariable(Score))"
+              ]
+            }
+          ]
+        }
+      ],
+      "layers": [
+        {
+          "ambientLightColorB": 200,
+          "ambientLightColorG": 200,
+          "ambientLightColorR": 200,
+          "camera3DFarPlaneDistance": 10000,
+          "camera3DFieldOfView": 45,
+          "camera3DNearPlaneDistance": 3,
+          "followBaseLayerCamera": false,
+          "isLightingLayer": false,
+          "isLocked": false,
+          "name": "",
+          "renderingType": "",
+          "visibility": true,
+          "cameras": [
+            {
+              "defaultSize": true,
+              "defaultViewport": true,
+              "height": 0,
+              "viewportBottom": 1,
+              "viewportLeft": 0,
+              "viewportRight": 1,
+              "viewportTop": 0,
+              "width": 0
+            }
+          ],
+          "effects": []
+        }
+      ],
+      "behaviorsSharedData": [
+        {
+          "name": "PlatformCharacter",
+          "type": "PlatformBehavior::PlatformerObjectBehavior"
+        },
+        {
+          "name": "Platform",
+          "type": "PlatformBehavior::PlatformBehavior"
+        }
       ]
     }
   ],

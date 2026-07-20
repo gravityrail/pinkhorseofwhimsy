@@ -75,7 +75,7 @@
       z-index: 200;
     }
   </style>
-  <script type="module" crossorigin src="/bean-simulator/assets/index-Dz3y07Pk.js"></script>
+  <script type="module" crossorigin src="/bean-simulator/assets/index-Da-7kmg8.js"></script>
 </head>
 <body>
   <div id="app">
@@ -88,7 +88,23 @@
     <div id="crosshair"></div>
   </div>
 
-<script>window.ARCADE_CONTROLS={};</script>
+<script>
+  window.ARCADE_SPLASH = {
+    image: '/arcade/splashes/bean-simulator.png',
+    title: 'BEAN SIMULATOR',
+    subtitle: 'TAP / PRESS START',
+    credit: 'Pink Horse of Whimsy'
+  };
+  window.ARCADE_CONTROLS = {
+    buttons: [
+      { label: 'Run', keys: 'Shift' },
+      { label: 'Rot◀', keys: 'z' },
+      { label: 'Rot▶', keys: 'x' },
+      { label: 'FPV', keys: '1' }
+    ]
+  };
+</script>
+<script src="/arcade/splash.js"></script>
 <script src="/arcade/controls.js" defer></script>
 </body>
 </html>

@@ -17,14 +17,30 @@
         border-radius: 3px;
       }
     </style>
-    <script type="module" crossorigin src="/vibekart/assets/index-CIWu51e-.js"></script>
+    <script type="module" crossorigin src="/vibekart/assets/index-EJHWYhla.js"></script>
     <link rel="stylesheet" crossorigin href="/vibekart/assets/index-C7P6SK_3.css">
   </head>
   <body>
     <div id="info">Vibekart v0.1</div>
     <div id="container"></div>
-  
-<script>window.ARCADE_CONTROLS={};</script>
+
+<script>
+  window.ARCADE_SPLASH = {
+    image: '/arcade/splashes/vibekart.png',
+    title: 'VIBEKART',
+    subtitle: 'TAP / PRESS START',
+    credit: 'Pink Horse of Whimsy'
+  };
+  window.ARCADE_CONTROLS = {
+    buttons: [
+      { label: 'Gas', keys: ' ' },
+      { label: 'Brake', keys: 'Shift' },
+      { label: 'Drift', keys: 'x' },
+      { label: 'Item', keys: 'z' }
+    ]
+  };
+</script>
+<script src="/arcade/splash.js"></script>
 <script src="/arcade/controls.js" defer></script>
 </body>
 </html>

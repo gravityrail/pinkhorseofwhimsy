@@ -372,6 +372,602 @@ function makeGemObject() {
   };
 }
 
+function makeKeyObject() {
+  return {
+    assetStoreId: '', name: 'Key', type: 'Sprite',
+    updateIfNotVisible: false, variables: [], effects: [], behaviors: [],
+    animations: [{
+      name: 'idle', useMultipleDirections: false,
+      directions: [{
+        looping: true, timeBetweenFrames: 0.08,
+        sprites: [{
+          hasCustomCollisionMask: false, image: 'key.png',
+          points: [],
+          originPoint: { name: 'origine', x: 0, y: 0 },
+          centerPoint: { automatic: true, name: 'centre', x: 0, y: 0 },
+          customCollisionMask: [],
+        }],
+      }],
+    }],
+  };
+}
+
+/** Locked door slab — static physics body the combat JS can delete. */
+function makeDoorObject() {
+  return {
+    assetStoreId: '', name: 'Door', type: 'Scene3D::Cube3DObject',
+    updateIfNotVisible: false, variables: [], effects: [],
+    behaviors: [makeStaticPhysicsBody()],
+    content: {
+      width: 180, height: 24, depth: 220,
+      frontFaceResourceName: 'metal_wall.png',
+      backFaceResourceName: 'metal_wall.png',
+      leftFaceResourceName: 'metal_wall.png',
+      rightFaceResourceName: 'metal_wall.png',
+      topFaceResourceName: 'metal_wall.png',
+      bottomFaceResourceName: 'metal_wall.png',
+      frontFaceVisible: true, backFaceVisible: true,
+      leftFaceVisible: true, rightFaceVisible: true,
+      topFaceVisible: true, bottomFaceVisible: true,
+      frontFaceResourceRepeat: true, backFaceResourceRepeat: true,
+      leftFaceResourceRepeat: true, rightFaceResourceRepeat: true,
+      topFaceResourceRepeat: true, bottomFaceResourceRepeat: true,
+      enableTextureTransparency: false,
+      materialType: 'StandardWithoutMetalness',
+    },
+  };
+}
+
+/** Enemy Model3D — NO static physics so JS AI can move them freely. */
+function makeEnemyModelObject(name, glbFile) {
+  return makeModel3DObject(name, glbFile, 'KeepOriginal', {
+    rotationX: 90,
+    castShadow: true,
+  });
+}
+
+/**
+ * Build open-cell walkability set + enemy defaults for the combat JsCode.
+ */
+function buildOpenCellSet(level) {
+  const open = [];
+  const { grid } = level;
+  for (let r = 0; r < grid.length; r++) {
+    for (let c = 0; c < grid[0].length; c++) {
+      if (grid[r][c] !== '#') open.push(`${c},${r}`);
+    }
+  }
+  return open;
+}
+
+function enemyObjectName(type) {
+  return capitalize(String(type || 'enemy').toLowerCase());
+}
+
+/**
+ * Giant Wolfenstein-style combat / AI / HUD / juice runtime (JsCode).
+ * Prefer raw Audio() so we don't fight the GDevelop resource pipeline.
+ */
+function generateCombatJs(level) {
+  const s = level.settings || {};
+  const cs = s.cellSize || 200;
+  const maxHp = s.playerMaxHp || 100;
+  const fireCd = s.fireCooldown || 0.35;
+  const gunRange = s.gunRange || 800;
+  const gunDamage = s.gunDamage || 25;
+  const totalGems = (level.collectibles || []).filter(c => c.type === 'gem').length;
+  const openCells = buildOpenCellSet(level);
+
+  // Enemy spawn metadata keyed later by instance order per type
+  const enemies = (level.enemies || []).map((e, i) => ({
+    id: i,
+    type: enemyObjectName(e.type),
+    gx: e.gx,
+    gy: e.gy,
+    hp: e.hp ?? 40,
+    speed: e.speed ?? 70,
+    aggro: e.aggro ?? 500,
+    damage: e.damage ?? 10,
+    meleeRange: e.meleeRange ?? 70,
+    float: !!e.float || e.type === 'beholder',
+    boss: !!e.boss,
+    roar: !!e.roar || e.type === 'beholder',
+    baseZ: e.baseZ ?? (e.type === 'beholder' ? 70 : 0),
+  }));
+
+  // JSON embedded into JS (safe — numbers/bools/strings only)
+  const enemiesJson = JSON.stringify(enemies);
+  const openJson = JSON.stringify(openCells);
+
+  // NOTE: this string is injected as GDevelop inlineCode. Keep it ES5-ish.
+  return `
+// ── Maze Explorer combat / AI / HUD ──────────────────────────────────
+var dt = runtimeScene.getTimeManager().getElapsedTime() / 1000;
+if (dt > 0.1) dt = 0.1;
+if (!runtimeScene.__fps) {
+  var openList = ${openJson};
+  var openMap = {};
+  for (var oi = 0; oi < openList.length; oi++) openMap[openList[oi]] = true;
+  runtimeScene.__fps = {
+    hp: ${maxHp},
+    maxHp: ${maxHp},
+    dead: false,
+    won: false,
+    gems: 0,
+    totalGems: ${totalGems},
+    keys: 0,
+    score: 0,
+    fireCd: 0,
+    hurtFlash: 0,
+    muzzle: 0,
+    shake: 0,
+    time: 0,
+    roarCd: 3,
+    open: openMap,
+    cs: ${cs},
+    gunRange: ${gunRange},
+    gunDamage: ${gunDamage},
+    fireCooldown: ${fireCd},
+    enemies: ${enemiesJson},
+    enemyState: {},
+    particles: [],
+    audio: {},
+    hudReady: false,
+    musicStarted: false,
+    doorOpen: {},
+  };
+  // Bind enemy instances (by type, in scene order) to spawn defs of that type
+  var byType = {};
+  for (var ei = 0; ei < runtimeScene.__fps.enemies.length; ei++) {
+    var def = runtimeScene.__fps.enemies[ei];
+    if (!byType[def.type]) byType[def.type] = [];
+    byType[def.type].push(def);
+  }
+  for (var tName in byType) {
+    if (!byType.hasOwnProperty(tName)) continue;
+    var objs = runtimeScene.getObjects(tName) || [];
+    var defs = byType[tName];
+    for (var j = 0; j < objs.length && j < defs.length; j++) {
+      var id = tName + '_' + j;
+      objs[j].__enemyId = id;
+      runtimeScene.__fps.enemyState[id] = {
+        def: defs[j],
+        hp: defs[j].hp,
+        alive: true,
+        obj: objs[j],
+        cx: defs[j].gx * ${cs},
+        cy: defs[j].gy * ${cs},
+        wz: defs[j].baseZ || 0,
+        atkCd: 0,
+        flash: 0,
+        wanderT: Math.random() * 3,
+        wdx: (Math.random() - 0.5),
+        wdy: (Math.random() - 0.5),
+        bobPhase: Math.random() * Math.PI * 2,
+      };
+    }
+  }
+}
+
+var F = runtimeScene.__fps;
+F.time += dt;
+if (F.fireCd > 0) F.fireCd -= dt;
+if (F.hurtFlash > 0) F.hurtFlash -= dt;
+if (F.muzzle > 0) F.muzzle -= dt;
+if (F.shake > 0) F.shake -= dt;
+if (F.roarCd > 0) F.roarCd -= dt;
+
+function fpsSfx(name, vol) {
+  try {
+    if (!F.audio[name]) {
+      F.audio[name] = new Audio('./sfx/' + name + '.mp3');
+      F.audio[name].preload = 'auto';
+    }
+    var a = F.audio[name].cloneNode();
+    a.volume = vol == null ? 0.55 : vol;
+    var p = a.play();
+    if (p && p.catch) p.catch(function(){});
+  } catch (e) {}
+}
+
+function fpsEnsureHud() {
+  if (F.hudReady) return;
+  F.hudReady = true;
+  var root = document.createElement('div');
+  root.id = 'maze-fps-hud';
+  root.innerHTML = [
+    '<div id="maze-crosshair"></div>',
+    '<div id="maze-muzzle"></div>',
+    '<div id="maze-hurt"></div>',
+    '<div id="maze-hud-panel">',
+    '  <div id="maze-hp-wrap"><div id="maze-hp-bar"></div></div>',
+    '  <div id="maze-hud-text"></div>',
+    '</div>',
+    '<div id="maze-banner"></div>'
+  ].join('');
+  var st = document.createElement('style');
+  st.textContent = [
+    '#maze-fps-hud{position:fixed;inset:0;pointer-events:none;z-index:9000;font-family:ui-monospace,Menlo,Consolas,monospace;color:#fff;}',
+    '#maze-crosshair{position:absolute;left:50%;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;}',
+    '#maze-crosshair:before,#maze-crosshair:after{content:"";position:absolute;background:rgba(255,255,255,0.85);box-shadow:0 0 4px #000;}',
+    '#maze-crosshair:before{left:8px;top:0;width:2px;height:18px;}',
+    '#maze-crosshair:after{left:0;top:8px;width:18px;height:2px;}',
+    '#maze-muzzle{position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-40px 0 0 -60px;border-radius:50%;',
+    '  background:radial-gradient(circle,rgba(255,220,80,0.85) 0%,rgba(255,120,0,0.35) 40%,transparent 70%);',
+    '  opacity:0;transform:scale(0.4);}',
+    '#maze-hurt{position:absolute;inset:0;background:radial-gradient(circle,transparent 40%,rgba(160,0,0,0.55) 100%);opacity:0;transition:opacity 0.05s;}',
+    '#maze-hud-panel{position:absolute;left:14px;top:14px;min-width:220px;padding:10px 12px;background:rgba(0,0,0,0.45);',
+    '  border:1px solid rgba(255,80,160,0.45);border-radius:8px;text-shadow:0 2px 4px #000;}',
+    '#maze-hp-wrap{height:14px;background:#300;border:1px solid #811;border-radius:4px;overflow:hidden;margin-bottom:6px;}',
+    '#maze-hp-bar{height:100%;width:100%;background:linear-gradient(90deg,#e22,#f84);transition:width 0.12s;}',
+    '#maze-hud-text{font-size:13px;line-height:1.45;letter-spacing:0.04em;}',
+    '#maze-banner{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);font-size:clamp(1.4rem,4vw,2.6rem);',
+    '  letter-spacing:0.12em;text-align:center;text-shadow:0 0 18px #ff2bd6,0 4px 12px #000;opacity:0;transition:opacity 0.3s;}'
+  ].join('\\n');
+  document.head.appendChild(st);
+  (document.body || document.documentElement).appendChild(root);
+  F.dom = {
+    hp: document.getElementById('maze-hp-bar'),
+    text: document.getElementById('maze-hud-text'),
+    hurt: document.getElementById('maze-hurt'),
+    muzzle: document.getElementById('maze-muzzle'),
+    banner: document.getElementById('maze-banner'),
+    root: root,
+  };
+}
+
+function fpsStartMusic() {
+  if (F.musicStarted) return;
+  // Wait until splash is dismissed (or absent)
+  if (document.getElementById('arcade-splash')) return;
+  F.musicStarted = true;
+  try {
+    var amb = new Audio('./sfx/ambient-dungeon-loop.mp3');
+    amb.loop = true; amb.volume = 0.22;
+    var p1 = amb.play(); if (p1 && p1.catch) p1.catch(function(){});
+    F.audio._ambient = amb;
+    var mood = new Audio('./sfx/mood-dungeon-theme.mp3');
+    mood.loop = true; mood.volume = 0.14;
+    var p2 = mood.play(); if (p2 && p2.catch) p2.catch(function(){});
+    F.audio._mood = mood;
+  } catch (e) {}
+}
+
+function fpsCellOpen(x, y) {
+  var c = Math.floor(x / F.cs);
+  var r = Math.floor(y / F.cs);
+  return !!F.open[c + ',' + r];
+}
+
+function fpsTryMove(st, nx, ny) {
+  // Simple radius check against walls using open cells
+  var rad = 28;
+  if (fpsCellOpen(nx, ny) && fpsCellOpen(nx + rad, ny) && fpsCellOpen(nx - rad, ny)
+      && fpsCellOpen(nx, ny + rad) && fpsCellOpen(nx, ny - rad)) {
+    st.cx = nx; st.cy = ny;
+    return true;
+  }
+  // Slide axes
+  if (fpsCellOpen(nx, st.cy) && fpsCellOpen(nx + rad, st.cy) && fpsCellOpen(nx - rad, st.cy)) {
+    st.cx = nx; return true;
+  }
+  if (fpsCellOpen(st.cx, ny) && fpsCellOpen(st.cx, ny + rad) && fpsCellOpen(st.cx, ny - rad)) {
+    st.cy = ny; return true;
+  }
+  return false;
+}
+
+function fpsFacing() {
+  var ang = runtimeScene.getScene().getVariables().get('CameraAngle').getAsNumber();
+  // Character forwardAngle = CameraAngle - 90; vel = (cos fa, sin fa)
+  var fa = (ang - 90) * Math.PI / 180;
+  return { ang: ang, fx: Math.cos(fa), fy: Math.sin(fa) };
+}
+
+function fpsPlayerPos() {
+  var players = runtimeScene.getObjects('Player');
+  if (!players.length) return null;
+  var p = players[0];
+  return {
+    x: p.getCenterX ? p.getCenterX() : (p.getX() + p.getWidth() / 2),
+    y: p.getCenterY ? p.getCenterY() : (p.getY() + p.getHeight() / 2),
+    z: p.getZ ? p.getZ() : 0,
+    obj: p,
+  };
+}
+
+function fpsCountAlive() {
+  var n = 0;
+  for (var id in F.enemyState) {
+    if (F.enemyState.hasOwnProperty(id) && F.enemyState[id].alive) n++;
+  }
+  return n;
+}
+
+function fpsUpdateHud() {
+  fpsEnsureHud();
+  if (!F.dom) return;
+  var pct = Math.max(0, Math.min(1, F.hp / F.maxHp));
+  F.dom.hp.style.width = (pct * 100).toFixed(1) + '%';
+  F.dom.hp.style.background = pct > 0.5
+    ? 'linear-gradient(90deg,#2a2,#8f4)'
+    : pct > 0.25
+      ? 'linear-gradient(90deg,#e82,#fc4)'
+      : 'linear-gradient(90deg,#e22,#f84)';
+  var weapon = F.fireCd > 0 ? 'COOLING' : 'READY';
+  F.dom.text.innerHTML =
+    'HP ' + Math.max(0, Math.ceil(F.hp)) + '/' + F.maxHp +
+    '&nbsp;&nbsp;\\uD83D\\uDD2B ' + weapon + '<br>' +
+    'GEMS ' + F.gems + '/' + F.totalGems +
+    '&nbsp;&nbsp;KEYS ' + F.keys +
+    '&nbsp;&nbsp;FOES ' + fpsCountAlive() +
+    '<br><span style="opacity:0.75;font-size:11px">WASD move · Q/E strafe · SPACE/CTRL fire · SHIFT run</span>';
+  F.dom.hurt.style.opacity = String(Math.max(0, Math.min(0.85, F.hurtFlash)));
+  F.dom.muzzle.style.opacity = F.muzzle > 0 ? String(Math.min(1, F.muzzle * 4)) : '0';
+  // Screen shake via canvas parent
+  try {
+    var canvas = document.querySelector('canvas');
+    if (canvas && canvas.parentElement) {
+      var sh = F.shake > 0 ? (Math.random() - 0.5) * 10 * F.shake : 0;
+      var sv = F.shake > 0 ? (Math.random() - 0.5) * 8 * F.shake : 0;
+      canvas.parentElement.style.transform = 'translate(' + sh.toFixed(1) + 'px,' + sv.toFixed(1) + 'px)';
+    }
+  } catch (e) {}
+}
+
+function fpsHurtPlayer(amount) {
+  if (F.dead || F.won) return;
+  F.hp -= amount;
+  F.hurtFlash = 0.55;
+  F.shake = 0.35;
+  fpsSfx('player-hurt', 0.6);
+  if (F.hp <= 0) {
+    F.hp = 0;
+    F.dead = true;
+    fpsEnsureHud();
+    if (F.dom) {
+      F.dom.banner.style.opacity = '1';
+      F.dom.banner.innerHTML = 'YOU DIED<br><span style="font-size:0.45em;letter-spacing:0.2em">PRESS R TO RESTART</span>';
+    }
+  }
+}
+
+function fpsWin() {
+  if (F.won || F.dead) return;
+  F.won = true;
+  fpsEnsureHud();
+  if (F.dom) {
+    F.dom.banner.style.opacity = '1';
+    F.dom.banner.innerHTML = 'DUNGEON CLEARED<br><span style="font-size:0.45em;letter-spacing:0.18em">ALL GEMS COLLECTED · SCORE ' + F.score + '</span>';
+  }
+  fpsSfx('ui-start', 0.5);
+}
+
+function fpsSpawnSplat(x, y, z) {
+  // DOM particles near crosshair aren't ideal in 3D; use short-lived scale flash on enemy instead.
+  // Also push a lightweight record for optional future use.
+  F.particles.push({ t: 0.25, x: x, y: y, z: z });
+}
+
+function fpsKillEnemy(st) {
+  st.alive = false;
+  st.hp = 0;
+  F.score += st.def.boss ? 500 : 100;
+  fpsSfx('enemy-death', 0.7);
+  try {
+    if (st.obj) st.obj.deleteFromScene(runtimeScene);
+  } catch (e) {
+    try { if (st.obj) st.obj.hide(); } catch (e2) {}
+  }
+  st.obj = null;
+}
+
+// ── Restart ──────────────────────────────────────────────────────────
+if (F.dead && gdjs.evtTools.input.wasKeyJustPressed(runtimeScene, 'r')) {
+  try { runtimeScene.getGame().getSceneStack().replace('Maze'); } catch (e) {
+    try { window.location.reload(); } catch (e2) {}
+  }
+}
+
+fpsStartMusic();
+fpsEnsureHud();
+
+var player = fpsPlayerPos();
+if (!player) { fpsUpdateHud(); }
+else if (!F.dead && !F.won) {
+  var face = fpsFacing();
+
+  // ── Fire (Space / Ctrl) ──────────────────────────────────────────
+  var firePressed =
+    gdjs.evtTools.input.isKeyPressed(runtimeScene, 'Space') ||
+    gdjs.evtTools.input.isKeyPressed(runtimeScene, 'LControl') ||
+    gdjs.evtTools.input.isKeyPressed(runtimeScene, 'RControl');
+  if (firePressed && F.fireCd <= 0) {
+    F.fireCd = F.fireCooldown;
+    F.muzzle = 0.12;
+    F.shake = 0.18;
+    fpsSfx('gunshot-wolf', 0.55);
+
+    // Hitscan: closest living enemy roughly in front within range
+    var best = null;
+    var bestDist = F.gunRange;
+    for (var hid in F.enemyState) {
+      if (!F.enemyState.hasOwnProperty(hid)) continue;
+      var est = F.enemyState[hid];
+      if (!est.alive) continue;
+      var edx = est.cx - player.x;
+      var edy = est.cy - player.y;
+      var dist = Math.sqrt(edx * edx + edy * edy);
+      if (dist < 20 || dist > F.gunRange) continue;
+      var inv = 1 / dist;
+      var dot = (edx * inv) * face.fx + (edy * inv) * face.fy;
+      // ~12° cone at long range, wider up close
+      var need = dist < 150 ? 0.55 : 0.88;
+      if (dot < need) continue;
+      if (dist < bestDist) { bestDist = dist; best = est; }
+    }
+    if (best) {
+      best.hp -= F.gunDamage;
+      best.flash = 0.15;
+      fpsSfx('enemy-hit', 0.65);
+      fpsSpawnSplat(best.cx, best.cy, best.wz + 40);
+      // Punch scale for feedback
+      try {
+        if (best.obj && best.obj.setScale) best.obj.setScale(1.15);
+      } catch (e) {}
+      if (best.hp <= 0) fpsKillEnemy(best);
+    }
+  }
+
+  // ── Enemy AI ─────────────────────────────────────────────────────
+  for (var aid in F.enemyState) {
+    if (!F.enemyState.hasOwnProperty(aid)) continue;
+    var st = F.enemyState[aid];
+    if (!st.alive || !st.obj) continue;
+    var def = st.def;
+    if (st.atkCd > 0) st.atkCd -= dt;
+    if (st.flash > 0) {
+      st.flash -= dt;
+      if (st.flash <= 0) {
+        try { if (st.obj.setScale) st.obj.setScale(1); } catch (e) {}
+      }
+    }
+
+    var dx = player.x - st.cx;
+    var dy = player.y - st.cy;
+    var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    var aggroed = dist < def.aggro;
+
+    // Wander / chase
+    var spd = def.speed * (aggroed ? 1.0 : 0.45);
+    if (def.float) spd *= 0.7;
+    var mx = 0, my = 0;
+    if (aggroed) {
+      mx = (dx / dist) * spd * dt;
+      my = (dy / dist) * spd * dt;
+      // Face player (GDevelop angle on XY)
+      try { st.obj.setAngle(Math.atan2(dy, dx) * 180 / Math.PI); } catch (e) {}
+    } else {
+      st.wanderT -= dt;
+      if (st.wanderT <= 0) {
+        st.wanderT = 1.5 + Math.random() * 2.5;
+        var a = Math.random() * Math.PI * 2;
+        st.wdx = Math.cos(a);
+        st.wdy = Math.sin(a);
+      }
+      mx = st.wdx * spd * dt;
+      my = st.wdy * spd * dt;
+      try { st.obj.setAngle(Math.atan2(st.wdy, st.wdx) * 180 / Math.PI); } catch (e) {}
+    }
+    fpsTryMove(st, st.cx + mx, st.cy + my);
+
+    // Bob / float
+    st.bobPhase += dt * (def.float ? 1.6 : 2.4);
+    var bob = def.float
+      ? (def.baseZ || 70) + 28 * Math.abs(Math.sin(st.bobPhase))
+      : (def.baseZ || 0) + 4 * Math.sin(st.bobPhase);
+    st.wz = bob;
+
+    // Apply transform (Model3D origin BottomCenterZ → set position of bottom-left-ish via setX/Y)
+    try {
+      var ow = st.obj.getWidth();
+      var oh = st.obj.getHeight();
+      st.obj.setX(st.cx - ow / 2);
+      st.obj.setY(st.cy - oh / 2);
+      if (st.obj.setZ) st.obj.setZ(st.wz);
+    } catch (e) {}
+
+    // Melee
+    var mRange = def.meleeRange || 70;
+    if (dist < mRange && st.atkCd <= 0) {
+      st.atkCd = def.boss ? 0.9 : 1.1;
+      fpsHurtPlayer(def.damage || 10);
+    }
+
+    // Beholder roar
+    if (def.roar && aggroed && F.roarCd <= 0 && dist < def.aggro * 0.85) {
+      F.roarCd = 6 + Math.random() * 4;
+      fpsSfx('beholder-roar', 0.7);
+    }
+  }
+
+  // ── Pickups: gems ────────────────────────────────────────────────
+  var gems = runtimeScene.getObjects('Gem') || [];
+  for (var gi = gems.length - 1; gi >= 0; gi--) {
+    var g = gems[gi];
+    var gx = g.getCenterX ? g.getCenterX() : (g.getX() + g.getWidth() / 2);
+    var gy = g.getCenterY ? g.getCenterY() : (g.getY() + g.getHeight() / 2);
+    var gdx = gx - player.x;
+    var gdy = gy - player.y;
+    if (gdx * gdx + gdy * gdy < 55 * 55) {
+      F.gems += 1;
+      F.score += 50;
+      fpsSfx('pickup-gem', 0.55);
+      try { g.deleteFromScene(runtimeScene); } catch (e) { try { g.hide(); } catch (e2) {} }
+      if (F.gems >= F.totalGems && F.totalGems > 0) fpsWin();
+    }
+  }
+
+  // ── Pickups: keys ────────────────────────────────────────────────
+  var keys = runtimeScene.getObjects('Key') || [];
+  for (var ki = keys.length - 1; ki >= 0; ki--) {
+    var k = keys[ki];
+    var kx = k.getCenterX ? k.getCenterX() : (k.getX() + k.getWidth() / 2);
+    var ky = k.getCenterY ? k.getCenterY() : (k.getY() + k.getHeight() / 2);
+    var kdx = kx - player.x;
+    var kdy = ky - player.y;
+    if (kdx * kdx + kdy * kdy < 55 * 55) {
+      F.keys += 1;
+      F.score += 75;
+      fpsSfx('pickup-key', 0.6);
+      try {
+        runtimeScene.getScene().getVariables().get('HasKey').setNumber(F.keys);
+      } catch (e) {}
+      try { k.deleteFromScene(runtimeScene); } catch (e) { try { k.hide(); } catch (e2) {} }
+    }
+  }
+
+  // ── Doors ────────────────────────────────────────────────────────
+  if (F.keys > 0) {
+    var doors = runtimeScene.getObjects('Door') || [];
+    for (var di = doors.length - 1; di >= 0; di--) {
+      var d = doors[di];
+      var dx2 = (d.getCenterX ? d.getCenterX() : (d.getX() + d.getWidth() / 2)) - player.x;
+      var dy2 = (d.getCenterY ? d.getCenterY() : (d.getY() + d.getHeight() / 2)) - player.y;
+      if (dx2 * dx2 + dy2 * dy2 < 130 * 130) {
+        F.keys -= 1;
+        try {
+          runtimeScene.getScene().getVariables().get('HasKey').setNumber(F.keys);
+        } catch (e) {}
+        fpsSfx('door-open', 0.7);
+        try { d.deleteFromScene(runtimeScene); } catch (e) { try { d.hide(); } catch (e2) {} }
+      }
+    }
+  }
+}
+
+// Keep particles list trimmed
+if (F.particles.length) {
+  for (var pi = F.particles.length - 1; pi >= 0; pi--) {
+    F.particles[pi].t -= dt;
+    if (F.particles[pi].t <= 0) F.particles.splice(pi, 1);
+  }
+}
+
+fpsUpdateHud();
+
+// Sync legacy GDevelop HUD text (hidden under our DOM HUD, still updated)
+try {
+  var hudObjs = runtimeScene.getObjects('HUD');
+  if (hudObjs.length) {
+    var label = F.dead ? 'YOU DIED — press R' : (F.won ? 'DUNGEON CLEARED!' :
+      ('HP ' + Math.ceil(F.hp) + '  Gems ' + F.gems + '/' + F.totalGems + '  Keys ' + F.keys + '  Foes ' + fpsCountAlive()));
+    if (hudObjs[0].setString) hudObjs[0].setString(label);
+  }
+} catch (e) {}
+`.trim();
+}
+
 // ─── Prop & light fixture objects (3D Models) ────────────────────────────
 
 function makeModel3DObject(name, glbFile, materialType = 'KeepOriginal', opts = {}) {
@@ -523,10 +1119,13 @@ function generateProps(level) {
   const cs = settings.cellSize;
   const props = [];
   let uid = 0;
+  // Enemy models are placed via enemies[] so combat AI owns them.
+  const skipProps = new Set(['beholder', 'gargoyle', 'pacman']);
 
   if (!level.propPlacements) return props;
 
   for (const p of level.propPlacements) {
+    if (skipProps.has(String(p.prop).toLowerCase())) continue;
     const gr = Math.floor(p.gy);
     const gc = Math.floor(p.gx);
     const floorH = isOpen(grid, gr, gc) ? getFloorHeight(level, gr, gc) : 0;
@@ -597,10 +1196,13 @@ function generateEvents(level) {
     actions: [
       // Hide the player cube (camera IS the player)
       { type: { value: 'Cache' }, parameters: ['Player', ''] },
+      // DOM HUD replaces the Text object — keep it hidden
+      { type: { value: 'Cache' }, parameters: ['HUD', ''] },
       // Set initial rotation variable
       { type: { value: 'SetNumberVariable' }, parameters: ['CameraAngle', '=', `${spawnAngleToCameraAngle(spawnAngle)}`] },
       { type: { value: 'SetNumberVariable' }, parameters: ['Gems', '=', '0'] },
-      { type: { value: 'TextObject::String' }, parameters: ['HUD', '=', '"Gems: 0  [WASD / Arrows, Q/E strafe, Space jump, Shift run]"'] },
+      { type: { value: 'SetNumberVariable' }, parameters: ['HasKey', '=', '0'] },
+      { type: { value: 'TextObject::String' }, parameters: ['HUD', '=', '"HP 100  Gems 0  [WASD move, SPACE fire, SHIFT run]"'] },
     ],
   });
 
@@ -705,62 +1307,23 @@ function generateEvents(level) {
     ],
   });
 
-  // Jump (Space)
+  // Jump moved off Space (Space = FIRE). Optional keyboard jump on F.
   events.push({
     type: 'BuiltinCommonInstructions::Standard',
-    conditions: [{ type: { value: 'KeyPressed' }, parameters: ['', 'Space'] }],
+    conditions: [{ type: { value: 'KeyPressed' }, parameters: ['', 'f'] }],
     actions: [
       { type: { value: 'Physics3D::PhysicsCharacter3D::SimulateJumpKey' }, parameters: ['Player', 'PhysicsCharacter3D'] },
     ],
   });
 
-  // Orbiting props (e.g., beholder circling a room)
-  if (level.props) {
-    const orbitProps = [];
-    for (const [propName, def] of Object.entries(level.props)) {
-      if (def.orbit) orbitProps.push({ name: capitalize(propName), orbit: def.orbit });
-    }
-
-    if (orbitProps.length > 0) {
-      // Build JS code to orbit all props with bobbing
-      const jsLines = [];
-      jsLines.push('var dt = runtimeScene.getTimeManager().getElapsedTime() / 1000;');
-      jsLines.push('if (!runtimeScene.__orbitTime) runtimeScene.__orbitTime = 0;');
-      jsLines.push('runtimeScene.__orbitTime += dt;');
-      jsLines.push('var t = runtimeScene.__orbitTime;');
-
-      for (const { name, orbit } of orbitProps) {
-        const cx = orbit.centerGx * cs;
-        const cy = orbit.centerGy * cs;
-        const r = orbit.radius;
-        const speed = orbit.speed;
-        const bobH = orbit.bobHeight;
-        const bobSpeed = orbit.bobSpeed;
-        const baseZ = orbit.baseZ || 0;
-
-        jsLines.push(`var objs = runtimeScene.getObjects("${name}");`);
-        jsLines.push(`if (objs.length > 0) {`);
-        jsLines.push(`  var o = objs[0];`);
-        jsLines.push(`  var angle = t * ${speed} * Math.PI * 2;`);
-        jsLines.push(`  o.setX(${cx} + ${r} * Math.cos(angle) - o.getWidth() / 2);`);
-        jsLines.push(`  o.setY(${cy} + ${r} * Math.sin(angle) - o.getHeight() / 2);`);
-        jsLines.push(`  o.setZ(${baseZ} + ${bobH} * Math.abs(Math.sin(t * ${bobSpeed} * Math.PI * 2)));`);
-        // Face direction of travel: tangent to circle
-        // Tangent of CCW orbit = orbit angle + 90° in math, but GDevelop angles are CW
-        jsLines.push(`  var deg = (angle * 180 / Math.PI);`);
-        jsLines.push(`  o.setAngle(deg);`);
-        jsLines.push(`}`);
-      }
-
-      events.push({
-        type: 'BuiltinCommonInstructions::JsCode',
-        inlineCode: jsLines.join('\n'),
-        parameterObjects: '',
-        useStrict: true,
-        eventsSheetExpanded: false,
-      });
-    }
-  }
+  // Wolfenstein-style combat, roaming AI, pickups, doors, DOM HUD, SFX, music
+  events.push({
+    type: 'BuiltinCommonInstructions::JsCode',
+    inlineCode: generateCombatJs(level),
+    parameterObjects: '',
+    useStrict: true,
+    eventsSheetExpanded: false,
+  });
 
   // All lights are steady — no flickering (point lights from level areas provide ambient glow)
 
@@ -968,15 +1531,10 @@ function compile(level) {
     behaviors: [makeStaticPhysicsBody()],
     animations: [{ name: 'blink', source: 'blink', loop: true }],
   });
-  const pacmanObj = makeModel3DObject('Pacman', 'pacman.glb', 'KeepOriginal', {
-    behaviors: [makeStaticPhysicsBody()], rotationX: 90,
-  });
-  const gargoyleObj = makeModel3DObject('Gargoyle', 'gargoyle.glb', 'KeepOriginal', {
-    behaviors: [makeStaticPhysicsBody()], rotationX: 90,
-  });
-  const beholderObj = makeModel3DObject('Beholder', 'beholder.glb', 'KeepOriginal', {
-    rotationX: 90,
-  });
+  // Enemies: no static physics — combat JS drives position
+  const pacmanObj = makeEnemyModelObject('Pacman', 'pacman.glb');
+  const gargoyleObj = makeEnemyModelObject('Gargoyle', 'gargoyle.glb');
+  const beholderObj = makeEnemyModelObject('Beholder', 'beholder.glb');
   const angelObj = makeModel3DObject('Angel', 'angel.glb', 'KeepOriginal', {
     behaviors: [makeStaticPhysicsBody()], rotationX: 90,
   });
@@ -985,10 +1543,12 @@ function compile(level) {
   const ceilingLightObj = makeEmissiveModel3DObject('CeilingLight', 'ceiling_light.glb');
 
 
-  // Add player, HUD, Gem objects
+  // Add player, HUD, Gem, Key, Door objects
   const playerObj = makePlayerObject(settings);
   const hudObj = makeHUDObject();
   const gemObj = makeGemObject();
+  const keyObj = makeKeyObject();
+  const doorObj = makeDoorObject();
 
   // Minimap objects (HUD layer sprites)
   const minimapObjects = [];
@@ -1001,7 +1561,7 @@ function compile(level) {
   }
 
   const allObjects = [
-    ...objectDefs.values(), playerObj, hudObj, gemObj,
+    ...objectDefs.values(), playerObj, hudObj, gemObj, keyObj, doorObj,
     barrelObj, crateObj, computerObj, pacmanObj, gargoyleObj, beholderObj, angelObj,
     sconceObj, ceilingLightObj,
     ...minimapObjects,
@@ -1082,21 +1642,79 @@ function compile(level) {
     });
   }
 
-  // Gem instances
+  // Collectible instances (gems + keys)
   if (level.collectibles) {
     for (let i = 0; i < level.collectibles.length; i++) {
       const col = level.collectibles[i];
-      if (col.type !== 'gem') continue;
+      if (col.type !== 'gem' && col.type !== 'key') continue;
       const gr = Math.floor(col.gy);
       const gc = Math.floor(col.gx);
       const fh = getFloorHeight(level, gr, gc);
+      const objName = col.type === 'key' ? 'Key' : 'Gem';
       instances.push({
         angle: 0, customSize: false, width: 0, height: 0,
-        layer: '', name: 'Gem',
+        layer: '', name: objName,
         x: col.gx * cs, y: col.gy * cs, z: fh + 50,
         zOrder: 2,
         numberProperties: [], stringProperties: [], initialVariables: [],
-        persistentUuid: `gem-${i}`,
+        persistentUuid: `${col.type}-${i}`,
+      });
+    }
+  }
+
+  // Door instances (locked gates — combat JS deletes when player has a key)
+  if (level.doors) {
+    for (let i = 0; i < level.doors.length; i++) {
+      const d = level.doors[i];
+      const gr = Math.floor(d.gy);
+      const gc = Math.floor(d.gx);
+      const fh = isOpen(grid, gr, gc) ? getFloorHeight(level, gr, gc) : 0;
+      const thickness = d.thickness || 24;
+      const height = d.height || 220;
+      const width = d.width || 180;
+      const ew = (d.orientation || 'ew') === 'ew';
+      // ew door spans X (blocks north-south passage); ns door spans Y
+      const w = ew ? width : thickness;
+      const h = ew ? thickness : width;
+      instances.push({
+        angle: 0, customSize: true,
+        width: w, height: h, depth: height,
+        layer: '', name: 'Door',
+        x: d.gx * cs - w / 2,
+        y: d.gy * cs - h / 2,
+        z: fh,
+        zOrder: 3,
+        numberProperties: [], stringProperties: [], initialVariables: [],
+        persistentUuid: d.id || `door-${i}`,
+      });
+    }
+  }
+
+  // Enemy instances (from enemies[] — not propPlacements)
+  if (level.enemies) {
+    const enemyDims = {
+      beholder: { w: 100, h: 100, d: 100 },
+      gargoyle: { w: 70, h: 70, d: 90 },
+      pacman: { w: 80, h: 80, d: 60 },
+    };
+    for (let i = 0; i < level.enemies.length; i++) {
+      const e = level.enemies[i];
+      const type = String(e.type || 'beholder').toLowerCase();
+      const dims = enemyDims[type] || { w: 80, h: 80, d: 80 };
+      const gr = Math.floor(e.gy);
+      const gc = Math.floor(e.gx);
+      const fh = isOpen(grid, gr, gc) ? getFloorHeight(level, gr, gc) : 0;
+      const baseZ = e.baseZ ?? (type === 'beholder' ? 70 : fh);
+      instances.push({
+        angle: 0, customSize: true,
+        width: dims.w, height: dims.h, depth: dims.d,
+        layer: '', name: capitalize(type),
+        x: e.gx * cs - dims.w / 2,
+        y: e.gy * cs - dims.h / 2,
+        z: baseZ,
+        zOrder: 4,
+        numberProperties: [], stringProperties: [], initialVariables: [],
+        persistentUuid: `enemy-${type}-${i}`,
       });
     }
   }
@@ -1114,8 +1732,10 @@ function compile(level) {
     });
   }
 
-  // Prop instances
+  // Prop instances (skip enemy types — those come from enemies[])
+  const enemyTypes = new Set(['beholder', 'gargoyle', 'pacman']);
   for (const p of props) {
+    if (enemyTypes.has(String(p.type).toLowerCase())) continue;
     const objName = capitalize(p.type);
     instances.push({
       angle: 0, customSize: true,
@@ -1189,8 +1809,8 @@ function compile(level) {
       templateSlug: '',
       version: '1.0.0',
       name: 'Maze Explorer',
-      description: 'A first-person 3D maze. Example project for Grass Valley Game Club.',
-      author: 'Grass Valley Game Club',
+      description: 'Wolfenstein-style dungeon FPS — roam, shoot, loot gems. Pink Horse of Whimsy.',
+      author: 'Pink Horse of Whimsy',
       windowWidth: 800,
       windowHeight: 600,
       latestCompilationDirectory: '',

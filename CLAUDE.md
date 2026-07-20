@@ -21,14 +21,20 @@ that also serves standalone HTML5 games as static files.
 | `site/src/pages/index.tsx` | Homepage. |
 | `site/src/pages/arcade/index.tsx` | The Arcade page — the `GAMES` array lists every playable game. |
 | `site/static/` | Served at the web root. Anything here is published as-is. |
-| `site/static/worm/` | **Worm** — a single self-contained `index.html` (canvas + Web Audio, no build step). |
 | `site/static/arcade/games/<slug>/` | GDevelop game builds (generated — see below). |
-| `site/static/<slug>/` | Committed static builds of the standalone games (e.g. `indigokart2/`, `star-bean/`, `pinball/`, `vibekart/`). Served as-is. |
+| `site/static/<slug>/` | Committed static builds / copies of standalone games. Served as-is. |
 | `site/static/CNAME` | Custom-domain marker for GitHub Pages (`pinkhorseofwhimsy.com`). Keep it. |
-| `games/` | Source + build pipeline (`build-games.mjs`) for the GDevelop example games. |
-| `games/indigo-kart-v2/` | Source for **Indigo Kart v2** — a Vite + Three.js kart racer. `npm run build` → copy to `site/static/indigokart2/`. |
-| `games/star-bean/` | Source for **Star Bean** — a Vite + React + Three.js rail shooter. `npm run build` → copy to `site/static/star-bean/`. |
-| `.github/workflows/deploy.yml` | CI: builds games + site and deploys to GitHub Pages. |
+| `games/` | **Source of truth** for every arcade game (plus GDevelop pipeline tooling). |
+| `games/2d/`, `games/3d/` | GDevelop example projects + Alien from Mars. |
+| `games/worm/`, `games/pinball/`, `games/indigokart/`, `games/bean-quiz/` | No-build HTML/JS games — copy into `site/static/<slug>/` to publish. |
+| `games/indigo-kart-v2/` | Vite + Three.js kart racer → `site/static/indigokart2/`. |
+| `games/space-bean/` | Vite + React + Three.js rail shooter (**Space Bean**) → `site/static/space-bean/`. (`/star-bean/` is a redirect.) |
+| `games/bean-simulator/` | Vite + Babylon.js first-person dog sim → `site/static/bean-simulator/`. |
+| `games/chickencraft/` | Vite + Babylon.js voxel builder → `site/static/chickencraft/`. |
+| `games/vibekart/` | Vite + Three.js procedural kart track → `site/static/vibekart/`. |
+| `.github/workflows/deploy.yml` | CI: builds GDevelop games + site and deploys to GitHub Pages. |
+
+**Rule:** every arcade game must be fully buildable (or copy-publishable) from `games/` inside this repo. Do not leave canonical source only under `site/static/` or outside this directory.
 
 ## Dev / build
 
@@ -53,8 +59,9 @@ npm run build    # production build -> site/build/  (CI uses this)
 ## Adding a game
 
 **Standalone HTML game (like Worm)** — easiest:
-1. Put the game at `site/static/<slug>/` (an `index.html` plus any assets).
-2. Add a card to the `GAMES` array in `site/src/pages/arcade/index.tsx`, using the
+1. Put the source under `games/<slug>/` (an `index.html` plus any assets).
+2. Copy/publish into `site/static/<slug>/` for the live site.
+3. Add a card to the `GAMES` array in `site/src/pages/arcade/index.tsx`, using the
    `href: '/<slug>/'` field (not the GDevelop `slug` path):
    ```ts
    { title: 'My Game', author: 'Pink Horse of Whimsy',
@@ -67,8 +74,8 @@ npm run build    # production build -> site/build/  (CI uses this)
 2. Add a card to `GAMES` with just `slug: '<slug>'` (no `href`); the play URL defaults to
    `/arcade/games/<slug>/`.
 
-**npm-built game (Vite / Three.js, like Indigo Kart v2 & Star Bean)** — source lives in the
-repo; the built output is committed:
+**npm-built game (Vite / Three.js / Babylon, like Indigo Kart v2 & Space Bean)** — source lives
+in the repo; the built output is committed:
 1. Put the game's source under `games/<name>/` as a self-contained npm project. Set its
    production base to the hosted sub-path — e.g. `"build": "vite build --base=/<slug>/"` —
    so bundled asset URLs resolve correctly. (Any runtime asset paths in the game code
@@ -82,9 +89,16 @@ repo; the built output is committed:
    the GDevelop games), so the committed build is what ships. Each game's `README.md` has
    its exact publish steps.
 3. Add a card to `GAMES` with `href: '/<slug>/'`.
-4. For gamepad support, inject `/arcade/controls.js` (see Controls below). Because Vite
-   rewrites root-absolute paths in `index.html` under a non-`/` base, inject the shim from a
-   small runtime `<script type="module">` rather than a static `<script src>` tag.
+4. For gamepad/touch support, load `/arcade/controls.js` from the game's **JS entry**
+   (`src/main.ts` / `main.js` / `main.tsx`), not from a Vite-processed `<script type="module">`
+   in `index.html` — Vite strips those module tags out of the built HTML. Example:
+   ```js
+   window.ARCADE_CONTROLS = { /* optional */ };
+   const s = document.createElement('script');
+   s.src = '/arcade/controls.js';
+   s.defer = true;
+   document.body.appendChild(s);
+   ```
 
 ## Controls (touch + gamepad)
 

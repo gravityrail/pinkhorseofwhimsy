@@ -1,0 +1,25 @@
+{
+  "name": "space-bean",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build --base=/space-bean/",
+    "preview": "vite preview --host 0.0.0.0",
+    "publish": "npm run build && rm -rf ../../site/static/space-bean && mkdir -p ../../site/static/space-bean && cp -R dist/. ../../site/static/space-bean/"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@types/three": "^0.180.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.9.0",
+    "vite": "^7.0.0"
+  }
+}

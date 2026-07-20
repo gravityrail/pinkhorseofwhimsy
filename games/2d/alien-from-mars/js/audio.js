@@ -8,13 +8,49 @@ let ctx = null;          // AudioContext (null until init)
 let master = null;       // final gain -> compressor -> destination
 let comp = null;         // limiter
 let noiseBuf = null;     // shared white-noise buffer
+let sampleBus = null;    // bus for decoded mp3 samples
 
 // beam loop state
 let beamNodes = null;
+let beamSample = null;   // optional looping mp3 beam hum
 
 // music state
 let music = null;
+let musicSample = null;  // optional looping mp3 bed under synth
 let wanted = 0;
+
+// decoded sample buffers keyed by cue name (null = missing/failed)
+const samples = Object.create(null);
+const SAMPLE_MAP = {
+  mutate: '/arcade/sfx/alien-mutate.mp3',
+  lava_explode: '/arcade/sfx/alien-explode.mp3',
+  explode_big: '/arcade/sfx/alien-explode.mp3',
+  alarm: '/arcade/sfx/alien-alarm.mp3',
+};
+const BEAM_URL = '/arcade/sfx/alien-beam.mp3';
+const MUSIC_URL = '/arcade/sfx/alien-music.mp3';
+
+function loadSample(url) {
+  return fetch(url)
+    .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject()))
+    .then((buf) => ctx.decodeAudioData(buf.slice(0)))
+    .catch(() => null);
+}
+
+function playSample(name, vol, rate) {
+  const buf = samples[name];
+  if (!buf || !ctx || !sampleBus) return false;
+  try {
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.playbackRate.value = rate || 1;
+    const g = ctx.createGain();
+    g.gain.value = (vol != null ? vol : 1) * 0.7;
+    src.connect(g); g.connect(sampleBus);
+    src.start();
+    return true;
+  } catch (e) { return false; }
+}
 
 // -------------------------------------------------------------------------
 // helpers (all no-op / guarded when ctx is null)
@@ -559,6 +595,175 @@ const CUES = {
       o.start(s); o.stop(s + 0.27);
     });
   },
+
+  // new animal caricatures
+  bleat(v, p) {
+    const t = now();
+    const o = ctx.createOscillator();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(480 * p, t);
+    o.frequency.linearRampToValueAtTime(360 * p, t + 0.25);
+    const lfo = ctx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 30;
+    const lg = ctx.createGain(); lg.gain.value = 40;
+    lfo.connect(lg); lg.connect(o.frequency);
+    const flt = ctx.createBiquadFilter(); flt.type = 'bandpass'; flt.frequency.value = 1100; flt.Q.value = 5;
+    const e = ctx.createGain();
+    e.gain.setValueAtTime(0.0001, t);
+    e.gain.exponentialRampToValueAtTime(0.32 * v, t + 0.03);
+    e.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+    o.connect(flt); flt.connect(e); e.connect(master);
+    o.start(t); o.stop(t + 0.32); lfo.start(t); lfo.stop(t + 0.32);
+  },
+  quack(v, p) {
+    const t = now();
+    const o = ctx.createOscillator();
+    o.type = 'square';
+    o.frequency.setValueAtTime(380 * p, t);
+    o.frequency.exponentialRampToValueAtTime(180 * p, t + 0.12);
+    const flt = ctx.createBiquadFilter(); flt.type = 'bandpass'; flt.frequency.value = 900; flt.Q.value = 4;
+    const e = ctx.createGain();
+    e.gain.setValueAtTime(0.4 * v, t);
+    e.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
+    o.connect(flt); flt.connect(e); e.connect(master);
+    o.start(t); o.stop(t + 0.16);
+  },
+  neigh(v, p) {
+    const t = now();
+    const o = ctx.createOscillator();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(520 * p, t);
+    o.frequency.linearRampToValueAtTime(280 * p, t + 0.18);
+    o.frequency.linearRampToValueAtTime(400 * p, t + 0.35);
+    o.frequency.linearRampToValueAtTime(200 * p, t + 0.55);
+    const flt = ctx.createBiquadFilter(); flt.type = 'bandpass'; flt.frequency.value = 1200; flt.Q.value = 2;
+    const e = ctx.createGain();
+    e.gain.setValueAtTime(0.0001, t);
+    e.gain.exponentialRampToValueAtTime(0.35 * v, t + 0.04);
+    e.gain.setValueAtTime(0.3 * v, t + 0.35);
+    e.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+    o.connect(flt); flt.connect(e); e.connect(master);
+    o.start(t); o.stop(t + 0.62);
+  },
+  disco(v, p) {
+    const t = now();
+    // four-on-the-floor kick + hi sparkle
+    for (let i = 0; i < 4; i++) {
+      const s = t + i * 0.12;
+      const o = ctx.createOscillator();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(140 * p, s);
+      o.frequency.exponentialRampToValueAtTime(50 * p, s + 0.08);
+      const e = ctx.createGain();
+      e.gain.setValueAtTime(0.4 * v, s);
+      e.gain.exponentialRampToValueAtTime(0.0001, s + 0.1);
+      o.connect(e); e.connect(master);
+      o.start(s); o.stop(s + 0.12);
+    }
+    tone('triangle', 880 * p, 0.3, 0.15 * v, master);
+    tone('triangle', 1320 * p, 0.25, 0.1 * v, master);
+  },
+  tornado(v, p) {
+    const t = now();
+    const src = ctx.createBufferSource();
+    src.buffer = noiseBuf; src.loop = true;
+    const flt = ctx.createBiquadFilter();
+    flt.type = 'bandpass'; flt.Q.value = 1.2;
+    flt.frequency.setValueAtTime(400 * p, t);
+    flt.frequency.linearRampToValueAtTime(1800 * p, t + 0.4);
+    flt.frequency.linearRampToValueAtTime(600 * p, t + 0.8);
+    const e = ctx.createGain();
+    e.gain.setValueAtTime(0.0001, t);
+    e.gain.exponentialRampToValueAtTime(0.45 * v, t + 0.1);
+    e.gain.exponentialRampToValueAtTime(0.0001, t + 0.85);
+    src.connect(flt); flt.connect(e); e.connect(master);
+    src.start(t); src.stop(t + 0.9);
+  },
+  laser(v, p) {
+    const t = now();
+    const o = ctx.createOscillator();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(1400 * p, t);
+    o.frequency.exponentialRampToValueAtTime(200 * p, t + 0.2);
+    const flt = ctx.createBiquadFilter(); flt.type = 'highpass'; flt.frequency.value = 600;
+    const e = ctx.createGain();
+    e.gain.setValueAtTime(0.4 * v, t);
+    e.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+    o.connect(flt); flt.connect(e); e.connect(master);
+    o.start(t); o.stop(t + 0.24);
+    noise(0.08, 0.25 * v, 'highpass', 3000, 0.5);
+  },
+  heli(v, p) {
+    const t = now();
+    const src = ctx.createBufferSource();
+    src.buffer = noiseBuf; src.loop = true;
+    const flt = ctx.createBiquadFilter();
+    flt.type = 'bandpass'; flt.frequency.value = 280 * p; flt.Q.value = 4;
+    const e = ctx.createGain();
+    e.gain.setValueAtTime(0.0001, t);
+    e.gain.exponentialRampToValueAtTime(0.35 * v, t + 0.15);
+    e.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
+    // chopper thump LFO
+    const lfo = ctx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 12;
+    const lg = ctx.createGain(); lg.gain.value = 0.15 * v;
+    lfo.connect(lg); lg.connect(e.gain);
+    src.connect(flt); flt.connect(e); e.connect(master);
+    src.start(t); src.stop(t + 1.15); lfo.start(t); lfo.stop(t + 1.15);
+  },
+  robot_stomp(v, p) {
+    const t = now();
+    noise(0.15, 0.6 * v, 'lowpass', 400 * p, 0.8);
+    const o = ctx.createOscillator();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(80 * p, t);
+    o.frequency.exponentialRampToValueAtTime(30 * p, t + 0.2);
+    const e = ctx.createGain();
+    e.gain.setValueAtTime(0.7 * v, t);
+    e.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
+    o.connect(e); e.connect(master);
+    o.start(t); o.stop(t + 0.27);
+  },
+  sat_charge(v, p) {
+    const t = now();
+    const o = ctx.createOscillator();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(200 * p, t);
+    o.frequency.exponentialRampToValueAtTime(1600 * p, t + 0.8);
+    const e = ctx.createGain();
+    e.gain.setValueAtTime(0.0001, t);
+    e.gain.exponentialRampToValueAtTime(0.25 * v, t + 0.1);
+    e.gain.exponentialRampToValueAtTime(0.0001, t + 0.85);
+    o.connect(e); e.connect(master);
+    o.start(t); o.stop(t + 0.9);
+  },
+  mission(v, p) {
+    const t = now();
+    [523, 659, 784, 1046].forEach((n, i) => {
+      const s = t + i * 0.06;
+      const o = ctx.createOscillator();
+      o.type = 'triangle';
+      o.frequency.setValueAtTime(n * p, s);
+      const e = ctx.createGain();
+      e.gain.setValueAtTime(0.0001, s);
+      e.gain.exponentialRampToValueAtTime(0.22 * v, s + 0.01);
+      e.gain.exponentialRampToValueAtTime(0.0001, s + 0.18);
+      o.connect(e); e.connect(master);
+      o.start(s); o.stop(s + 0.2);
+    });
+  },
+  easter(v, p) {
+    const t = now();
+    [523, 659, 784, 1046, 784, 1046, 1318].forEach((n, i) => {
+      const s = t + i * 0.09;
+      const o = ctx.createOscillator();
+      o.type = 'triangle';
+      o.frequency.setValueAtTime(n * p, s);
+      const e = ctx.createGain();
+      e.gain.setValueAtTime(0.28 * v, s);
+      e.gain.exponentialRampToValueAtTime(0.0001, s + 0.2);
+      o.connect(e); e.connect(master);
+      o.start(s); o.stop(s + 0.22);
+    });
+  },
 };
 
 // -------------------------------------------------------------------------
@@ -591,6 +796,20 @@ function beamStart() {
   g.connect(master);
   carrier.start(t); shimmer.start(t); lfo.start(t);
   beamNodes = { carrier, shimmer, lfo, g };
+
+  // layer optional mp3 beam loop under the synth hum
+  if (samples._beam && !beamSample) {
+    try {
+      const src = ctx.createBufferSource();
+      src.buffer = samples._beam; src.loop = true;
+      const bg = ctx.createGain();
+      bg.gain.setValueAtTime(0.0001, t);
+      bg.gain.exponentialRampToValueAtTime(0.22, t + 0.1);
+      src.connect(bg); bg.connect(sampleBus || master);
+      src.start(t);
+      beamSample = { src, g: bg };
+    } catch (e) {}
+  }
 }
 
 function beamStop() {
@@ -604,6 +823,15 @@ function beamStop() {
   shimmer.stop(t + 0.15);
   lfo.stop(t + 0.15);
   beamNodes = null;
+  if (beamSample) {
+    try {
+      beamSample.g.gain.cancelScheduledValues(t);
+      beamSample.g.gain.setValueAtTime(beamSample.g.gain.value || 0.01, t);
+      beamSample.g.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+      beamSample.src.stop(t + 0.15);
+    } catch (e) {}
+    beamSample = null;
+  }
 }
 
 // -------------------------------------------------------------------------
@@ -650,12 +878,41 @@ function musicStart() {
   tenseOsc.connect(tenseFlt); tenseFlt.connect(tenseGain); tenseGain.connect(busGain);
   tenseOsc.start();
 
+  // high alarm pad at wanted 3
+  const alarmOsc = ctx.createOscillator();
+  alarmOsc.type = 'triangle';
+  alarmOsc.frequency.value = 660;
+  const alarmGain = ctx.createGain();
+  alarmGain.gain.value = 0.0;
+  alarmOsc.connect(alarmGain); alarmGain.connect(busGain);
+  alarmOsc.start();
+
+  // percussion noise tick bus
+  const percGain = ctx.createGain();
+  percGain.gain.value = 0.0;
+  percGain.connect(busGain);
+
   music = {
     busGain, pulseGain, leadOsc, leadGain, tenseOsc, tenseGain, leadVib,
+    alarmOsc, alarmGain, percGain,
     step: 0,
     nextTime: now() + 0.1,
     timer: null,
   };
+
+  // optional mp3 music bed under the synth
+  if (samples._music && !musicSample) {
+    try {
+      const src = ctx.createBufferSource();
+      src.buffer = samples._music; src.loop = true;
+      const mg = ctx.createGain();
+      mg.gain.value = 0.18;
+      src.connect(mg); mg.connect(sampleBus || master);
+      src.start();
+      musicSample = { src, g: mg };
+    } catch (e) {}
+  }
+
   scheduleMusic();
   applyWanted();
 }
@@ -714,6 +971,26 @@ function playMusicStep(t) {
     const n = LEAD_SCALE[(step + 2) % LEAD_SCALE.length] / 2;
     music.tenseOsc.frequency.setValueAtTime(n, t);
   }
+
+  // percussion ticks denser with wanted
+  if (wanted >= 1 && music.percGain && (step % (wanted >= 3 ? 1 : 2) === 0)) {
+    try {
+      const src = ctx.createBufferSource();
+      src.buffer = noiseBuf;
+      const flt = ctx.createBiquadFilter();
+      flt.type = 'highpass'; flt.frequency.value = 2000 + wanted * 400;
+      const e = ctx.createGain();
+      e.gain.setValueAtTime(0.15 + wanted * 0.05, t);
+      e.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+      src.connect(flt); flt.connect(e); e.connect(music.percGain);
+      src.start(t); src.stop(t + 0.05);
+    } catch (e) {}
+  }
+
+  // alarm siren blips at wanted 3
+  if (wanted >= 3 && music.alarmOsc && step % 4 === 0) {
+    music.alarmOsc.frequency.setValueAtTime(step % 8 === 0 ? 660 : 880, t);
+  }
 }
 
 // tiny dedicated RNG for musical variety (deterministic-ish, self-contained)
@@ -735,7 +1012,12 @@ function applyWanted() {
   // busier lead vibrato as it heats up
   music.leadVib.frequency.setTargetAtTime(5.2 + wanted * 1.1, t, 0.8);
   // overall a touch louder when hot
-  music.busGain.gain.setTargetAtTime(0.5 + wanted * 0.06, t, 1.0);
+  music.busGain.gain.setTargetAtTime(0.5 + wanted * 0.08, t, 1.0);
+  // perc + alarm layer
+  if (music.percGain) music.percGain.gain.setTargetAtTime(wanted >= 1 ? 0.5 + wanted * 0.15 : 0, t, 0.5);
+  if (music.alarmGain) music.alarmGain.gain.setTargetAtTime(wanted >= 3 ? 0.12 : 0, t, 0.4);
+  // mp3 bed louder when wanted rises
+  if (musicSample) musicSample.g.gain.setTargetAtTime(0.14 + wanted * 0.06, t, 0.8);
 }
 
 // -------------------------------------------------------------------------
@@ -763,17 +1045,47 @@ export const audio = {
     master.gain.value = 0.6;
     master.connect(comp);
     comp.connect(ctx.destination);
+    sampleBus = ctx.createGain();
+    sampleBus.gain.value = 0.85;
+    sampleBus.connect(master);
     noiseBuf = makeNoiseBuffer();
     if (ctx.state === 'suspended') ctx.resume();
+
+    // fire-and-forget sample loads (layered over synth when ready)
+    const keys = Object.keys(SAMPLE_MAP);
+    for (let i = 0; i < keys.length; i++) {
+      const k = keys[i];
+      loadSample(SAMPLE_MAP[k]).then((buf) => { if (buf) samples[k] = buf; });
+    }
+    loadSample(BEAM_URL).then((buf) => { if (buf) samples._beam = buf; });
+    loadSample(MUSIC_URL).then((buf) => {
+      if (buf) {
+        samples._music = buf;
+        // if music already running, start bed now
+        if (music && !musicSample) {
+          try {
+            const src = ctx.createBufferSource();
+            src.buffer = buf; src.loop = true;
+            const mg = ctx.createGain();
+            mg.gain.value = 0.14 + wanted * 0.06;
+            src.connect(mg); mg.connect(sampleBus);
+            src.start();
+            musicSample = { src, g: mg };
+          } catch (e) {}
+        }
+      }
+    });
   },
 
   play(name, opts = {}) {
     if (!ctx) return;
-    const fn = CUES[name];
-    if (!fn) return; // unknown cue: no-op
     if (ctx.state === 'suspended') ctx.resume();
     const v = opts.vol != null ? opts.vol : 1;
     const p = opts.pitch != null ? opts.pitch : 1;
+    // layer sample on top of synth for mapped cues
+    if (samples[name]) playSample(name, v * 0.85, p);
+    const fn = CUES[name];
+    if (!fn) return; // unknown cue: no-op (sample may still have played)
     try { fn(v, p); } catch (e) { /* never throw into the game loop */ }
   },
 

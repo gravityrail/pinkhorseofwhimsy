@@ -61,7 +61,19 @@ export function makeWorld(seed) {
     const gx = (frac) => cx0 + frac * K.CHUNK_W;
     const spawns = [];
     const farm = rng() < 0.25;
-    const kinds = ['cow', 'sheep', 'pig', 'chicken'];
+    // weighted farm fauna — classic + goat/duck/horse; pink_horse is ultra-rare
+    const kinds = ['cow', 'sheep', 'pig', 'chicken', 'goat', 'duck', 'horse'];
+    function pickAnimal() {
+      if (rng() < 0.012) return 'pink_horse'; // ~1.2% easter egg
+      const r = rng();
+      if (r < 0.18) return 'cow';
+      if (r < 0.34) return 'sheep';
+      if (r < 0.48) return 'pig';
+      if (r < 0.62) return 'chicken';
+      if (r < 0.75) return 'goat';
+      if (r < 0.88) return 'duck';
+      return 'horse';
+    }
 
     if (farm) {
       const bigX = gx(0.18 + rng() * 0.18);
@@ -73,7 +85,7 @@ export function makeWorld(seed) {
       const fStart = gx(0.05 + rng() * 0.08);
       for (let i = 0; i < fN; i++) spawns.push({ cls: 'prop', type: 'fence', x: fStart + i * 15 });
       const aN = 3 + Math.floor(rng() * 4);
-      for (let i = 0; i < aN; i++) spawns.push({ cls: 'animal', type: kinds[Math.floor(rng() * 4)], x: gx(0.12 + rng() * 0.82) });
+      for (let i = 0; i < aN; i++) spawns.push({ cls: 'animal', type: pickAnimal(), x: gx(0.12 + rng() * 0.82) });
       if (rng() < 0.7) spawns.push({ cls: 'prop', type: rng() < 0.5 ? 'tree1' : 'tree2', x: gx(0.9 + rng() * 0.07) });
     } else {
       const tN = 2 + Math.floor(rng() * 4);
@@ -83,7 +95,7 @@ export function makeWorld(seed) {
         spawns.push({ cls: 'prop', type, x: gx(0.05 + rng() * 0.9) });
       }
       const aN = Math.floor(rng() * 3);
-      for (let i = 0; i < aN; i++) spawns.push({ cls: 'animal', type: kinds[Math.floor(rng() * 4)], x: gx(0.1 + rng() * 0.8) });
+      for (let i = 0; i < aN; i++) spawns.push({ cls: 'animal', type: pickAnimal(), x: gx(0.1 + rng() * 0.8) });
     }
     return { ci, farm, spawns };
   }

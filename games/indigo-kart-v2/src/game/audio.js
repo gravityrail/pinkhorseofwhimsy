@@ -193,6 +193,8 @@ export class GameAudio {
       space: [[NOTES.E4, 0, 0.34], [NOTES.A4, 0.4, 0.34], [NOTES.E5, 0.8, 0.42], [NOTES.B5, 1.28, 0.6]],
       // A bugle call for the 1892 main street.
       western: [[NOTES.C4, 0, 0.16], [NOTES.E4, 0.18, 0.16], [NOTES.G4, 0.36, 0.16], [NOTES.C5, 0.54, 0.34], [NOTES.G4, 0.94, 0.18], [NOTES.C5, 1.14, 0.5]],
+      // Bouncy sugar-rush fanfare for Candy Canyon.
+      candy: [[NOTES.G4, 0, 0.14], [NOTES.B4, 0.16, 0.14], [NOTES.D5, 0.32, 0.14], [NOTES.G5, 0.5, 0.28], [NOTES.E5, 0.84, 0.16], [NOTES.G5, 1.04, 0.42]],
       sunset: [[NOTES.D4, 0, 0.2], [NOTES.FS4, 0.22, 0.2], [NOTES.A4, 0.44, 0.28], [NOTES.D5, 0.78, 0.2], [NOTES.FS5, 1.02, 0.5]],
     };
     const line = lines[theme] || lines.sunset;
@@ -279,6 +281,20 @@ export class GameAudio {
     if (note && Math.floor(step / 2) % 2 === 0) this.synthNote(note, time, beat * 2.6, { type: 'triangle', gain: 0.024, filter: 1900 });
   }
 
+  // Bouncy major-key sugar pop for Candy Canyon — xylophone-ish sparkles.
+  scheduleCandyStep(step, time, beat) {
+    if (step % 4 === 0) this.percussion(time, 'kick', 0.08);
+    if (step === 4 || step === 12) this.percussion(time, 'clap', 0.04);
+    if (step % 2 === 1) this.percussion(time, 'hat', 0.022);
+    const bass = [NOTES.G2, NOTES.G2, NOTES.D3, NOTES.D3, NOTES.E3, NOTES.E3, NOTES.C3, NOTES.D3];
+    if (step % 2 === 0) this.synthNote(bass[step / 2], time, beat * 1.5, { type: 'square', gain: 0.036, filter: 580 });
+    const sparkle = [NOTES.G5, NOTES.B5, NOTES.D5, NOTES.G5, NOTES.A5, NOTES.B5, NOTES.D5, NOTES.E5];
+    if (step % 2 === 0) this.synthNote(sparkle[step / 2], time, beat * 1.1, { type: 'triangle', gain: 0.034, filter: 4800, detune: 5 });
+    if (step % 4 === 0) {
+      [NOTES.G3, NOTES.B3, NOTES.D4].forEach((note) => this.synthNote(note, time, beat * 3.4, { type: 'sine', gain: 0.018, filter: 2200 }));
+    }
+  }
+
   startMusic(theme = 'sunset') {
     if (!this.ctx) return;
     this.stopMusic();
@@ -289,6 +305,7 @@ export class GameAudio {
       western: { step: (s, t, b) => this.scheduleWesternStep(s, t, b), bpm: 116, gain: 0.5 },
       surf: { step: (s, t, b) => this.scheduleSurfStep(s, t, b), bpm: 140, gain: 0.46 },
       outback: { step: (s, t, b) => this.scheduleOutbackStep(s, t, b), bpm: 92, gain: 0.5 },
+      candy: { step: (s, t, b) => this.scheduleCandyStep(s, t, b), bpm: 150, gain: 0.48 },
       sunset: { step: (s, t, b) => this.scheduleDayStep(s, t, b), bpm: 132, gain: 0.46 },
     };
     const arrangement = arrangements[theme] || arrangements.sunset;
@@ -345,8 +362,28 @@ export class GameAudio {
     [440, 554.37, 659.25, 880].forEach((note, index) => this.tone(note, 0.18, 'sine', 0.065, 90, this.ctx.currentTime + index * 0.075));
   }
   boost() {
+    // Prefer the shared arcade mp3 whoosh; fall back to synthesized ramp.
+    if (this.playSample('/arcade/sfx/kart-boost.mp3', 0.55)) return;
     this.tone(155, 0.42, 'sawtooth', 0.13, 760);
     window.setTimeout(() => this.tone(480, 0.24, 'square', 0.075, 320), 80);
+  }
+  itemPickup() {
+    if (this.playSample('/arcade/sfx/kart-item.mp3', 0.6)) return;
+    this.tone(620, 0.12, 'triangle', 0.12, 420);
+    this.tone(880, 0.16, 'sine', 0.1, 280, this.ctx?.currentTime + 0.06);
+  }
+
+  playSample(url, volume = 0.5) {
+    if (this.muted) return true;
+    try {
+      const audio = new Audio(url);
+      audio.volume = volume;
+      const play = audio.play();
+      if (play && play.catch) play.catch(() => {});
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   toggle() {

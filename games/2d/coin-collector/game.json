@@ -1,22 +1,27 @@
 {
   "firstLayout": "Level1",
-  "gdVersion": { "build": 237, "major": 5, "minor": 5, "revision": 0 },
+  "gdVersion": {
+    "build": 237,
+    "major": 5,
+    "minor": 5,
+    "revision": 0
+  },
   "properties": {
     "adaptGameResolutionAtRuntime": true,
     "antialiasingMode": "MSAA",
     "antialisingEnabledOnMobile": false,
     "folderProject": false,
     "orientation": "landscape",
-    "packageName": "com.grassvalley.coincollector",
+    "packageName": "com.pinkhorse.coincollector",
     "pixelsRounding": true,
     "projectUuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     "scaleMode": "nearest",
     "sizeOnStartupMode": "adaptWidth",
     "templateSlug": "",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "name": "Coin Collector",
-    "description": "A simple 2D platformer where you collect coins. Example project for Week 2 of the Grass Valley Game Club.",
-    "author": "Grass Valley Game Club",
+    "description": "Collect coins, find keys, unlock secrets across 3 vertical levels!",
+    "author": "Pink Horse of Whimsy",
     "windowWidth": 800,
     "windowHeight": 600,
     "latestCompilationDirectory": "",
@@ -39,43 +44,183 @@
       "showGDevelopSplash": false,
       "showProgressBar": true
     },
-    "watermark": { "placement": "bottom-left", "showWatermark": true },
+    "watermark": {
+      "placement": "bottom-left",
+      "showWatermark": false
+    },
     "authorIds": [],
     "authorUsernames": [],
     "categories": [],
-    "playableDevices": ["keyboard"],
+    "playableDevices": [
+      "keyboard",
+      "mobile"
+    ],
     "extensionProperties": [],
     "platforms": [
-      { "name": "GDevelop JS platform" }
+      {
+        "name": "GDevelop JS platform"
+      }
     ],
     "currentPlatform": "GDevelop JS platform"
   },
   "resources": {
     "resources": [
-      { "file": "player.png", "kind": "image", "name": "player.png", "smoothed": false, "userAdded": true },
-      { "file": "coin.png", "kind": "image", "name": "coin.png", "smoothed": false, "userAdded": true },
-      { "file": "ground.png", "kind": "image", "name": "ground.png", "smoothed": false, "userAdded": true },
-      { "file": "platform.png", "kind": "image", "name": "platform.png", "smoothed": false, "userAdded": true },
-      { "file": "loading.png", "kind": "image", "name": "loading.png", "smoothed": true, "userAdded": true }
+      {
+        "file": "player.png",
+        "kind": "image",
+        "name": "player.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "coin.png",
+        "kind": "image",
+        "name": "coin.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "ground.png",
+        "kind": "image",
+        "name": "ground.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "platform.png",
+        "kind": "image",
+        "name": "platform.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "loading.png",
+        "kind": "image",
+        "name": "loading.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "key.png",
+        "kind": "image",
+        "name": "key.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "door.png",
+        "kind": "image",
+        "name": "door.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "flag.png",
+        "kind": "image",
+        "name": "flag.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "checkpoint.png",
+        "kind": "image",
+        "name": "checkpoint.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "gem.png",
+        "kind": "image",
+        "name": "gem.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "bush.png",
+        "kind": "image",
+        "name": "bush.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "cloud.png",
+        "kind": "image",
+        "name": "cloud.png",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "coin-collect.mp3",
+        "kind": "audio",
+        "name": "coin-collect.mp3",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "jump.mp3",
+        "kind": "audio",
+        "name": "jump.mp3",
+        "smoothed": false,
+        "userAdded": true
+      },
+      {
+        "file": "level-complete.mp3",
+        "kind": "audio",
+        "name": "level-complete.mp3",
+        "smoothed": false,
+        "userAdded": true
+      }
     ],
     "resourceFolders": []
   },
   "objects": [],
-  "objectsFolderStructure": { "folderName": "__ROOT", "children": [] },
+  "objectsFolderStructure": {
+    "folderName": "__ROOT",
+    "children": []
+  },
   "objectsGroups": [],
   "variables": [
-    { "name": "Score", "type": "number", "value": 0 }
+    {
+      "name": "Score",
+      "type": "number",
+      "value": 0
+    },
+    {
+      "name": "HasKey",
+      "type": "number",
+      "value": 0
+    },
+    {
+      "name": "CheckpointX",
+      "type": "number",
+      "value": 64
+    },
+    {
+      "name": "CheckpointY",
+      "type": "number",
+      "value": 472
+    },
+    {
+      "name": "LevelDone",
+      "type": "number",
+      "value": 0
+    },
+    {
+      "name": "Invuln",
+      "type": "number",
+      "value": 0
+    }
   ],
   "layouts": [
     {
-      "b": 200,
+      "b": 235,
+      "r": 135,
+      "v": 206,
       "disableInputWhenNotFocused": true,
       "mangledName": "Level1",
       "name": "Level1",
-      "r": 135,
-      "v": 235,
       "standardSortMethod": true,
-      "stopSoundsOnStartup": true,
+      "stopSoundsOnStartup": false,
       "title": "",
       "uiSettings": {
         "grid": true,
@@ -91,22 +236,469 @@
         "windowMask": false
       },
       "objectsGroups": [
-        { "name": "Platforms", "objects": [{ "name": "Ground" }, { "name": "Platform" }] },
-        { "name": "Coins", "objects": [{ "name": "Coin" }] }
+        {
+          "name": "Platforms",
+          "objects": [
+            {
+              "name": "Ground"
+            },
+            {
+              "name": "Platform"
+            },
+            {
+              "name": "Jumpthru"
+            }
+          ]
+        },
+        {
+          "name": "Collectibles",
+          "objects": [
+            {
+              "name": "Coin"
+            },
+            {
+              "name": "Gem"
+            }
+          ]
+        }
       ],
       "variables": [],
       "instances": [
-        { "angle": 0, "customSize": true, "height": 64, "width": 800, "layer": "", "name": "Ground", "x": 0, "y": 536, "zOrder": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "ground-1" },
-        { "angle": 0, "customSize": true, "height": 32, "width": 192, "layer": "", "name": "Platform", "x": 128, "y": 400, "zOrder": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "plat-1" },
-        { "angle": 0, "customSize": true, "height": 32, "width": 192, "layer": "", "name": "Platform", "x": 450, "y": 300, "zOrder": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "plat-2" },
-        { "angle": 0, "customSize": true, "height": 32, "width": 128, "layer": "", "name": "Platform", "x": 250, "y": 200, "zOrder": 0, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "plat-3" },
-        { "angle": 0, "customSize": true, "height": 64, "width": 64, "layer": "", "name": "Player", "x": 64, "y": 472, "zOrder": 2, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "player-1" },
-        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Coin", "x": 192, "y": 360, "zOrder": 1, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "coin-1" },
-        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Coin", "x": 512, "y": 260, "zOrder": 1, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "coin-2" },
-        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Coin", "x": 300, "y": 160, "zOrder": 1, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "coin-3" },
-        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Coin", "x": 640, "y": 496, "zOrder": 1, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "coin-4" },
-        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "Coin", "x": 400, "y": 496, "zOrder": 1, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "coin-5" },
-        { "angle": 0, "customSize": false, "height": 0, "width": 0, "layer": "", "name": "ScoreText", "x": 16, "y": 16, "zOrder": 10, "numberProperties": [], "stringProperties": [], "initialVariables": [], "persistentUuid": "score-1" }
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 64,
+          "width": 320,
+          "layer": "",
+          "name": "Ground",
+          "x": 0,
+          "y": 836,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "ground-1"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 64,
+          "width": 480,
+          "layer": "",
+          "name": "Ground",
+          "x": 480,
+          "y": 836,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "ground-2"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 160,
+          "layer": "",
+          "name": "Platform",
+          "x": 100,
+          "y": 720,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-3"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 160,
+          "layer": "",
+          "name": "Platform",
+          "x": 340,
+          "y": 640,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-4"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 16,
+          "width": 128,
+          "layer": "",
+          "name": "Jumpthru",
+          "x": 560,
+          "y": 560,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "jumpthru-5"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 192,
+          "layer": "",
+          "name": "Platform",
+          "x": 200,
+          "y": 480,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-6"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 160,
+          "layer": "",
+          "name": "Platform",
+          "x": 480,
+          "y": 380,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-7"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 128,
+          "layer": "",
+          "name": "Platform",
+          "x": 120,
+          "y": 280,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-8"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 220,
+          "layer": "",
+          "name": "Platform",
+          "x": 360,
+          "y": 180,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-9"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 96,
+          "layer": "",
+          "name": "Platform",
+          "x": 0,
+          "y": 120,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-10"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 48,
+          "width": 48,
+          "layer": "",
+          "name": "Player",
+          "x": 48,
+          "y": 772,
+          "zOrder": 5,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "player-11"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Flag",
+          "x": 440,
+          "y": 116,
+          "zOrder": 3,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "flag-12"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 140,
+          "y": 680,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c1-0"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 380,
+          "y": 600,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c1-1"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 600,
+          "y": 520,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c1-2"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 260,
+          "y": 440,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c1-3"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 520,
+          "y": 340,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c1-4"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 160,
+          "y": 240,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c1-5"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 400,
+          "y": 140,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c1-6"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 700,
+          "y": 796,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c1-7"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 560,
+          "y": 796,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c1-8"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Gem",
+          "x": 24,
+          "y": 80,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "g1"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Bush",
+          "x": 200,
+          "y": 804,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "bush-13"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Bush",
+          "x": 620,
+          "y": 804,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "bush-14"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Cloud",
+          "x": 80,
+          "y": 40,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "cloud-15"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Cloud",
+          "x": 500,
+          "y": 80,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "cloud-16"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "ScoreText",
+          "x": 16,
+          "y": 12,
+          "zOrder": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "scoretext-17"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "LevelText",
+          "x": 16,
+          "y": 44,
+          "zOrder": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "leveltext-18"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "MessageText",
+          "x": 280,
+          "y": 260,
+          "zOrder": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "messagetext-19"
+        }
       ],
       "objects": [
         {
@@ -125,7 +717,7 @@
               "gravity": 1000,
               "jumpSpeed": 800,
               "ladderClimbingSpeed": 150,
-              "maxFallingSpeed": 700,
+              "maxFallingSpeed": 750,
               "maxSpeed": 500,
               "slopeMaxAngle": 60,
               "canGrabPlatforms": false,
@@ -147,8 +739,17 @@
                       "hasCustomCollisionMask": false,
                       "image": "player.png",
                       "points": [],
-                      "originPoint": { "name": "origine", "x": 0, "y": 0 },
-                      "centerPoint": { "automatic": true, "name": "centre", "x": 0, "y": 0 },
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
                       "customCollisionMask": []
                     }
                   ]
@@ -197,6 +798,25 @@
         },
         {
           "assetStoreId": "",
+          "name": "Jumpthru",
+          "type": "TiledSpriteObject::TiledSprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Platform",
+              "type": "PlatformBehavior::PlatformBehavior",
+              "canBeGrabbed": false,
+              "platformType": "Jumpthru"
+            }
+          ],
+          "width": 128,
+          "height": 16,
+          "texture": "platform.png"
+        },
+        {
+          "assetStoreId": "",
           "name": "Coin",
           "type": "Sprite",
           "updateIfNotVisible": false,
@@ -216,8 +836,304 @@
                       "hasCustomCollisionMask": false,
                       "image": "coin.png",
                       "points": [],
-                      "originPoint": { "name": "origine", "x": 0, "y": 0 },
-                      "centerPoint": { "automatic": true, "name": "centre", "x": 0, "y": 0 },
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Gem",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "spin",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "gem.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Key",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "key.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Door",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Platform",
+              "type": "PlatformBehavior::PlatformBehavior",
+              "canBeGrabbed": false,
+              "platformType": "NormalPlatform"
+            }
+          ],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "door.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Flag",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "wave",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "flag.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Checkpoint",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "checkpoint.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Bush",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "bush.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Cloud",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "cloud.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
                       "customCollisionMask": []
                     }
                   ]
@@ -234,20 +1150,149 @@
           "variables": [],
           "effects": [],
           "behaviors": [],
-          "characterSize": 32,
+          "characterSize": 28,
           "font": "",
           "textAlignment": "left",
-          "color": { "b": 255, "g": 255, "r": 255 },
+          "color": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
           "string": "Score: 0",
           "bold": true,
           "italic": false,
           "underlined": false,
           "smoothed": true,
           "isOutlineEnabled": true,
-          "outlineColor": { "b": 0, "g": 0, "r": 0 },
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
           "outlineThickness": 2,
           "isShadowEnabled": false,
-          "shadowColor": { "b": 0, "g": 0, "r": 0 },
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        },
+        {
+          "assetStoreId": "",
+          "name": "LevelText",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 22,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 240,
+            "b": 120
+          },
+          "string": "Level 1",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        },
+        {
+          "assetStoreId": "",
+          "name": "MessageText",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 36,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 255,
+            "b": 100
+          },
+          "string": "",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        },
+        {
+          "assetStoreId": "",
+          "name": "ScorePopup",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 20,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 230,
+            "b": 80
+          },
+          "string": "+10",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
           "shadowOpacity": 127,
           "shadowDistance": 1,
           "shadowAngle": 90,
@@ -257,11 +1302,54 @@
       "objectsFolderStructure": {
         "folderName": "__ROOT",
         "children": [
-          { "objectName": "Player" },
-          { "objectName": "Ground" },
-          { "objectName": "Platform" },
-          { "objectName": "Coin" },
-          { "objectName": "ScoreText" }
+          {
+            "objectName": "Player"
+          },
+          {
+            "objectName": "Ground"
+          },
+          {
+            "objectName": "Platform"
+          },
+          {
+            "objectName": "Jumpthru"
+          },
+          {
+            "objectName": "Coin"
+          },
+          {
+            "objectName": "Gem"
+          },
+          {
+            "objectName": "Key"
+          },
+          {
+            "objectName": "Door"
+          },
+          {
+            "objectName": "Flag"
+          },
+          {
+            "objectName": "Checkpoint"
+          },
+          {
+            "objectName": "Bush"
+          },
+          {
+            "objectName": "Cloud"
+          },
+          {
+            "objectName": "ScoreText"
+          },
+          {
+            "objectName": "LevelText"
+          },
+          {
+            "objectName": "MessageText"
+          },
+          {
+            "objectName": "ScorePopup"
+          }
         ]
       },
       "events": [
@@ -269,18 +1357,220 @@
           "type": "BuiltinCommonInstructions::Standard",
           "conditions": [
             {
-              "type": { "value": "DepartScene" },
-              "parameters": [""]
+              "type": {
+                "value": "DepartScene"
+              },
+              "parameters": [
+                ""
+              ]
             }
           ],
           "actions": [
             {
-              "type": { "value": "SetNumberVariable" },
-              "parameters": ["Score", "=", "0"]
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Score",
+                "=",
+                "0"
+              ]
             },
             {
-              "type": { "value": "TextObject::String" },
-              "parameters": ["ScoreText", "=", "\"Score: 0\""]
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "HasKey",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointX",
+                "=",
+                "48"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointY",
+                "=",
+                "772"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Invuln",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScoreText",
+                "=",
+                "\"Score: \" + ToString(GlobalVariable(Score))"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "LevelText",
+                "=",
+                "\"Level 1\""
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Hide"
+              },
+              "parameters": [
+                "ScorePopup"
+              ]
+            },
+            {
+              "type": {
+                "value": "Hide"
+              },
+              "parameters": [
+                "MessageText"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": "var players = runtimeScene.getObjects(\"Player\");\nif (!players.length) return;\nvar p = players[0];\nvar camX = p.getCenterXInScene();\nvar camY = p.getCenterYInScene();\nvar halfW = 400, halfH = 300;\nvar levelW = 960, levelH = 900;\ncamX = Math.max(halfW, Math.min(levelW - halfW, camX));\ncamY = Math.max(halfH, Math.min(levelH - halfH, camY));\nvar layer = runtimeScene.getLayer(\"\");\nlayer.setCameraX(camX, 0);\nlayer.setCameraY(camY, 0);\n// Keep HUD glued to camera\nfunction pin(name, ox, oy) {\n  var arr = runtimeScene.getObjects(name);\n  for (var i = 0; i < arr.length; i++) {\n    arr[i].setX(camX - halfW + ox);\n    arr[i].setY(camY - halfH + oy);\n  }\n}\npin(\"ScoreText\", 16, 12);\npin(\"LevelText\", 16, 44);\npin(\"MessageText\", halfW - 120, halfH - 40);",
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": false
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Coin",
+                "",
+                "",
+                ""
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Score",
+                "+",
+                "10"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScoreText",
+                "=",
+                "\"Score: \" + ToString(GlobalVariable(Score))"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "coin-collect.mp3",
+                "",
+                "60",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "Create"
+              },
+              "parameters": [
+                "",
+                "ScorePopup",
+                "Coin.X()",
+                "Coin.Y() - 10",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScorePopup",
+                "=",
+                "\"+10\""
+              ]
+            },
+            {
+              "type": {
+                "value": "ModVarObjet"
+              },
+              "parameters": [
+                "ScorePopup",
+                "age",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "Delete"
+              },
+              "parameters": [
+                "Coin",
+                ""
+              ]
             }
           ]
         },
@@ -288,22 +1578,578 @@
           "type": "BuiltinCommonInstructions::Standard",
           "conditions": [
             {
-              "type": { "value": "CollisionNP" },
-              "parameters": ["Player", "Coin", "", "", ""]
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Gem",
+                "",
+                "",
+                ""
+              ]
             }
           ],
           "actions": [
             {
-              "type": { "value": "Delete" },
-              "parameters": ["Coin", ""]
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Score",
+                "+",
+                "50"
+              ]
             },
             {
-              "type": { "value": "SetNumberVariable" },
-              "parameters": ["Score", "+", "10"]
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScoreText",
+                "=",
+                "\"Score: \" + ToString(GlobalVariable(Score))"
+              ]
             },
             {
-              "type": { "value": "TextObject::String" },
-              "parameters": ["ScoreText", "=", "\"Score: \" + ToString(Variable(Score))"]
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "coin-collect.mp3",
+                "",
+                "80",
+                "1.2"
+              ]
+            },
+            {
+              "type": {
+                "value": "Create"
+              },
+              "parameters": [
+                "",
+                "ScorePopup",
+                "Gem.X()",
+                "Gem.Y() - 10",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScorePopup",
+                "=",
+                "\"+50!\""
+              ]
+            },
+            {
+              "type": {
+                "value": "ModVarObjet"
+              },
+              "parameters": [
+                "ScorePopup",
+                "age",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "Delete"
+              },
+              "parameters": [
+                "Gem",
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": "var dt = runtimeScene.getTimeManager().getElapsedTime() / 1000;\nvar pops = runtimeScene.getObjects(\"ScorePopup\");\nfor (var i = pops.length - 1; i >= 0; i--) {\n  var o = pops[i];\n  var age = o.getVariables().get(\"age\");\n  age.add(dt);\n  o.setY(o.getY() - 50 * dt);\n  if (age.getAsNumber() > 0.7) o.deleteFromScene(runtimeScene);\n}",
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": false
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Key",
+                "",
+                "",
+                ""
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "Delete"
+              },
+              "parameters": [
+                "Key",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "HasKey",
+                "=",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "coin-collect.mp3",
+                "",
+                "70",
+                "0.8"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"Got a key!\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Show"
+              },
+              "parameters": [
+                "MessageText",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "ResetTimer"
+              },
+              "parameters": [
+                "",
+                "\"msg\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Door",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "HasKey",
+                "=",
+                "1"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "Delete"
+              },
+              "parameters": [
+                "Door",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "HasKey",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "level-complete.mp3",
+                "",
+                "50",
+                "1.3"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"Door unlocked!\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Show"
+              },
+              "parameters": [
+                "MessageText",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "ResetTimer"
+              },
+              "parameters": [
+                "",
+                "\"msg\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CompareTimer"
+              },
+              "parameters": [
+                "",
+                "\"msg\"",
+                ">=",
+                "1.5"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Hide"
+              },
+              "parameters": [
+                "MessageText"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Checkpoint",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "BuiltinCommonInstructions::Once"
+              },
+              "parameters": []
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointX",
+                "=",
+                "Checkpoint.X()"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointY",
+                "=",
+                "Checkpoint.Y() - 32"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "coin-collect.mp3",
+                "",
+                "40",
+                "0.6"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"Checkpoint!\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Show"
+              },
+              "parameters": [
+                "MessageText",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "ResetTimer"
+              },
+              "parameters": [
+                "",
+                "\"msg\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "PosY"
+              },
+              "parameters": [
+                "Player",
+                ">",
+                "940"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "MettreXY"
+              },
+              "parameters": [
+                "Player",
+                "=",
+                "GlobalVariable(CheckpointX)",
+                "=",
+                "GlobalVariable(CheckpointY)"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "jump.mp3",
+                "",
+                "40",
+                "0.5"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Flag",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "0"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "level-complete.mp3",
+                "",
+                "80",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"Level clear!\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Show"
+              },
+              "parameters": [
+                "MessageText",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "ResetTimer"
+              },
+              "parameters": [
+                "",
+                "\"levelend\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "CompareTimer"
+              },
+              "parameters": [
+                "",
+                "\"levelend\"",
+                ">=",
+                "1.4"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "Scene"
+              },
+              "parameters": [
+                "",
+                "\"Level2\"",
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "PlatformBehavior::IsJumping"
+              },
+              "parameters": [
+                "Player",
+                "PlatformCharacter"
+              ]
+            },
+            {
+              "type": {
+                "value": "BuiltinCommonInstructions::Once"
+              },
+              "parameters": []
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "jump.mp3",
+                "",
+                "35",
+                "1"
+              ]
             }
           ]
         }
@@ -323,7 +2169,4525 @@
           "renderingType": "",
           "visibility": true,
           "cameras": [
-            { "defaultSize": true, "defaultViewport": true, "height": 0, "viewportBottom": 1, "viewportLeft": 0, "viewportRight": 1, "viewportTop": 0, "width": 0 }
+            {
+              "defaultSize": true,
+              "defaultViewport": true,
+              "height": 0,
+              "viewportBottom": 1,
+              "viewportLeft": 0,
+              "viewportRight": 1,
+              "viewportTop": 0,
+              "width": 0
+            }
+          ],
+          "effects": []
+        }
+      ],
+      "behaviorsSharedData": [
+        {
+          "name": "PlatformCharacter",
+          "type": "PlatformBehavior::PlatformerObjectBehavior"
+        },
+        {
+          "name": "Platform",
+          "type": "PlatformBehavior::PlatformBehavior"
+        }
+      ]
+    },
+    {
+      "b": 180,
+      "r": 100,
+      "v": 140,
+      "disableInputWhenNotFocused": true,
+      "mangledName": "Level2",
+      "name": "Level2",
+      "standardSortMethod": true,
+      "stopSoundsOnStartup": false,
+      "title": "",
+      "uiSettings": {
+        "grid": true,
+        "gridType": "rectangular",
+        "gridWidth": 32,
+        "gridHeight": 32,
+        "gridOffsetX": 0,
+        "gridOffsetY": 0,
+        "gridColor": 10401023,
+        "gridAlpha": 0.8,
+        "snap": true,
+        "zoomFactor": 1,
+        "windowMask": false
+      },
+      "objectsGroups": [
+        {
+          "name": "Platforms",
+          "objects": [
+            {
+              "name": "Ground"
+            },
+            {
+              "name": "Platform"
+            },
+            {
+              "name": "Jumpthru"
+            }
+          ]
+        },
+        {
+          "name": "Collectibles",
+          "objects": [
+            {
+              "name": "Coin"
+            },
+            {
+              "name": "Gem"
+            }
+          ]
+        }
+      ],
+      "variables": [],
+      "instances": [
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 64,
+          "width": 1000,
+          "layer": "",
+          "name": "Ground",
+          "x": 0,
+          "y": 1036,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "ground-20"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 160,
+          "layer": "",
+          "name": "Platform",
+          "x": 40,
+          "y": 900,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-21"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 128,
+          "layer": "",
+          "name": "Platform",
+          "x": 40,
+          "y": 760,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-22"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 128,
+          "layer": "",
+          "name": "Platform",
+          "x": 40,
+          "y": 620,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-23"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 160,
+          "layer": "",
+          "name": "Platform",
+          "x": 40,
+          "y": 480,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-24"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 192,
+          "layer": "",
+          "name": "Platform",
+          "x": 280,
+          "y": 880,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-25"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 16,
+          "width": 128,
+          "layer": "",
+          "name": "Jumpthru",
+          "x": 520,
+          "y": 800,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "jumpthru-26"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 160,
+          "layer": "",
+          "name": "Platform",
+          "x": 700,
+          "y": 720,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-27"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Door",
+          "x": 860,
+          "y": 972,
+          "zOrder": 2,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "door-28"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 32,
+          "layer": "",
+          "name": "Platform",
+          "x": 860,
+          "y": 1004,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-29"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 96,
+          "layer": "",
+          "name": "Platform",
+          "x": 900,
+          "y": 900,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-30"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 96,
+          "layer": "",
+          "name": "Platform",
+          "x": 900,
+          "y": 780,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-31"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 192,
+          "layer": "",
+          "name": "Platform",
+          "x": 520,
+          "y": 560,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-32"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 160,
+          "layer": "",
+          "name": "Platform",
+          "x": 280,
+          "y": 440,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-33"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 200,
+          "layer": "",
+          "name": "Platform",
+          "x": 520,
+          "y": 320,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-34"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Checkpoint",
+          "x": 560,
+          "y": 520,
+          "zOrder": 2,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "checkpoint-35"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 48,
+          "width": 48,
+          "layer": "",
+          "name": "Player",
+          "x": 64,
+          "y": 972,
+          "zOrder": 5,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "player-36"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Key",
+          "x": 80,
+          "y": 440,
+          "zOrder": 3,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "key-37"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Flag",
+          "x": 600,
+          "y": 256,
+          "zOrder": 3,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "flag-38"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 80,
+          "y": 860,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c2-0"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 80,
+          "y": 720,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c2-1"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 80,
+          "y": 580,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c2-2"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 340,
+          "y": 840,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c2-3"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 560,
+          "y": 760,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c2-4"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 740,
+          "y": 680,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c2-5"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 560,
+          "y": 520,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c2-6"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 320,
+          "y": 400,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c2-7"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 560,
+          "y": 280,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c2-8"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Gem",
+          "x": 930,
+          "y": 860,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "g2a"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Gem",
+          "x": 930,
+          "y": 740,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "g2b"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 930,
+          "y": 996,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c2s"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Bush",
+          "x": 200,
+          "y": 1004,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "bush-39"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Cloud",
+          "x": 400,
+          "y": 100,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "cloud-40"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "ScoreText",
+          "x": 16,
+          "y": 12,
+          "zOrder": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "scoretext-41"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "LevelText",
+          "x": 16,
+          "y": 44,
+          "zOrder": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "leveltext-42"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "MessageText",
+          "x": 380,
+          "y": 400,
+          "zOrder": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "messagetext-43"
+        }
+      ],
+      "objects": [
+        {
+          "assetStoreId": "",
+          "name": "Player",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "PlatformCharacter",
+              "type": "PlatformBehavior::PlatformerObjectBehavior",
+              "acceleration": 1500,
+              "deceleration": 1500,
+              "gravity": 1000,
+              "jumpSpeed": 800,
+              "ladderClimbingSpeed": 150,
+              "maxFallingSpeed": 750,
+              "maxSpeed": 500,
+              "slopeMaxAngle": 60,
+              "canGrabPlatforms": false,
+              "ignoreDefaultControls": false,
+              "canGoDownFromJumpthru": true,
+              "useLegacyTrajectory": false
+            }
+          ],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "player.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Ground",
+          "type": "TiledSpriteObject::TiledSprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Platform",
+              "type": "PlatformBehavior::PlatformBehavior",
+              "canBeGrabbed": false,
+              "platformType": "NormalPlatform"
+            }
+          ],
+          "width": 800,
+          "height": 64,
+          "texture": "ground.png"
+        },
+        {
+          "assetStoreId": "",
+          "name": "Platform",
+          "type": "TiledSpriteObject::TiledSprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Platform",
+              "type": "PlatformBehavior::PlatformBehavior",
+              "canBeGrabbed": false,
+              "platformType": "NormalPlatform"
+            }
+          ],
+          "width": 192,
+          "height": 32,
+          "texture": "platform.png"
+        },
+        {
+          "assetStoreId": "",
+          "name": "Jumpthru",
+          "type": "TiledSpriteObject::TiledSprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Platform",
+              "type": "PlatformBehavior::PlatformBehavior",
+              "canBeGrabbed": false,
+              "platformType": "Jumpthru"
+            }
+          ],
+          "width": 128,
+          "height": 16,
+          "texture": "platform.png"
+        },
+        {
+          "assetStoreId": "",
+          "name": "Coin",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "spin",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "coin.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Gem",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "spin",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "gem.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Key",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "key.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Door",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Platform",
+              "type": "PlatformBehavior::PlatformBehavior",
+              "canBeGrabbed": false,
+              "platformType": "NormalPlatform"
+            }
+          ],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "door.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Flag",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "wave",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "flag.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Checkpoint",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "checkpoint.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Bush",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "bush.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Cloud",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "cloud.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "ScoreText",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 28,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "string": "Score: 0",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        },
+        {
+          "assetStoreId": "",
+          "name": "LevelText",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 22,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 240,
+            "b": 120
+          },
+          "string": "Level 1",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        },
+        {
+          "assetStoreId": "",
+          "name": "MessageText",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 36,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 255,
+            "b": 100
+          },
+          "string": "",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        },
+        {
+          "assetStoreId": "",
+          "name": "ScorePopup",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 20,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 230,
+            "b": 80
+          },
+          "string": "+10",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        }
+      ],
+      "objectsFolderStructure": {
+        "folderName": "__ROOT",
+        "children": [
+          {
+            "objectName": "Player"
+          },
+          {
+            "objectName": "Ground"
+          },
+          {
+            "objectName": "Platform"
+          },
+          {
+            "objectName": "Jumpthru"
+          },
+          {
+            "objectName": "Coin"
+          },
+          {
+            "objectName": "Gem"
+          },
+          {
+            "objectName": "Key"
+          },
+          {
+            "objectName": "Door"
+          },
+          {
+            "objectName": "Flag"
+          },
+          {
+            "objectName": "Checkpoint"
+          },
+          {
+            "objectName": "Bush"
+          },
+          {
+            "objectName": "Cloud"
+          },
+          {
+            "objectName": "ScoreText"
+          },
+          {
+            "objectName": "LevelText"
+          },
+          {
+            "objectName": "MessageText"
+          },
+          {
+            "objectName": "ScorePopup"
+          }
+        ]
+      },
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "DepartScene"
+              },
+              "parameters": [
+                ""
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "HasKey",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointX",
+                "=",
+                "64"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointY",
+                "=",
+                "972"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Invuln",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScoreText",
+                "=",
+                "\"Score: \" + ToString(GlobalVariable(Score))"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "LevelText",
+                "=",
+                "\"Level 2\""
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Hide"
+              },
+              "parameters": [
+                "ScorePopup"
+              ]
+            },
+            {
+              "type": {
+                "value": "Hide"
+              },
+              "parameters": [
+                "MessageText"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": "var players = runtimeScene.getObjects(\"Player\");\nif (!players.length) return;\nvar p = players[0];\nvar camX = p.getCenterXInScene();\nvar camY = p.getCenterYInScene();\nvar halfW = 400, halfH = 300;\nvar levelW = 1000, levelH = 1100;\ncamX = Math.max(halfW, Math.min(levelW - halfW, camX));\ncamY = Math.max(halfH, Math.min(levelH - halfH, camY));\nvar layer = runtimeScene.getLayer(\"\");\nlayer.setCameraX(camX, 0);\nlayer.setCameraY(camY, 0);\n// Keep HUD glued to camera\nfunction pin(name, ox, oy) {\n  var arr = runtimeScene.getObjects(name);\n  for (var i = 0; i < arr.length; i++) {\n    arr[i].setX(camX - halfW + ox);\n    arr[i].setY(camY - halfH + oy);\n  }\n}\npin(\"ScoreText\", 16, 12);\npin(\"LevelText\", 16, 44);\npin(\"MessageText\", halfW - 120, halfH - 40);",
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": false
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Coin",
+                "",
+                "",
+                ""
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Score",
+                "+",
+                "10"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScoreText",
+                "=",
+                "\"Score: \" + ToString(GlobalVariable(Score))"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "coin-collect.mp3",
+                "",
+                "60",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "Create"
+              },
+              "parameters": [
+                "",
+                "ScorePopup",
+                "Coin.X()",
+                "Coin.Y() - 10",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScorePopup",
+                "=",
+                "\"+10\""
+              ]
+            },
+            {
+              "type": {
+                "value": "ModVarObjet"
+              },
+              "parameters": [
+                "ScorePopup",
+                "age",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "Delete"
+              },
+              "parameters": [
+                "Coin",
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Gem",
+                "",
+                "",
+                ""
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Score",
+                "+",
+                "50"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScoreText",
+                "=",
+                "\"Score: \" + ToString(GlobalVariable(Score))"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "coin-collect.mp3",
+                "",
+                "80",
+                "1.2"
+              ]
+            },
+            {
+              "type": {
+                "value": "Create"
+              },
+              "parameters": [
+                "",
+                "ScorePopup",
+                "Gem.X()",
+                "Gem.Y() - 10",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScorePopup",
+                "=",
+                "\"+50!\""
+              ]
+            },
+            {
+              "type": {
+                "value": "ModVarObjet"
+              },
+              "parameters": [
+                "ScorePopup",
+                "age",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "Delete"
+              },
+              "parameters": [
+                "Gem",
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": "var dt = runtimeScene.getTimeManager().getElapsedTime() / 1000;\nvar pops = runtimeScene.getObjects(\"ScorePopup\");\nfor (var i = pops.length - 1; i >= 0; i--) {\n  var o = pops[i];\n  var age = o.getVariables().get(\"age\");\n  age.add(dt);\n  o.setY(o.getY() - 50 * dt);\n  if (age.getAsNumber() > 0.7) o.deleteFromScene(runtimeScene);\n}",
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": false
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Key",
+                "",
+                "",
+                ""
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "Delete"
+              },
+              "parameters": [
+                "Key",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "HasKey",
+                "=",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "coin-collect.mp3",
+                "",
+                "70",
+                "0.8"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"Got a key!\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Show"
+              },
+              "parameters": [
+                "MessageText",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "ResetTimer"
+              },
+              "parameters": [
+                "",
+                "\"msg\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Door",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "HasKey",
+                "=",
+                "1"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "Delete"
+              },
+              "parameters": [
+                "Door",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "HasKey",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "level-complete.mp3",
+                "",
+                "50",
+                "1.3"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"Door unlocked!\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Show"
+              },
+              "parameters": [
+                "MessageText",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "ResetTimer"
+              },
+              "parameters": [
+                "",
+                "\"msg\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CompareTimer"
+              },
+              "parameters": [
+                "",
+                "\"msg\"",
+                ">=",
+                "1.5"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Hide"
+              },
+              "parameters": [
+                "MessageText"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Checkpoint",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "BuiltinCommonInstructions::Once"
+              },
+              "parameters": []
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointX",
+                "=",
+                "Checkpoint.X()"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointY",
+                "=",
+                "Checkpoint.Y() - 32"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "coin-collect.mp3",
+                "",
+                "40",
+                "0.6"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"Checkpoint!\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Show"
+              },
+              "parameters": [
+                "MessageText",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "ResetTimer"
+              },
+              "parameters": [
+                "",
+                "\"msg\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "PosY"
+              },
+              "parameters": [
+                "Player",
+                ">",
+                "1140"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "MettreXY"
+              },
+              "parameters": [
+                "Player",
+                "=",
+                "GlobalVariable(CheckpointX)",
+                "=",
+                "GlobalVariable(CheckpointY)"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "jump.mp3",
+                "",
+                "40",
+                "0.5"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Flag",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "0"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "level-complete.mp3",
+                "",
+                "80",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"Level clear!\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Show"
+              },
+              "parameters": [
+                "MessageText",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "ResetTimer"
+              },
+              "parameters": [
+                "",
+                "\"levelend\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "CompareTimer"
+              },
+              "parameters": [
+                "",
+                "\"levelend\"",
+                ">=",
+                "1.4"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "Scene"
+              },
+              "parameters": [
+                "",
+                "\"Level3\"",
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "PlatformBehavior::IsJumping"
+              },
+              "parameters": [
+                "Player",
+                "PlatformCharacter"
+              ]
+            },
+            {
+              "type": {
+                "value": "BuiltinCommonInstructions::Once"
+              },
+              "parameters": []
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "jump.mp3",
+                "",
+                "35",
+                "1"
+              ]
+            }
+          ]
+        }
+      ],
+      "layers": [
+        {
+          "ambientLightColorB": 200,
+          "ambientLightColorG": 200,
+          "ambientLightColorR": 200,
+          "camera3DFarPlaneDistance": 10000,
+          "camera3DFieldOfView": 45,
+          "camera3DNearPlaneDistance": 3,
+          "followBaseLayerCamera": false,
+          "isLightingLayer": false,
+          "isLocked": false,
+          "name": "",
+          "renderingType": "",
+          "visibility": true,
+          "cameras": [
+            {
+              "defaultSize": true,
+              "defaultViewport": true,
+              "height": 0,
+              "viewportBottom": 1,
+              "viewportLeft": 0,
+              "viewportRight": 1,
+              "viewportTop": 0,
+              "width": 0
+            }
+          ],
+          "effects": []
+        }
+      ],
+      "behaviorsSharedData": [
+        {
+          "name": "PlatformCharacter",
+          "type": "PlatformBehavior::PlatformerObjectBehavior"
+        },
+        {
+          "name": "Platform",
+          "type": "PlatformBehavior::PlatformBehavior"
+        }
+      ]
+    },
+    {
+      "b": 140,
+      "r": 70,
+      "v": 90,
+      "disableInputWhenNotFocused": true,
+      "mangledName": "Level3",
+      "name": "Level3",
+      "standardSortMethod": true,
+      "stopSoundsOnStartup": false,
+      "title": "",
+      "uiSettings": {
+        "grid": true,
+        "gridType": "rectangular",
+        "gridWidth": 32,
+        "gridHeight": 32,
+        "gridOffsetX": 0,
+        "gridOffsetY": 0,
+        "gridColor": 10401023,
+        "gridAlpha": 0.8,
+        "snap": true,
+        "zoomFactor": 1,
+        "windowMask": false
+      },
+      "objectsGroups": [
+        {
+          "name": "Platforms",
+          "objects": [
+            {
+              "name": "Ground"
+            },
+            {
+              "name": "Platform"
+            },
+            {
+              "name": "Jumpthru"
+            }
+          ]
+        },
+        {
+          "name": "Collectibles",
+          "objects": [
+            {
+              "name": "Coin"
+            },
+            {
+              "name": "Gem"
+            }
+          ]
+        }
+      ],
+      "variables": [],
+      "instances": [
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 64,
+          "width": 800,
+          "layer": "",
+          "name": "Ground",
+          "x": 0,
+          "y": 1536,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "ground-44"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 200,
+          "layer": "",
+          "name": "Platform",
+          "x": 0,
+          "y": 1400,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-0-0"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 200,
+          "layer": "",
+          "name": "Platform",
+          "x": 350,
+          "y": 1400,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-0-1"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 150,
+          "layer": "",
+          "name": "Platform",
+          "x": 650,
+          "y": 1400,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-0-2"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 180,
+          "layer": "",
+          "name": "Platform",
+          "x": 100,
+          "y": 1240,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-1-0"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 220,
+          "layer": "",
+          "name": "Platform",
+          "x": 400,
+          "y": 1240,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-1-1"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 100,
+          "layer": "",
+          "name": "Platform",
+          "x": 700,
+          "y": 1240,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-1-2"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 160,
+          "layer": "",
+          "name": "Platform",
+          "x": 0,
+          "y": 1080,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-2-0"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 160,
+          "layer": "",
+          "name": "Platform",
+          "x": 300,
+          "y": 1080,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-2-1"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 240,
+          "layer": "",
+          "name": "Platform",
+          "x": 560,
+          "y": 1080,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-2-2"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 200,
+          "layer": "",
+          "name": "Platform",
+          "x": 80,
+          "y": 920,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-3-0"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 200,
+          "layer": "",
+          "name": "Platform",
+          "x": 420,
+          "y": 920,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-3-1"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 140,
+          "layer": "",
+          "name": "Platform",
+          "x": 0,
+          "y": 760,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-4-0"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 180,
+          "layer": "",
+          "name": "Platform",
+          "x": 250,
+          "y": 760,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-4-1"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 200,
+          "layer": "",
+          "name": "Platform",
+          "x": 560,
+          "y": 760,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-4-2"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 220,
+          "layer": "",
+          "name": "Platform",
+          "x": 100,
+          "y": 600,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-5-0"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 180,
+          "layer": "",
+          "name": "Platform",
+          "x": 480,
+          "y": 600,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-5-1"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 200,
+          "layer": "",
+          "name": "Platform",
+          "x": 0,
+          "y": 440,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-6-0"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 200,
+          "layer": "",
+          "name": "Platform",
+          "x": 360,
+          "y": 440,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-6-1"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 160,
+          "layer": "",
+          "name": "Platform",
+          "x": 640,
+          "y": 440,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-6-2"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 240,
+          "layer": "",
+          "name": "Platform",
+          "x": 150,
+          "y": 280,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-7-0"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 200,
+          "layer": "",
+          "name": "Platform",
+          "x": 500,
+          "y": 280,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-7-1"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 300,
+          "layer": "",
+          "name": "Platform",
+          "x": 250,
+          "y": 140,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "p3-8-0"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Door",
+          "x": 300,
+          "y": 1048,
+          "zOrder": 2,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "d3a"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Door",
+          "x": 500,
+          "y": 568,
+          "zOrder": 2,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "d3b"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Key",
+          "x": 700,
+          "y": 1200,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "k3a"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Key",
+          "x": 40,
+          "y": 720,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "k3b"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 32,
+          "width": 64,
+          "layer": "",
+          "name": "Platform",
+          "x": 0,
+          "y": 860,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "platform-45"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Gem",
+          "x": 16,
+          "y": 820,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "g3a"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Gem",
+          "x": 280,
+          "y": 100,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "g3b"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Checkpoint",
+          "x": 450,
+          "y": 880,
+          "zOrder": 2,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "checkpoint-46"
+        },
+        {
+          "angle": 0,
+          "customSize": true,
+          "height": 48,
+          "width": 48,
+          "layer": "",
+          "name": "Player",
+          "x": 48,
+          "y": 1472,
+          "zOrder": 5,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "player-47"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Flag",
+          "x": 360,
+          "y": 76,
+          "zOrder": 3,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "flag-48"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 80,
+          "y": 1360,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c3-0"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 400,
+          "y": 1360,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c3-1"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 700,
+          "y": 1360,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c3-2"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 160,
+          "y": 1200,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c3-3"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 480,
+          "y": 1200,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c3-4"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 40,
+          "y": 1040,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c3-5"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 600,
+          "y": 1040,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c3-6"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 160,
+          "y": 880,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c3-7"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 500,
+          "y": 880,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c3-8"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 40,
+          "y": 720,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c3-9"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 320,
+          "y": 720,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c3-10"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 620,
+          "y": 720,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c3-11"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 160,
+          "y": 560,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c3-12"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 540,
+          "y": 560,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c3-13"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 80,
+          "y": 400,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c3-14"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 420,
+          "y": 400,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c3-15"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 700,
+          "y": 400,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c3-16"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 220,
+          "y": 240,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c3-17"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 560,
+          "y": 240,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c3-18"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Coin",
+          "x": 360,
+          "y": 100,
+          "zOrder": 1,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "c3-19"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Cloud",
+          "x": 100,
+          "y": 40,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "cloud-49"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Cloud",
+          "x": 500,
+          "y": 60,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "cloud-50"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "Bush",
+          "x": 180,
+          "y": 1504,
+          "zOrder": 0,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "bush-51"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "ScoreText",
+          "x": 16,
+          "y": 12,
+          "zOrder": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "scoretext-52"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "LevelText",
+          "x": 16,
+          "y": 44,
+          "zOrder": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "leveltext-53"
+        },
+        {
+          "angle": 0,
+          "customSize": false,
+          "height": 0,
+          "width": 0,
+          "layer": "",
+          "name": "MessageText",
+          "x": 280,
+          "y": 700,
+          "zOrder": 20,
+          "numberProperties": [],
+          "stringProperties": [],
+          "initialVariables": [],
+          "persistentUuid": "messagetext-54"
+        }
+      ],
+      "objects": [
+        {
+          "assetStoreId": "",
+          "name": "Player",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "PlatformCharacter",
+              "type": "PlatformBehavior::PlatformerObjectBehavior",
+              "acceleration": 1500,
+              "deceleration": 1500,
+              "gravity": 1000,
+              "jumpSpeed": 800,
+              "ladderClimbingSpeed": 150,
+              "maxFallingSpeed": 750,
+              "maxSpeed": 500,
+              "slopeMaxAngle": 60,
+              "canGrabPlatforms": false,
+              "ignoreDefaultControls": false,
+              "canGoDownFromJumpthru": true,
+              "useLegacyTrajectory": false
+            }
+          ],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "player.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Ground",
+          "type": "TiledSpriteObject::TiledSprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Platform",
+              "type": "PlatformBehavior::PlatformBehavior",
+              "canBeGrabbed": false,
+              "platformType": "NormalPlatform"
+            }
+          ],
+          "width": 800,
+          "height": 64,
+          "texture": "ground.png"
+        },
+        {
+          "assetStoreId": "",
+          "name": "Platform",
+          "type": "TiledSpriteObject::TiledSprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Platform",
+              "type": "PlatformBehavior::PlatformBehavior",
+              "canBeGrabbed": false,
+              "platformType": "NormalPlatform"
+            }
+          ],
+          "width": 192,
+          "height": 32,
+          "texture": "platform.png"
+        },
+        {
+          "assetStoreId": "",
+          "name": "Jumpthru",
+          "type": "TiledSpriteObject::TiledSprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Platform",
+              "type": "PlatformBehavior::PlatformBehavior",
+              "canBeGrabbed": false,
+              "platformType": "Jumpthru"
+            }
+          ],
+          "width": 128,
+          "height": 16,
+          "texture": "platform.png"
+        },
+        {
+          "assetStoreId": "",
+          "name": "Coin",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "spin",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "coin.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Gem",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "spin",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "gem.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Key",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "key.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Door",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [
+            {
+              "name": "Platform",
+              "type": "PlatformBehavior::PlatformBehavior",
+              "canBeGrabbed": false,
+              "platformType": "NormalPlatform"
+            }
+          ],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "door.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Flag",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "wave",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "flag.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Checkpoint",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "checkpoint.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Bush",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "bush.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "Cloud",
+          "type": "Sprite",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "animations": [
+            {
+              "name": "idle",
+              "useMultipleDirections": false,
+              "directions": [
+                {
+                  "looping": true,
+                  "timeBetweenFrames": 0.08,
+                  "sprites": [
+                    {
+                      "hasCustomCollisionMask": false,
+                      "image": "cloud.png",
+                      "points": [],
+                      "originPoint": {
+                        "name": "origine",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "centerPoint": {
+                        "automatic": true,
+                        "name": "centre",
+                        "x": 0,
+                        "y": 0
+                      },
+                      "customCollisionMask": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "assetStoreId": "",
+          "name": "ScoreText",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 28,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+          },
+          "string": "Score: 0",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        },
+        {
+          "assetStoreId": "",
+          "name": "LevelText",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 22,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 240,
+            "b": 120
+          },
+          "string": "Level 1",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        },
+        {
+          "assetStoreId": "",
+          "name": "MessageText",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 36,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 255,
+            "b": 100
+          },
+          "string": "",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        },
+        {
+          "assetStoreId": "",
+          "name": "ScorePopup",
+          "type": "TextObject::Text",
+          "updateIfNotVisible": false,
+          "variables": [],
+          "effects": [],
+          "behaviors": [],
+          "characterSize": 20,
+          "font": "",
+          "textAlignment": "left",
+          "color": {
+            "r": 255,
+            "g": 230,
+            "b": 80
+          },
+          "string": "+10",
+          "bold": true,
+          "italic": false,
+          "underlined": false,
+          "smoothed": true,
+          "isOutlineEnabled": true,
+          "outlineColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "outlineThickness": 2,
+          "isShadowEnabled": false,
+          "shadowColor": {
+            "b": 0,
+            "g": 0,
+            "r": 0
+          },
+          "shadowOpacity": 127,
+          "shadowDistance": 1,
+          "shadowAngle": 90,
+          "shadowBlurRadius": 1
+        }
+      ],
+      "objectsFolderStructure": {
+        "folderName": "__ROOT",
+        "children": [
+          {
+            "objectName": "Player"
+          },
+          {
+            "objectName": "Ground"
+          },
+          {
+            "objectName": "Platform"
+          },
+          {
+            "objectName": "Jumpthru"
+          },
+          {
+            "objectName": "Coin"
+          },
+          {
+            "objectName": "Gem"
+          },
+          {
+            "objectName": "Key"
+          },
+          {
+            "objectName": "Door"
+          },
+          {
+            "objectName": "Flag"
+          },
+          {
+            "objectName": "Checkpoint"
+          },
+          {
+            "objectName": "Bush"
+          },
+          {
+            "objectName": "Cloud"
+          },
+          {
+            "objectName": "ScoreText"
+          },
+          {
+            "objectName": "LevelText"
+          },
+          {
+            "objectName": "MessageText"
+          },
+          {
+            "objectName": "ScorePopup"
+          }
+        ]
+      },
+      "events": [
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "DepartScene"
+              },
+              "parameters": [
+                ""
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "HasKey",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointX",
+                "=",
+                "48"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointY",
+                "=",
+                "1472"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Invuln",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScoreText",
+                "=",
+                "\"Score: \" + ToString(GlobalVariable(Score))"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "LevelText",
+                "=",
+                "\"Level 3\""
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Hide"
+              },
+              "parameters": [
+                "ScorePopup"
+              ]
+            },
+            {
+              "type": {
+                "value": "Hide"
+              },
+              "parameters": [
+                "MessageText"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": "var players = runtimeScene.getObjects(\"Player\");\nif (!players.length) return;\nvar p = players[0];\nvar camX = p.getCenterXInScene();\nvar camY = p.getCenterYInScene();\nvar halfW = 400, halfH = 300;\nvar levelW = 800, levelH = 1600;\ncamX = Math.max(halfW, Math.min(levelW - halfW, camX));\ncamY = Math.max(halfH, Math.min(levelH - halfH, camY));\nvar layer = runtimeScene.getLayer(\"\");\nlayer.setCameraX(camX, 0);\nlayer.setCameraY(camY, 0);\n// Keep HUD glued to camera\nfunction pin(name, ox, oy) {\n  var arr = runtimeScene.getObjects(name);\n  for (var i = 0; i < arr.length; i++) {\n    arr[i].setX(camX - halfW + ox);\n    arr[i].setY(camY - halfH + oy);\n  }\n}\npin(\"ScoreText\", 16, 12);\npin(\"LevelText\", 16, 44);\npin(\"MessageText\", halfW - 120, halfH - 40);",
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": false
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Coin",
+                "",
+                "",
+                ""
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Score",
+                "+",
+                "10"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScoreText",
+                "=",
+                "\"Score: \" + ToString(GlobalVariable(Score))"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "coin-collect.mp3",
+                "",
+                "60",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "Create"
+              },
+              "parameters": [
+                "",
+                "ScorePopup",
+                "Coin.X()",
+                "Coin.Y() - 10",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScorePopup",
+                "=",
+                "\"+10\""
+              ]
+            },
+            {
+              "type": {
+                "value": "ModVarObjet"
+              },
+              "parameters": [
+                "ScorePopup",
+                "age",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "Delete"
+              },
+              "parameters": [
+                "Coin",
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Gem",
+                "",
+                "",
+                ""
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Score",
+                "+",
+                "50"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScoreText",
+                "=",
+                "\"Score: \" + ToString(GlobalVariable(Score))"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "coin-collect.mp3",
+                "",
+                "80",
+                "1.2"
+              ]
+            },
+            {
+              "type": {
+                "value": "Create"
+              },
+              "parameters": [
+                "",
+                "ScorePopup",
+                "Gem.X()",
+                "Gem.Y() - 10",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "ScorePopup",
+                "=",
+                "\"+50!\""
+              ]
+            },
+            {
+              "type": {
+                "value": "ModVarObjet"
+              },
+              "parameters": [
+                "ScorePopup",
+                "age",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "Delete"
+              },
+              "parameters": [
+                "Gem",
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::JsCode",
+          "inlineCode": "var dt = runtimeScene.getTimeManager().getElapsedTime() / 1000;\nvar pops = runtimeScene.getObjects(\"ScorePopup\");\nfor (var i = pops.length - 1; i >= 0; i--) {\n  var o = pops[i];\n  var age = o.getVariables().get(\"age\");\n  age.add(dt);\n  o.setY(o.getY() - 50 * dt);\n  if (age.getAsNumber() > 0.7) o.deleteFromScene(runtimeScene);\n}",
+          "parameterObjects": "",
+          "useStrict": true,
+          "eventsSheetExpanded": false
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Key",
+                "",
+                "",
+                ""
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "Delete"
+              },
+              "parameters": [
+                "Key",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "HasKey",
+                "=",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "coin-collect.mp3",
+                "",
+                "70",
+                "0.8"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"Got a key!\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Show"
+              },
+              "parameters": [
+                "MessageText",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "ResetTimer"
+              },
+              "parameters": [
+                "",
+                "\"msg\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Door",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "HasKey",
+                "=",
+                "1"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "Delete"
+              },
+              "parameters": [
+                "Door",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "HasKey",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "level-complete.mp3",
+                "",
+                "50",
+                "1.3"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"Door unlocked!\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Show"
+              },
+              "parameters": [
+                "MessageText",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "ResetTimer"
+              },
+              "parameters": [
+                "",
+                "\"msg\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CompareTimer"
+              },
+              "parameters": [
+                "",
+                "\"msg\"",
+                ">=",
+                "1.5"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Hide"
+              },
+              "parameters": [
+                "MessageText"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Checkpoint",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "BuiltinCommonInstructions::Once"
+              },
+              "parameters": []
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointX",
+                "=",
+                "Checkpoint.X()"
+              ]
+            },
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "CheckpointY",
+                "=",
+                "Checkpoint.Y() - 32"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "coin-collect.mp3",
+                "",
+                "40",
+                "0.6"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"Checkpoint!\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Show"
+              },
+              "parameters": [
+                "MessageText",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "ResetTimer"
+              },
+              "parameters": [
+                "",
+                "\"msg\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "PosY"
+              },
+              "parameters": [
+                "Player",
+                ">",
+                "1640"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "MettreXY"
+              },
+              "parameters": [
+                "Player",
+                "=",
+                "GlobalVariable(CheckpointX)",
+                "=",
+                "GlobalVariable(CheckpointY)"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "jump.mp3",
+                "",
+                "40",
+                "0.5"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "CollisionNP"
+              },
+              "parameters": [
+                "Player",
+                "Flag",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "0"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "level-complete.mp3",
+                "",
+                "80",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "TextObject::String"
+              },
+              "parameters": [
+                "MessageText",
+                "=",
+                "\"YOU WIN!\""
+              ]
+            },
+            {
+              "type": {
+                "value": "Show"
+              },
+              "parameters": [
+                "MessageText",
+                ""
+              ]
+            },
+            {
+              "type": {
+                "value": "ResetTimer"
+              },
+              "parameters": [
+                "",
+                "\"levelend\""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "NumberVariable"
+              },
+              "parameters": [
+                "LevelDone",
+                "=",
+                "1"
+              ]
+            },
+            {
+              "type": {
+                "value": "CompareTimer"
+              },
+              "parameters": [
+                "",
+                "\"levelend\"",
+                ">=",
+                "4"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "SetNumberVariable"
+              },
+              "parameters": [
+                "Score",
+                "=",
+                "0"
+              ]
+            },
+            {
+              "type": {
+                "value": "Scene"
+              },
+              "parameters": [
+                "",
+                "\"Level1\"",
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "type": "BuiltinCommonInstructions::Standard",
+          "conditions": [
+            {
+              "type": {
+                "value": "PlatformBehavior::IsJumping"
+              },
+              "parameters": [
+                "Player",
+                "PlatformCharacter"
+              ]
+            },
+            {
+              "type": {
+                "value": "BuiltinCommonInstructions::Once"
+              },
+              "parameters": []
+            }
+          ],
+          "actions": [
+            {
+              "type": {
+                "value": "PlaySound"
+              },
+              "parameters": [
+                "",
+                "jump.mp3",
+                "",
+                "35",
+                "1"
+              ]
+            }
+          ]
+        }
+      ],
+      "layers": [
+        {
+          "ambientLightColorB": 200,
+          "ambientLightColorG": 200,
+          "ambientLightColorR": 200,
+          "camera3DFarPlaneDistance": 10000,
+          "camera3DFieldOfView": 45,
+          "camera3DNearPlaneDistance": 3,
+          "followBaseLayerCamera": false,
+          "isLightingLayer": false,
+          "isLocked": false,
+          "name": "",
+          "renderingType": "",
+          "visibility": true,
+          "cameras": [
+            {
+              "defaultSize": true,
+              "defaultViewport": true,
+              "height": 0,
+              "viewportBottom": 1,
+              "viewportLeft": 0,
+              "viewportRight": 1,
+              "viewportTop": 0,
+              "width": 0
+            }
           ],
           "effects": []
         }

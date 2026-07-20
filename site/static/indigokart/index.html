@@ -183,7 +183,23 @@
     <audio id="engineSound" loop preload="auto"></audio>
     <script type="module" src="js/main.js"></script>
 
-<script>window.ARCADE_CONTROLS={buttons:[{label:'Gas',keys:' '},{label:'Brake',keys:'Shift'},{label:'Drift',keys:'x'},{label:'Item',keys:'z'}]};</script>
+<script>
+  window.ARCADE_SPLASH = {
+    image: '/arcade/splashes/indigokart.png',
+    title: 'INDIGO KART',
+    subtitle: 'TAP / PRESS START',
+    credit: 'Pink Horse of Whimsy'
+  };
+  window.ARCADE_CONTROLS = {
+    buttons: [
+      { label: 'Gas', keys: ' ' },
+      { label: 'Brake', keys: 'Shift' },
+      { label: 'Drift', keys: 'x' },
+      { label: 'Item', keys: 'z' }
+    ]
+  };
+</script>
+<script src="/arcade/splash.js"></script>
 <script src="/arcade/controls.js" defer></script>
 </body>
 </html>

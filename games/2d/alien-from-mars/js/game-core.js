@@ -18,27 +18,37 @@ export const G = {
 
   camX: 0, camY: 0, camLead: 0,
   shakeMag: 0, shakeX: 0, shakeY: 0,
+  hitFlash: 0,           // full-screen white flash residual (0..1)
 
   player: null,
   props: [], animals: [], mutants: [],
   soldiers: [], tanks: [], jets: [], ufos: [],
+  helis: [], robots: [], sats: [],
   bolts: [],             // player + enemy energy bolts
   shells: [],            // tank arcing shells
   zaps: [],              // cloudsheep lightning visuals
   fires: [],             // active fire-breath cones (steak)
   lavaPools: [],
+  satBeams: [],          // satellite laser visuals
 
   loadedChunks: null,    // Map<ci, chunkState>
   minChunk: 0, maxChunk: 0,
 
   score: 0, best: 0, combo: 1, comboTimer: 0,
   mutantsCreated: 0, startX: 0, distance: 0,
+  pinkHorseFound: false,
 
   wanted: 0, heat: 0,
   wantArrow: 0,          // jet warning arrow timer
   spawnTimerInf: 0, spawnTimerTank: 0, spawnTimerJet: 0, spawnTimerUfo: 0,
+  spawnTimerHeli: 0, spawnTimerRobot: 0, spawnTimerSat: 0,
   nextUfoAt: 0,
   gameOverTimer: 0,
+
+  // mini missions
+  mission: null,         // { id, text, need, have, reward, kind, type }
+  missionCd: 0,          // delay before next mission
+  missionsDone: 0,
 };
 
 // ---- pools ---------------------------------------------------------------
@@ -81,7 +91,11 @@ export function popup(x, y, text, col, scale) {
 }
 
 // ---- screen shake --------------------------------------------------------
-export function shake(mag) { if (mag > G.shakeMag) G.shakeMag = Math.min(mag, 14); }
+export function shake(mag) { if (mag > G.shakeMag) G.shakeMag = Math.min(mag, 16); }
+
+export function hitFlash(amt) {
+  G.hitFlash = Math.min(1, Math.max(G.hitFlash, amt || 0.35));
+}
 
 export function updateShake(dt) {
   G.shakeMag *= Math.pow(0.0025, dt); // fast decay
@@ -89,17 +103,45 @@ export function updateShake(dt) {
   const m = G.shakeMag;
   G.shakeX = (G.rng() * 2 - 1) * m;
   G.shakeY = (G.rng() * 2 - 1) * m;
+  if (G.hitFlash > 0) G.hitFlash = Math.max(0, G.hitFlash - dt * 3.5);
 }
 
 // ---- scoring / combo -----------------------------------------------------
 export function addScore(base, x, y, label, col) {
   const pts = Math.round(base * G.combo);
   G.score += pts;
+  const prev = G.combo;
   G.combo = Math.min(8, G.combo + 1);
   G.comboTimer = 2.5;
   const txt = label || ('+' + pts);
-  popup(x, y, txt, col || PAL.ui, label ? 1 : 1);
+  const sc = label ? 1.15 : (G.combo >= 6 ? 1.3 : G.combo >= 4 ? 1.15 : 1);
+  popup(x, y, txt, col || (G.combo >= 6 ? PAL.fire1 : G.combo >= 4 ? PAL.fire2 : PAL.ui), sc);
+  if (G.combo >= 4 && G.combo > prev && G.combo % 2 === 0) {
+    popup(x, y - 12, 'COMBO x' + G.combo + '!', G.combo >= 6 ? PAL.fire1 : PAL.beam, 1.4);
+  }
+  // mission progress: score-agnostic hooks live in noteMission
   return pts;
+}
+
+// mission counters — call when relevant events happen
+export function noteMission(kind, type) {
+  const m = G.mission;
+  if (!m || m.have >= m.need) return;
+  if (m.kind !== kind) return;
+  if (m.type && m.type !== type && m.type !== '*') return;
+  m.have++;
+  if (m.have >= m.need) {
+    m.have = m.need;
+    addScore(m.reward, G.player.x, G.player.y - 20, 'MISSION!', PAL.horizon);
+    audio.play('mission');
+    shake(4);
+    hitFlash(0.25);
+    G.missionsDone++;
+    G.missionCd = 4;
+    // keep completed text briefly
+    m.done = true;
+    m.doneT = 2.5;
+  }
 }
 
 // ---- heat / wanted -------------------------------------------------------
@@ -116,6 +158,9 @@ const KILL = {
   tank: { score: 150, living: true },
   jet: { score: 200, living: true },
   ufo: { score: 300, living: true },
+  heli: { score: 220, living: true },
+  robot: { score: 400, living: true },
+  sat: { score: 350, living: true },
   mutant: { score: 0, living: true },
 };
 
@@ -137,18 +182,31 @@ export function killEntity(e, killer) {
   if (info.score > 0) {
     addScore(info.score, e.x, e.y - (e.h ? e.h * 0.5 : 10));
   }
-  addHeat(e.cls === 'prop' ? 3 : e.cls === 'tank' ? 14 : e.cls === 'jet' ? 12 : e.cls === 'ufo' ? 10 : 6);
+  addHeat(e.cls === 'prop' ? 3 : e.cls === 'tank' ? 14 : e.cls === 'jet' ? 12
+    : e.cls === 'ufo' ? 10 : e.cls === 'heli' ? 12 : e.cls === 'robot' ? 18
+    : e.cls === 'sat' ? 14 : 6);
   if (info.living && killer && killer !== e && killer._grow) killer._grow();
   if (e._onDeath) e._onDeath(killer);
+  // mission hooks
+  if (e.cls === 'animal') noteMission('kill_animal', e.type);
+  else if (e.cls === 'soldier' || e.cls === 'tank' || e.cls === 'jet' || e.cls === 'heli' || e.cls === 'robot' || e.cls === 'sat' || e.cls === 'ufo') {
+    noteMission('kill_army', e.cls);
+    noteMission('kill_army', '*');
+  }
+  if (e.cls === 'prop') noteMission('destroy_prop', '*');
 }
 
 // giblet bursts (no gore — cartoon chunks/puffs)
 const GIB = {
   cow: [PAL.white, PAL.pinkskin, PAL.meat1], sheep: [PAL.wool, PAL.cloud2],
   pig: [PAL.pinkskin, PAL.pinkshade], chicken: [PAL.white, PAL.fire2],
+  goat: [PAL.wool, PAL.bone, PAL.dirt2], duck: [PAL.white, PAL.fire2, PAL.wool],
+  horse: [PAL.dirt1, PAL.dirt2, PAL.bone], pink_horse: [PAL.pinkskin, PAL.star, PAL.horizon],
   meat: [PAL.meat1, PAL.meat2, PAL.crust], wool: [PAL.wool, PAL.cloud1],
   feather: [PAL.white, PAL.cloud2], army: [PAL.army1, PAL.army2, PAL.red],
   metal: [PAL.metal2, PAL.metal3, PAL.fire2], dust: [PAL.dirt1, PAL.dirt2],
+  disco: [PAL.zap2, PAL.fire1, PAL.beam], tornado: [PAL.cloud1, PAL.zap2, PAL.wool],
+  mecha: [PAL.metal1, PAL.metal3, PAL.fire2],
 };
 
 export function giblets(x, y, kind, count) {
@@ -279,11 +337,13 @@ export function hurtPlayer(dmg) {
   p.iframe = 1.0;
   p.flash = 0.2;
   shake(6);
+  hitFlash(0.45);
   audio.play('player_hurt');
   if (p.hp <= 0) {
     p.hp = 0; p.dead = true;
     smoke(p.x, p.y, 12, true);
     sparks(p.x, p.y, 20, PAL.fire1);
+    hitFlash(0.8);
     if (G.onPlayerDeath) G.onPlayerDeath();
   }
 }

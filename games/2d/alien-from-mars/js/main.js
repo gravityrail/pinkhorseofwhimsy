@@ -4,11 +4,11 @@
 import { K, PAL } from './shared.js';
 import { makeWorld, mulberry32 } from './game-world.js';
 import { audio } from './audio.js';
-import { drawBackground } from './background.js';
+import { drawBackground, setBackgroundMood } from './background.js';
 import { buildRegistry, drawSprite, drawShadow } from './game-sprites.js';
 import {
   G, resetPools, popups, spawnParticle, spawnBolt, shake, hurtPlayer,
-  updateParticles, drawParticles, updateShake, updatePopups,
+  updateParticles, drawParticles, updateShake, updatePopups, hitFlash,
 } from './game-core.js';
 import { drawText, drawTextCentered } from './game-font.js';
 import {
@@ -20,9 +20,11 @@ import {
 } from './game-mutants.js';
 import {
   updateWanted, updateArmySpawns, updateSoldiers, updateTanks, updateJets,
-  updateUfos, updateProjectiles, drawArmy, drawProjectiles,
+  updateUfos, updateHelis, updateRobots, updateSats, updateProjectiles,
+  drawArmy, drawProjectiles,
 } from './game-army.js';
 import { drawHUD, drawTitle, drawGameOver, drawSpriteGrid, spriteGridHeight } from './game-hud.js';
+import { resetMissions, updateMissions } from './game-missions.js';
 
 // ---- canvas + buffer -----------------------------------------------------
 const display = document.getElementById('game');
@@ -84,6 +86,9 @@ function pointerStart() { ensureAudio(); tryStart(); }
 display.addEventListener('pointerdown', pointerStart);
 window.addEventListener('touchstart', () => ensureAudio(), { passive: true });
 
+// splash dismiss also unlocks audio
+window.addEventListener('arcade-splash-done', () => { ensureAudio(); });
+
 function tryStart() {
   if (G.state === 'title' || G.state === 'over') newGame(((Math.random() * 0xffffffff) >>> 0));
 }
@@ -96,12 +101,15 @@ function newGame(seed) {
   resetPools();
   G.props = []; G.animals = []; G.mutants = [];
   G.soldiers = []; G.tanks = []; G.jets = []; G.ufos = [];
+  G.helis = []; G.robots = []; G.sats = []; G.satBeams = [];
   G.bolts = []; G.shells = []; G.zaps = []; G.lavaPools = [];
   initWorldModel();
   G.score = 0; G.combo = 1; G.comboTimer = 0; G.heat = 0; G.wanted = 0;
   G.mutantsCreated = 0; G.time = 0; G.distance = 0; G.startX = 0;
+  G.pinkHorseFound = false; G.hitFlash = 0;
   G.spawnTimerInf = 3; G.spawnTimerTank = 8; G.spawnTimerJet = 10;
-  G.nextUfoAt = 45; G.pendingJet = null; G.wantArrow = 0;
+  G.spawnTimerHeli = 12; G.spawnTimerRobot = 20; G.spawnTimerSat = 16;
+  G.nextUfoAt = 45; G.pendingJet = null; G.wantArrow = 0; G.wantArrowLabel = 'JET';
   G.shakeMag = 0; G.beamAnim = 0;
   G.player = {
     cls: 'player', x: 0, y: 110, vx: 0, vy: 0, hp: 5, maxhp: 5, iframe: 0,
@@ -110,6 +118,7 @@ function newGame(seed) {
   };
   G.camX = -K.W / 2; G.camY = 0; G.camLead = 0;
   G.onPlayerDeath = onPlayerDeath;
+  resetMissions();
   streamChunks();
   audio.setWanted(0);
   G.state = 'play';
@@ -122,6 +131,7 @@ function onPlayerDeath() {
   audio.setWanted(0);
   audio.play('game_over');
   shake(10);
+  hitFlash(0.7);
 }
 
 // ---- player update -------------------------------------------------------
@@ -204,12 +214,18 @@ function step(dt) {
   updateTanks(dt);
   updateJets(dt);
   updateUfos(dt);
+  updateHelis(dt);
+  updateRobots(dt);
+  updateSats(dt);
   updateProjectiles(dt);
   updateParticles(dt);
   updatePopups(dt);
   updateShake(dt);
+  updateMissions(dt);
   if (G.comboTimer > 0) { G.comboTimer -= dt; if (G.comboTimer <= 0) G.combo = 1; }
   updateCamera(dt);
+  // day/night cycle ~90s, pushed by wanted
+  setBackgroundMood(G.wanted, (G.time / 90) % 1);
 }
 
 // ---- player draw ---------------------------------------------------------
@@ -232,7 +248,8 @@ function drawPopups() {
     if (sx < -40 || sx > K.W + 40) continue;
     const a = Math.min(1, q.life / 0.4);
     ctx.globalAlpha = a;
-    drawTextCentered(ctx, q.text, sx, sy, q.scale >= 1.2 ? 2 : 1, q.col, PAL.outline);
+    const sc = q.scale >= 1.2 ? 2 : 1;
+    drawTextCentered(ctx, q.text, sx, sy, sc, q.col, PAL.outline);
     ctx.globalAlpha = 1;
   }
 }
@@ -245,8 +262,14 @@ function render() {
     blit();
     return;
   }
-  if (G.state === 'title') { drawTitle(ctx, performance.now() / 1000, G.reg); blit(); return; }
+  if (G.state === 'title') {
+    setBackgroundMood(0, (performance.now() / 1000 / 90) % 1);
+    drawTitle(ctx, performance.now() / 1000, G.reg);
+    blit();
+    return;
+  }
 
+  setBackgroundMood(G.wanted, (G.time / 90) % 1);
   drawBackground(ctx, G.camX, K.W, K.H, G.time);
   drawTerrain(ctx);
   drawProps(ctx, 'flat');
@@ -262,6 +285,13 @@ function render() {
   drawParticles(ctx);
   drawPopups();
   drawHUD(ctx);
+  // full-screen hit flash
+  if (G.hitFlash > 0) {
+    ctx.globalAlpha = Math.min(0.55, G.hitFlash);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, K.W, K.H);
+    ctx.globalAlpha = 1;
+  }
   if (G.state === 'over') drawGameOver(ctx);
   blit();
 }

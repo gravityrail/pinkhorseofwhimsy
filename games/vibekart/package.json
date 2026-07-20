@@ -1,0 +1,28 @@
+{
+  "name": "vibekart",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build --base=/vibekart/",
+    "preview": "vite preview",
+    "publish": "npm run build && rm -rf ../../site/static/vibekart && mkdir -p ../../site/static/vibekart && cp -R dist/. ../../site/static/vibekart/",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "lil-gui": "^0.19.2",
+    "seedrandom": "^3.0.5",
+    "stats.js": "^0.17.0",
+    "three": "^0.164.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "@types/seedrandom": "^3.0.8",
+    "@types/stats.js": "^0.17.3",
+    "@types/three": "^0.164.0",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+}

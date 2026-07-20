@@ -5,7 +5,7 @@ import { K, PAL } from './shared.js';
 import { audio } from './audio.js';
 import {
   G, damageEntity, killEntity, hurtPlayer, shake, sparks, smoke, spawnParticle,
-  spawnBolt, spawnShell, giblets, addHeat,
+  spawnBolt, spawnShell, giblets, addHeat, hitFlash, noteMission,
 } from './game-core.js';
 import { igniteProp } from './game-entities.js';
 import { drawSprite, drawShadow } from './game-sprites.js';
@@ -96,6 +96,52 @@ function spawnUfos() {
   audio.play('ufo_arrive');
 }
 
+function spawnHeli() {
+  if (G.helis.length >= 2) return;
+  const side = G.rng() < 0.5 ? -1 : 1;
+  const x = G.player.x + side * (K.W / 2 + 40);
+  const h = {
+    cls: 'heli', x, y: 70 + G.rng() * 30, vx: -side * 70, hp: 36, maxhp: 36, flash: 0,
+    dead: false, dir: -side, w: 28, h: 16, shootCd: 1.2, targetable: true, life: 18,
+    animT: 0,
+  };
+  h._onDeath = () => { giblets(h.x, h.y, 'metal', 14); smoke(h.x, h.y, 12, true); shake(8); audio.play('explode_big'); };
+  G.helis.push(h);
+  audio.play('heli');
+  G.wantArrow = 1.0; G.wantArrowSide = side; G.wantArrowLabel = 'HELI';
+}
+
+function spawnRobot() {
+  if (G.robots.length >= 1) return;
+  const side = G.rng() < 0.5 ? -1 : 1;
+  const x = G.player.x + side * (K.W / 2 + 50);
+  const r = {
+    cls: 'robot', x, y: G.world.groundY(x), vx: 0, hp: 120, maxhp: 120, flash: 0,
+    dead: false, dir: -side, w: 22, h: 36, animT: 0, swingCd: 2, targetable: true,
+  };
+  r._onDeath = () => {
+    giblets(r.x, r.y - 18, 'metal', 20); smoke(r.x, r.y - 18, 16, true);
+    sparks(r.x, r.y - 18, 20, PAL.fire1); shake(12); hitFlash(0.4); audio.play('explode_big');
+  };
+  G.robots.push(r);
+  audio.play('robot_stomp');
+  audio.play('alarm', { vol: 0.5 });
+}
+
+function spawnSatellite() {
+  if (G.sats.length >= 1) return;
+  const x = G.player.x + (G.rng() * 80 - 40);
+  const s = {
+    cls: 'sat', x, y: 28, vx: 0, hp: 40, maxhp: 40, flash: 0,
+    dead: false, w: 20, h: 14, animT: 0, charge: 0, fireCd: 3 + G.rng() * 2,
+    targetable: true, life: 25, phase: G.rng() * 6,
+  };
+  s._onDeath = () => { giblets(s.x, s.y, 'metal', 14); sparks(s.x, s.y, 20, PAL.zap1); shake(8); audio.play('explode_big'); };
+  G.sats.push(s);
+  audio.play('sat_charge');
+  audio.play('ufo_arrive', { pitch: 1.4 });
+}
+
 // ---- spawn scheduler -----------------------------------------------------
 export function updateArmySpawns(dt) {
   if (G.calm) return;
@@ -106,10 +152,19 @@ export function updateArmySpawns(dt) {
   if (G.wanted >= 2) {
     G.spawnTimerTank -= dt;
     if (G.spawnTimerTank <= 0 && G.tanks.length < 2) { spawnTank(); G.spawnTimerTank = 12 + G.rng() * 6; }
+    // helicopters at ★2+
+    G.spawnTimerHeli -= dt;
+    if (G.spawnTimerHeli <= 0 && G.helis.length < 2) { spawnHeli(); G.spawnTimerHeli = 14 + G.rng() * 8; }
   }
   if (G.wanted >= 3) {
     G.spawnTimerJet -= dt;
     if (G.spawnTimerJet <= 0 && G.jets.length < 2 && !G.pendingJet) { spawnJetWarn(); G.spawnTimerJet = 10 + G.rng() * 6; }
+    // giant robot farmer
+    G.spawnTimerRobot -= dt;
+    if (G.spawnTimerRobot <= 0 && G.robots.length < 1) { spawnRobot(); G.spawnTimerRobot = 22 + G.rng() * 10; }
+    // satellite laser
+    G.spawnTimerSat -= dt;
+    if (G.spawnTimerSat <= 0 && G.sats.length < 1) { spawnSatellite(); G.spawnTimerSat = 18 + G.rng() * 10; }
   }
   if (G.pendingJet) {
     G.pendingJet.delay -= dt;
@@ -229,6 +284,116 @@ export function updateUfos(dt) {
   }
 }
 
+// ---- new unit updates ----------------------------------------------------
+export function updateHelis(dt) {
+  for (let i = G.helis.length - 1; i >= 0; i--) {
+    const h = G.helis[i];
+    if (h.dead) { G.helis.splice(i, 1); continue; }
+    if (h.flash > 0) h.flash -= dt;
+    h.animT += dt;
+    h.life -= dt;
+    // hover near player x
+    const tx = G.player.x + Math.sin(h.animT * 0.8) * 60;
+    const ty = 65 + Math.sin(h.animT * 1.4) * 12;
+    h.vx += ((tx - h.x) * 1.5 - h.vx) * Math.min(1, dt * 2);
+    h.x += h.vx * dt;
+    h.y += (ty - h.y) * Math.min(1, dt * 2);
+    h.dir = h.vx < 0 ? -1 : 1;
+    // rotor wash particles
+    if (Math.random() < dt * 12) spawnParticle(h.x + (Math.random() * 16 - 8), h.y + 8, Math.random() * 20 - 10, 20, 0.25, 1, 'dust', PAL.dirt1, 0, 0.05);
+    h.shootCd -= dt;
+    if (h.shootCd <= 0 && Math.abs(h.x - G.player.x) < 180) {
+      h.shootCd = 1.0 + G.rng() * 0.6;
+      const tgt = nearestMutant(h.x) || G.player;
+      if (tgt && !tgt.dead) {
+        const a = Math.atan2((tgt.y - 8) - h.y, tgt.x - h.x);
+        spawnBolt(h.x + h.dir * 10, h.y + 4, Math.cos(a) * 180, Math.sin(a) * 180, false, 1);
+        audio.play('enemy_shoot', { vol: 0.55, pitch: 0.7 });
+      }
+    }
+    if (h.life <= 0 || Math.abs(h.x - G.player.x) > K.W * 1.4) G.helis.splice(i, 1);
+  }
+}
+
+export function updateRobots(dt) {
+  for (let i = G.robots.length - 1; i >= 0; i--) {
+    const r = G.robots[i];
+    if (r.dead) { G.robots.splice(i, 1); continue; }
+    if (r.flash > 0) r.flash -= dt;
+    if (Math.abs(r.x - G.player.x) > K.CHUNK_W * 2.5 + 300) { G.robots.splice(i, 1); continue; }
+    const tgt = biggestMutant() || (G.player.dead ? null : G.player);
+    if (!tgt) { r.y = G.world.groundY(r.x); continue; }
+    const dx = tgt.x - r.x, dist = Math.abs(dx);
+    r.dir = dx < 0 ? -1 : 1;
+    const want = dist > 40 ? r.dir * 28 : 0;
+    r.vx += (want - r.vx) * Math.min(1, dt * 3);
+    r.x += r.vx * dt;
+    r.y = G.world.groundY(r.x);
+    r.animT += dt * (Math.abs(r.vx) > 3 ? 1 : 0.3);
+    // stomp shake
+    if (Math.abs(r.vx) > 10 && ((r.animT * 5) | 0) !== (((r.animT - dt) * 5) | 0)) {
+      if (Math.abs(r.x - G.player.x) < 200) { shake(2); audio.play('robot_stomp', { vol: 0.35, pitch: 0.9 + G.rng() * 0.2 }); }
+    }
+    r.swingCd -= dt;
+    if (dist < 36 && r.swingCd <= 0) {
+      r.swingCd = 1.6;
+      audio.play('chop', { pitch: 0.5 });
+      // pitchfork sweep
+      hurtInR(G.mutants, r.x + r.dir * 14, r.y - 16, 28, 22);
+      hurtInR(G.animals, r.x + r.dir * 14, r.y - 16, 28, 18);
+      if (Math.abs(G.player.x - r.x) < 30 && Math.abs(G.player.y - (r.y - 20)) < 30) hurtPlayer(1);
+      sparks(r.x + r.dir * 16, r.y - 18, 8, PAL.metal1);
+      shake(5);
+    }
+  }
+}
+
+export function updateSats(dt) {
+  for (let i = G.sats.length - 1; i >= 0; i--) {
+    const s = G.sats[i];
+    if (s.dead) { G.sats.splice(i, 1); continue; }
+    if (s.flash > 0) s.flash -= dt;
+    s.life -= dt;
+    s.animT += dt;
+    s.phase += dt;
+    // drift slowly following player
+    const tx = G.player.x + Math.sin(s.phase * 0.5) * 40;
+    s.x += (tx - s.x) * Math.min(1, dt * 0.8);
+    s.y = 26 + Math.sin(s.phase * 1.1) * 4;
+    s.fireCd -= dt;
+    if (s.charge > 0) {
+      s.charge -= dt;
+      // charging particles
+      if (Math.random() < dt * 20) spawnParticle(s.x + (Math.random() * 10 - 5), s.y + 6, 0, 30 + Math.random() * 20, 0.3, 1, 'spark', PAL.fire1, 0, 0.05);
+      if (s.charge <= 0) {
+        // FIRE laser at ground under player / biggest mutant
+        const tgt = biggestMutant() || G.player;
+        const lx = tgt.x + (G.rng() * 30 - 15);
+        const gy = G.world.groundY(lx);
+        G.satBeams.push({ x: lx, y0: s.y + 6, y1: gy, life: 0.55, max: 0.55 });
+        audio.play('laser', { pitch: 0.6 });
+        audio.play('explode_small');
+        shake(7); hitFlash(0.3);
+        // AoE at impact
+        shellExplode(lx, gy);
+        // extra player check higher
+        if (!G.player.dead && Math.abs(G.player.x - lx) < 22) hurtPlayer(1);
+      }
+    } else if (s.fireCd <= 0 && Math.abs(s.x - G.player.x) < 220) {
+      s.fireCd = 4 + G.rng() * 2;
+      s.charge = 1.1;
+      audio.play('sat_charge');
+      G.wantArrow = 1.1; G.wantArrowSide = s.x < G.player.x ? -1 : 1; G.wantArrowLabel = 'SAT';
+    }
+    if (s.life <= 0) G.sats.splice(i, 1);
+  }
+  // sat beam visuals countdown
+  for (let i = G.satBeams.length - 1; i >= 0; i--) {
+    G.satBeams[i].life -= dt;
+    if (G.satBeams[i].life <= 0) G.satBeams.splice(i, 1);
+  }
+}
+
 // ---- projectiles ---------------------------------------------------------
 const HIT_R = 8;
 function boltHitArr(b, arr) {
@@ -237,7 +402,8 @@ function boltHitArr(b, arr) {
     if (e.dead) continue;
     if (e.cls === 'prop' && (e.ruin || !e.targetable)) continue;
     const hh = (e.h || 12) * 0.5 + 4;
-    if (Math.abs(e.x - b.x) < HIT_R && Math.abs((e.y - (e.h ? e.h * 0.4 : 0)) - b.y) < hh) {
+    const hw = Math.max(HIT_R, (e.w || 10) * 0.35);
+    if (Math.abs(e.x - b.x) < hw && Math.abs((e.y - (e.h ? e.h * 0.4 : 0)) - b.y) < hh) {
       damageEntity(e, b.dmg, null);
       return true;
     }
@@ -255,7 +421,9 @@ export function updateProjectiles(dt) {
     if (b.y >= gy) { hit = true; sparks(b.x, gy, 3, b.friendly ? PAL.beam : PAL.fire2); }
     if (!hit && b.friendly) {
       hit = boltHitArr(b, G.props) || boltHitArr(b, G.animals) || boltHitArr(b, G.soldiers) ||
-        boltHitArr(b, G.tanks) || boltHitArr(b, G.jets) || boltHitArr(b, G.ufos) || boltHitArr(b, G.mutants);
+        boltHitArr(b, G.tanks) || boltHitArr(b, G.jets) || boltHitArr(b, G.ufos) ||
+        boltHitArr(b, G.helis) || boltHitArr(b, G.robots) || boltHitArr(b, G.sats) ||
+        boltHitArr(b, G.mutants);
     } else if (!hit) {
       // enemy bolt hits player + mutants
       const p = G.player;
@@ -307,13 +475,49 @@ export function drawArmy(ctx) {
     if (Math.abs(ang) > Math.PI / 2) { flip = true; ang = Math.PI - ang; }
     drawSprite(ctx, reg, 'tank_turret', sx, t.y - cy - 11, { rot: ang, flip, flash: t.flash > 0 ? 0.7 : 0 });
   }
+  for (let i = 0; i < G.robots.length; i++) {
+    const r = G.robots[i]; const sx = r.x - cx;
+    if (sx < -40 || sx > K.W + 40) continue;
+    drawShadow(ctx, sx, r.y - cy, r.w * 1.2, 0.5);
+    drawSprite(ctx, reg, 'robot_farmer', sx, r.y - cy, { t: r.animT, flip: r.dir < 0, flash: r.flash > 0 ? 0.7 : 0 });
+  }
   for (let i = 0; i < G.jets.length; i++) {
     const j = G.jets[i]; const sx = j.x - cx;
     drawSprite(ctx, reg, 'jet', sx, j.y - cy, { flip: j.vx > 0, flash: j.flash > 0 ? 0.7 : 0 });
   }
+  for (let i = 0; i < G.helis.length; i++) {
+    const h = G.helis[i]; const sx = h.x - cx;
+    drawSprite(ctx, reg, 'heli', sx, h.y - cy, { t: h.animT, flip: h.dir < 0, flash: h.flash > 0 ? 0.7 : 0 });
+  }
   for (let i = 0; i < G.ufos.length; i++) {
     const u = G.ufos[i]; const sx = u.x - cx;
     drawSprite(ctx, reg, 'enemy_ufo', sx, u.y - cy, { t: u.phase, flash: u.flash > 0 ? 0.7 : 0 });
+  }
+  for (let i = 0; i < G.sats.length; i++) {
+    const s = G.sats[i]; const sx = s.x - cx;
+    drawSprite(ctx, reg, 'satellite', sx, s.y - cy, { t: s.animT, flash: s.flash > 0 ? 0.7 : (s.charge > 0 ? 0.4 : 0) });
+    // charge indicator beam preview
+    if (s.charge > 0) {
+      const gy = G.world.groundY(s.x);
+      ctx.save();
+      ctx.globalAlpha = 0.15 + 0.2 * Math.sin(s.charge * 20);
+      ctx.fillStyle = PAL.fire2;
+      ctx.fillRect(Math.round(sx) - 1, Math.round(s.y - cy + 6), 2, Math.round(gy - s.y));
+      ctx.restore();
+    }
+  }
+  // sat laser beams
+  for (let i = 0; i < G.satBeams.length; i++) {
+    const b = G.satBeams[i];
+    const sx = Math.round(b.x - cx);
+    const a = b.life / b.max;
+    ctx.save();
+    ctx.globalAlpha = 0.4 + 0.5 * a;
+    ctx.fillStyle = PAL.fire1;
+    ctx.fillRect(sx - 2, Math.round(b.y0 - cy), 4, Math.round(b.y1 - b.y0));
+    ctx.fillStyle = PAL.white;
+    ctx.fillRect(sx - 1, Math.round(b.y0 - cy), 2, Math.round(b.y1 - b.y0));
+    ctx.restore();
   }
 }
 

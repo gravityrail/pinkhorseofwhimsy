@@ -6,8 +6,8 @@ import { GameAudio } from './audio.js';
 import { KartEffects } from './Effects.js';
 import { damp, formatTime, lerpAngle, ordinal } from './utils.js';
 
-const DRIVER_NAMES = ['Mika', 'Bolt', 'Nova', 'Rex', 'Lulu', 'Dash'];
-const DRIVER_COLORS = [0xffd166, 0x6be585, 0xb692ff, 0x5de7ff, 0xff7a59, 0xf4f1de];
+const DRIVER_NAMES = ['Mika', 'Bolt', 'Nova', 'Rex', 'Lulu', 'Pip'];
+const DRIVER_COLORS = [0xffd166, 0x6be585, 0xb692ff, 0x5de7ff, 0xff7a59, 0xff6ad5];
 const CONTROL_KEYS = {
   ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down',
   ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right',
@@ -45,8 +45,9 @@ export class Game {
           </div>
           <div class="hero-copy">
             <p class="eyebrow">ARCADE GRAND PRIX</p>
-            <h1>Pick your ride.<br><em>Own the circuit.</em></h1>
-            <p>Seven racers. Three laps. No room for boring.</p>
+            <h1 class="hero-title">Pick your ride.<br><em>Own the circuit.</em></h1>
+            <p class="hero-tag">Seven racers. Three laps. No room for boring.</p>
+            <div class="title-sparkles" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
           </div>
           <div class="setup-panel">
             <div class="setup-section">
@@ -62,7 +63,7 @@ export class Game {
               <div class="difficulty-picker" id="difficulty-picker"></div>
             </div>
             <button id="start-race" class="start-button"><span>START RACE</span><kbd>↵</kbd></button>
-            <p class="control-hint"><span>↑ ↓ ← →</span> Drive · <span>SPACE</span> use collected boost · <span>P</span> pause</p>
+            <p class="control-hint"><span>↑ ↓ ← →</span> or touchscreen · <span>SPACE / A</span> boost · <span>P</span> pause</p>
           </div>
         </section>
         <section id="hud" class="hud hidden">
@@ -311,8 +312,10 @@ export class Game {
     this.boostCharges -= 1;
     this.boostTimer = 1.3;
     this.audio.boost();
-    this.flashMessage('TURBO!', 0.65);
-    this.shake = 0.16;
+    this.flashMessage('TURBO!', 0.65, 'boost');
+    this.el.boostButton?.classList.add('fired');
+    setTimeout(() => this.el.boostButton?.classList.remove('fired'), 420);
+    this.shake = 0.22;
     this.updateBoostHud();
   }
 
@@ -419,8 +422,11 @@ export class Game {
     const pad = this.trackWorld.collectBoostAt(this.player.position, this.player.progress);
     if (!pad) return;
     this.boostCharges += 1;
-    this.audio.tone(620, 0.18, 'triangle', 0.13, 420);
-    this.flashMessage('BOOST +1', 0.75);
+    this.audio.itemPickup();
+    this.flashMessage(this.boostCharges >= 3 ? 'BOOST MAX!' : 'BOOST +1', 0.85, 'item');
+    this.el.boostButton?.classList.add('pickup-pop');
+    setTimeout(() => this.el.boostButton?.classList.remove('pickup-pop'), 380);
+    this.shake = Math.max(this.shake, 0.08);
     this.updateBoostHud();
   }
 
@@ -430,12 +436,16 @@ export class Game {
     if (this.player.damage > 0.08) {
       this.player.damage = Math.max(0, this.player.damage - 0.48);
       this.audio.repair();
-      this.flashMessage('REPAIRED!', 0.85);
+      this.audio.itemPickup();
+      this.flashMessage('REPAIRED!', 0.95, 'repair');
     } else {
       this.boostTimer = Math.max(this.boostTimer, 1.55);
       this.audio.boost();
-      this.flashMessage('POWER BOOST!', 0.85);
+      this.flashMessage('POWER BOOST!', 0.95, 'boost');
+      this.el.boostButton?.classList.add('fired');
+      setTimeout(() => this.el.boostButton?.classList.remove('fired'), 420);
     }
+    this.shake = Math.max(this.shake, 0.12);
     this.updateDamageHud();
   }
 
@@ -595,11 +605,15 @@ export class Game {
     this.camera.updateProjectionMatrix();
   }
 
-  flashMessage(text, duration = 1) {
+  flashMessage(text, duration = 1, kind = '') {
     this.el.message.textContent = text;
+    this.el.message.classList.remove('msg-boost', 'msg-item', 'msg-repair');
+    if (kind) this.el.message.classList.add(`msg-${kind}`);
     this.el.message.classList.add('show');
     clearTimeout(this.messageTimer);
-    this.messageTimer = setTimeout(() => this.el.message.classList.remove('show'), duration * 1000);
+    this.messageTimer = setTimeout(() => {
+      this.el.message.classList.remove('show', 'msg-boost', 'msg-item', 'msg-repair');
+    }, duration * 1000);
   }
 
   updateHud() {

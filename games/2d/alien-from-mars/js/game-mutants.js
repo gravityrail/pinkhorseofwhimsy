@@ -5,7 +5,7 @@ import { K, PAL } from './shared.js';
 import { audio } from './audio.js';
 import {
   G, popup, sparks, smoke, spawnParticle, spawnLavaGlob, giblets, shake,
-  damageEntity, killEntity, addScore,
+  damageEntity, killEntity, addScore, noteMission, hitFlash,
 } from './game-core.js';
 import { igniteProp } from './game-entities.js';
 import { drawSprite, drawShadow } from './game-sprites.js';
@@ -18,8 +18,14 @@ const MUT = {
   drumstick: { w: 16, h: 22, hp: 26, dmg: 9, spd: 78, fly: false, base: 'drumstick_hop', label: 'CLUCK-U-LOSS!' },
   cloudsheep: { w: 26, h: 16, hp: 24, dmg: 13, spd: 66, fly: true, base: 'cloudsheep_fly', label: 'BAA-BARIAN!' },
   karatepig: { w: 18, h: 19, hp: 34, dmg: 26, spd: 92, fly: false, base: 'karatepig_walk', label: 'PORK CHOP!' },
+  disco: { w: 28, h: 20, hp: 36, dmg: 6, spd: 55, fly: false, base: 'disco_walk', label: 'DISCO INFERNO!' },
+  tornado: { w: 24, h: 28, hp: 30, dmg: 11, spd: 70, fly: true, base: 'tornado_spin', label: 'TWISTER!' },
+  mecha: { w: 22, h: 26, hp: 50, dmg: 14, spd: 48, fly: false, base: 'mecha_walk', label: 'MECHA CLUCK!' },
 };
-const ANIMAL_TO_MUT = { cow: 'steak', chicken: 'drumstick', sheep: 'cloudsheep', pig: 'karatepig' };
+const ANIMAL_TO_MUT = {
+  cow: 'steak', chicken: 'drumstick', sheep: 'cloudsheep', pig: 'karatepig',
+  goat: 'disco', duck: 'mecha', horse: 'tornado', pink_horse: 'tornado',
+};
 
 function applyStage(mu) {
   const s = mu.stage;
@@ -31,17 +37,25 @@ function applyStage(mu) {
   mu.dmg = MUT[mu.kind].dmg * (1 + (s - 1) * 0.45);
 }
 
-export function spawnMutant(kind, x, y) {
+export function spawnMutant(kind, x, y, opts) {
   const m = MUT[kind];
+  if (!m) return null;
   const mu = {
     cls: 'mutant', kind, x, y, vx: 0, vy: 0, stage: 1, scale: 1,
     hp: m.hp, maxhp: m.hp, dmg: m.dmg, w: m.w, h: m.h, fly: m.fly,
     flash: 0, dead: false, facing: 1, animT: Math.random() * 3,
     slot: G.mutants.length % SLOTS.length, state: 'follow', target: null,
     attackCd: 0, boredom: 0, engorge: 0, pulse: 0, squash: 0, hop: 0,
-    firing: 0, biting: 0, zapping: 0, chopping: 0, brawlMate: null, dashT: 0,
+    firing: 0, biting: 0, zapping: 0, chopping: 0, boogie: 0, spinning: 0,
+    brawlMate: null, dashT: 0,
     targetable: true, invuln: 0,
+    pink: !!(opts && opts.pink),
   };
+  if (mu.pink) {
+    // Pink Horse of Whimsy buff: starts larger + tougher
+    mu.stage = 2; applyStage(mu); mu.hp = mu.maxhp;
+    mu.scale *= 1.1;
+  }
   mu._grow = function () {
     if (mu.engorge > 0) return;
     if (mu.stage < K.MUTANT_MAX_STAGE) {
@@ -59,12 +73,15 @@ export function spawnMutant(kind, x, y) {
   };
   mu._onDeath = function () {
     const gk = mu.kind === 'steak' ? 'meat' : mu.kind === 'drumstick' ? 'meat'
-      : mu.kind === 'cloudsheep' ? 'wool' : 'meat';
+      : mu.kind === 'cloudsheep' || mu.kind === 'tornado' ? 'wool'
+      : mu.kind === 'disco' ? 'disco' : mu.kind === 'mecha' ? 'mecha' : 'meat';
     giblets(mu.x, mu.y - mu.h * 0.4, gk, 8);
     audio.play('explode_small');
   };
   G.mutants.push(mu);
   G.mutantsCreated++;
+  noteMission('mutate', kind);
+  noteMission('mutate', '*');
   return mu;
 }
 
@@ -110,14 +127,31 @@ export function updateAbduction(dt) {
         for (let i = 0; i < 12; i++) spawnParticle(pl.x + (Math.random() * 10 - 5), pl.y, Math.random() * 40 - 20, Math.random() * 40 - 20, 0.3, 2, 'spark', PAL.beam, 0, 0.05);
         if (G.mutants.length < MAX_MUTANTS) {
           const kind = ANIMAL_TO_MUT[a.type] || 'steak';
-          const mu = spawnMutant(kind, pl.x, pl.y + 10);
-          mu.vy = -30;
+          const isPink = a.type === 'pink_horse';
+          const mu = spawnMutant(kind, pl.x, pl.y + 10, { pink: isPink });
+          if (mu) mu.vy = -30;
           audio.play('mutate');
-          popup(pl.x, pl.y - 16, MUT[kind].label, PAL.beam, 1.2);
+          if (isPink) {
+            G.pinkHorseFound = true;
+            audio.play('easter');
+            hitFlash(0.5);
+            shake(8);
+            addScore(500, pl.x, pl.y - 28, 'PINK HORSE!', PAL.pinkskin);
+            popup(pl.x, pl.y - 40, 'OF WHIMSY!', PAL.horizon, 1.4);
+            for (let i = 0; i < 24; i++) {
+              const ang = (i / 24) * Math.PI * 2;
+              spawnParticle(pl.x, pl.y, Math.cos(ang) * 80, Math.sin(ang) * 80, 0.6, 2, 'spark',
+                i % 2 ? PAL.pinkskin : PAL.star, 0, 0.02);
+            }
+          } else {
+            popup(pl.x, pl.y - 16, MUT[kind].label, PAL.beam, 1.2);
+          }
           a.dead = true; a.beamed = false;
         } else {
           // over cap -> probe
-          addScore(250, pl.x, pl.y - 14, 'PROBED!', PAL.zap2);
+          const bonus = a.type === 'pink_horse' ? 750 : 250;
+          addScore(bonus, pl.x, pl.y - 14, a.type === 'pink_horse' ? 'PINK PROBE!' : 'PROBED!', PAL.zap2);
+          if (a.type === 'pink_horse') { G.pinkHorseFound = true; audio.play('easter'); }
           audio.play('abduct_pop');
           a.beamed = false; a.beamT = 0; a.spin = 0;
           a.vx = (Math.random() * 40 - 20); a.dazed = 0.8;
@@ -175,13 +209,14 @@ export function drawBeam(ctx) {
 }
 
 // ---- targeting -----------------------------------------------------------
-function isAir(e) { return e.cls === 'jet' || e.cls === 'ufo'; }
+function isAir(e) { return e.cls === 'jet' || e.cls === 'ufo' || e.cls === 'heli' || e.cls === 'sat'; }
 
 function findTarget(mu, allowAir) {
   const ox = G.player.x, R = 140;
   // tier scan: army(3) > wild(2) > props(1)
   const groups = [
-    [G.soldiers, G.tanks, allowAir ? G.jets : null, allowAir ? G.ufos : null],
+    [G.soldiers, G.tanks, G.robots, allowAir ? G.jets : null, allowAir ? G.ufos : null,
+      allowAir ? G.helis : null, allowAir ? G.sats : null],
     [G.animals],
     [G.props],
   ];
@@ -220,11 +255,14 @@ export function updateMutants(dt) {
     if (mu.biting > 0) mu.biting -= dt;
     if (mu.zapping > 0) mu.zapping -= dt;
     if (mu.chopping > 0) mu.chopping -= dt;
+    if (mu.boogie > 0) mu.boogie -= dt;
+    if (mu.spinning > 0) mu.spinning -= dt;
     if (mu.attackCd > 0) mu.attackCd -= dt;
 
     if (mu.engorge > 0) { updateEngorge(mu, dt); continue; }
 
-    const target = findTarget(mu, mu.kind === 'cloudsheep');
+    const airOk = mu.kind === 'cloudsheep' || mu.kind === 'tornado' || mu.kind === 'mecha';
+    const target = findTarget(mu, airOk);
     if (target) { mu.boredom = 0; mu.target = target; mu.brawlMate = null; }
     else mu.boredom += dt;
 
@@ -276,7 +314,116 @@ function attackBehavior(mu, target, dt) {
       moveToward(mu, target.x, dt, 1.6);
       if (dist < 15 && Math.abs(target.y - mu.y) < 26 && mu.attackCd <= 0) porkChop(mu, target);
     } else moveToward(mu, target.x, dt, 1);
+  } else if (mu.kind === 'disco') {
+    moveToward(mu, target.x, dt, 1.0);
+    if (dist < 70 && mu.attackCd <= 0) discoBlast(mu);
+    if (mu.boogie > 0) applyDisco(mu, dt);
+  } else if (mu.kind === 'tornado') {
+    moveToward(mu, target.x, dt, 1.1);
+    if (dist < 50 && mu.attackCd <= 0) tornadoSuck(mu);
+    if (mu.spinning > 0) applyTornado(mu, dt);
+  } else if (mu.kind === 'mecha') {
+    moveToward(mu, target.x, dt, 0.9);
+    if (dist < 140 && mu.attackCd <= 0) mechaLaser(mu, target);
   }
+}
+
+function discoBlast(mu) {
+  mu.boogie = 0.8; mu.attackCd = 1.6;
+  audio.play('disco');
+  popup(mu.x, mu.y - mu.h * mu.scale, 'BOOGIE!', PAL.zap2, 1.1);
+  // stun nearby army — confuse them by reversing direction briefly
+  const R = 70 * mu.scale;
+  for (const arr of [G.soldiers, G.tanks, G.robots, G.animals]) {
+    for (let i = 0; i < arr.length; i++) {
+      const e = arr[i];
+      if (e.dead || Math.abs(e.x - mu.x) > R) continue;
+      damageEntity(e, mu.dmg * 0.6, mu);
+      if (e.dir != null) e.dir *= -1;
+      if (e.vx != null) e.vx *= -1;
+      e.flash = 0.3;
+    }
+  }
+  for (let i = 0; i < 16; i++) {
+    const a = (i / 16) * Math.PI * 2;
+    spawnParticle(mu.x, mu.y - 10, Math.cos(a) * 90, Math.sin(a) * 90, 0.4, 2, 'spark',
+      i % 3 === 0 ? PAL.zap2 : i % 3 === 1 ? PAL.fire1 : PAL.beam, 0, 0.02);
+  }
+  shake(3);
+}
+
+function applyDisco(mu, dt) {
+  if (Math.random() < dt * 20) {
+    spawnParticle(mu.x + (Math.random() * 24 - 12), mu.y - mu.h * 0.5,
+      Math.random() * 20 - 10, -30 - Math.random() * 20, 0.35, 2, 'spark',
+      Math.random() < 0.5 ? PAL.zap2 : PAL.fire1, 0, 0.03);
+  }
+}
+
+function tornadoSuck(mu) {
+  mu.spinning = 0.9; mu.attackCd = 1.8;
+  audio.play('tornado');
+  popup(mu.x, mu.y - mu.h * mu.scale, 'WHOOSH!', PAL.zap1, 1.1);
+  shake(4);
+}
+
+function applyTornado(mu, dt) {
+  const R = 55 * mu.scale;
+  const pull = 80 * mu.scale;
+  const groups = [G.animals, G.soldiers, G.props, G.tanks, G.robots];
+  for (let g = 0; g < groups.length; g++) {
+    const arr = groups[g];
+    for (let i = 0; i < arr.length; i++) {
+      const e = arr[i];
+      if (e === mu || e.dead) continue;
+      if (e.cls === 'prop' && (e.ruin || !e.targetable)) continue;
+      const dx = mu.x - e.x, dy = (mu.y - 10) - e.y;
+      const d = Math.hypot(dx, dy);
+      if (d < R && d > 2) {
+        e.x += (dx / d) * pull * dt;
+        if (e.y != null && !e.fly) { /* ground units slide */ }
+        if (d < 18) damageEntity(e, mu.dmg * dt * 2.5, mu);
+      }
+    }
+  }
+  // air targets too
+  for (const arr of [G.jets, G.helis, G.ufos]) {
+    for (let i = 0; i < arr.length; i++) {
+      const e = arr[i];
+      if (e.dead) continue;
+      const d = Math.hypot(mu.x - e.x, mu.y - e.y);
+      if (d < R) {
+        e.x += (mu.x - e.x) * dt * 1.5;
+        e.y += (mu.y - e.y) * dt * 1.5;
+        if (d < 22) damageEntity(e, mu.dmg * dt * 2, mu);
+      }
+    }
+  }
+  if (Math.random() < dt * 25) {
+    spawnParticle(mu.x + (Math.random() * 30 - 15), mu.y - Math.random() * 20,
+      Math.random() * 40 - 20, -10 - Math.random() * 30, 0.4, 2, 'poof', PAL.cloud2, -0.05, 0.02);
+  }
+}
+
+function mechaLaser(mu, target) {
+  mu.firing = 0.35; mu.attackCd = 1.3;
+  audio.play('laser');
+  const zx = target.x, zy = target.y - (target.h ? target.h * 0.4 : 6);
+  G.zaps.push({ x1: mu.x + mu.facing * 10, y1: mu.y - mu.h * 0.5, x2: zx, y2: zy, life: 0.18, max: 0.18, col: PAL.fire1 });
+  // also second barrel
+  G.zaps.push({ x1: mu.x - mu.facing * 6, y1: mu.y - mu.h * 0.55, x2: zx + 6, y2: zy + 2, life: 0.14, max: 0.14, col: PAL.zap1 });
+  const R = 18 * mu.scale;
+  hurtRadius(G.animals, zx, zy, R, mu.dmg, mu);
+  hurtRadius(G.soldiers, zx, zy, R, mu.dmg, mu);
+  hurtRadius(G.tanks, zx, zy, R, mu.dmg * 0.7, mu);
+  hurtRadius(G.jets, zx, zy, R, mu.dmg, mu);
+  hurtRadius(G.helis, zx, zy, R, mu.dmg, mu);
+  hurtRadius(G.ufos, zx, zy, R, mu.dmg, mu);
+  hurtRadius(G.robots, zx, zy, R, mu.dmg * 0.6, mu);
+  hurtRadius(G.sats, zx, zy, R, mu.dmg, mu);
+  hurtRadius(G.props, zx, zy, R, mu.dmg, mu);
+  sparks(zx, zy, 10, PAL.fire1);
+  shake(2);
 }
 
 function steakFire(mu) {
@@ -303,6 +450,7 @@ function hurtCone(mu, x, y, dir, reach, halfH, dmg, ignite) {
   scanHurt(G.animals, x, y, dir, reach, halfH, dmg, mu, false);
   scanHurt(G.soldiers, x, y, dir, reach, halfH, dmg, mu, false);
   scanHurt(G.tanks, x, y, dir, reach, halfH, dmg, mu, false);
+  scanHurt(G.robots, x, y, dir, reach, halfH, dmg, mu, false);
   scanHurt(G.mutants, x, y, dir, reach, halfH, dmg, mu, false);
 }
 
@@ -331,6 +479,9 @@ function cloudZap(mu, target) {
   hurtRadius(G.tanks, zx, zy, R, mu.dmg, mu);
   hurtRadius(G.jets, zx, zy, R, mu.dmg, mu);
   hurtRadius(G.ufos, zx, zy, R, mu.dmg, mu);
+  hurtRadius(G.helis, zx, zy, R, mu.dmg, mu);
+  hurtRadius(G.robots, zx, zy, R, mu.dmg, mu);
+  hurtRadius(G.sats, zx, zy, R, mu.dmg, mu);
   hurtRadius(G.props, zx, zy, R, mu.dmg, mu);
   sparks(zx, zy, 8, PAL.zap2);
   shake(2);
@@ -425,12 +576,14 @@ function detonate(mu) {
 function integrate(mu, dt) {
   mu.x += mu.vx * dt;
   if (mu.fly) {
-    const ty = G.player.y + 30;
+    const ty = mu.kind === 'tornado' ? G.player.y + 20 : G.player.y + 30;
     mu.y += (ty - mu.y) * Math.min(1, dt * 3) + Math.sin(mu.animT * 3) * 0.3;
   } else {
     const gy = G.world.groundY(mu.x);
-    // drumstick hops
+    // drumstick hops / disco bounce / mecha stomp
     if (mu.kind === 'drumstick' && Math.abs(mu.vx) > 6) mu.hop = Math.abs(Math.sin(mu.animT * 9)) * 7;
+    else if (mu.kind === 'disco' && mu.boogie > 0) mu.hop = Math.abs(Math.sin(mu.animT * 14)) * 5;
+    else if (mu.kind === 'mecha') mu.hop = Math.abs(Math.sin(mu.animT * 5)) * 1.2;
     else mu.hop = Math.abs(Math.sin(mu.animT * 4)) * 1.5;
     mu.y = gy - mu.hop;
   }
@@ -442,7 +595,7 @@ export function drawZaps(ctx, dt) {
     z.life -= dt;
     if (z.life <= 0) { G.zaps.splice(i, 1); continue; }
     const x1 = z.x1 - G.camX, y1 = z.y1 - G.camY, x2 = z.x2 - G.camX, y2 = z.y2 - G.camY;
-    ctx.strokeStyle = z.life > z.max * 0.5 ? PAL.zap1 : PAL.zap2;
+    ctx.strokeStyle = z.col || (z.life > z.max * 0.5 ? PAL.zap1 : PAL.zap2);
     ctx.lineWidth = 1;
     ctx.beginPath();
     const segs = 6;
@@ -468,12 +621,13 @@ export function drawMutants(ctx) {
     else if (mu.kind === 'drumstick' && mu.biting > 0) { name = 'drumstick_bite'; }
     else if (mu.kind === 'cloudsheep' && mu.zapping > 0) name = 'cloudsheep_zap';
     else if (mu.kind === 'karatepig' && mu.chopping > 0) { name = 'karatepig_chop'; frameOverride = mu.chopping > 0.18 ? 0 : 1; }
+    else if (mu.kind === 'disco' && mu.boogie > 0) name = 'disco_boogie';
+    else if (mu.kind === 'mecha' && mu.firing > 0) name = 'mecha_fire';
 
     if (!mu.fly) drawShadow(ctx, sx, G.world.groundY(mu.x) - cy, mu.w * mu.scale, 0.4);
-    const sq = mu.squash > 0 ? 1 - mu.squash * 0.18 : 1;
     const o = {
-      t: mu.animT, flip: mu.facing < 0, scale: mu.scale,
-      flash: mu.engorge > 0 ? Math.max(0, mu.flash) : (mu.flash > 0 ? 0.7 : 0),
+      t: mu.animT, flip: mu.facing < 0, scale: mu.scale * (mu.pink ? 1.05 : 1),
+      flash: mu.engorge > 0 ? Math.max(0, mu.flash) : (mu.flash > 0 ? 0.7 : (mu.pink ? 0.15 : 0)),
       frame: frameOverride,
     };
     // squash: draw with slight vertical scale via two-axis not supported in helper;

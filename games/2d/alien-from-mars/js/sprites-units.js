@@ -298,6 +298,123 @@ function drawJet() {
 }
 
 // ---------------------------------------------------------------------------
+// HELICOPTER — 28x16, 2 frames (rotor blur), center anchor
+// ---------------------------------------------------------------------------
+function drawHeli(frame) {
+  const g = G(28, 16);
+  // cabin
+  box(g, 8, 5, 18, 11, PAL.army2);
+  box(g, 10, 6, 16, 9, PAL.army1);
+  // cockpit glass
+  row(g, 6, 15, 18, PAL.glow);
+  row(g, 7, 16, 18, PAL.metal2);
+  // tail boom
+  row(g, 8, 2, 8, PAL.army2);
+  row(g, 9, 1, 8, PAL.army2);
+  // tail rotor
+  if (frame === 0) { col(g, 1, 6, 11, PAL.metal3); px(g, 0, 8, PAL.metal2); px(g, 2, 8, PAL.metal2); }
+  else { row(g, 8, 0, 3, PAL.metal3); px(g, 1, 7, PAL.metal2); px(g, 1, 9, PAL.metal2); }
+  // skids
+  row(g, 12, 9, 17, PAL.metal4);
+  px(g, 9, 11, PAL.metal4); px(g, 17, 11, PAL.metal4);
+  // main rotor mast
+  col(g, 13, 3, 5, PAL.metal3);
+  // main rotor blades (alternate)
+  if (frame === 0) {
+    row(g, 3, 2, 24, PAL.metal2);
+    px(g, 2, 3, PAL.metal1); px(g, 24, 3, PAL.metal1);
+  } else {
+    row(g, 2, 4, 22, PAL.metal3);
+    row(g, 4, 6, 20, PAL.metal2);
+  }
+  // rocket pod
+  box(g, 19, 9, 22, 11, PAL.metal4);
+  px(g, 22, 10, PAL.fire3);
+  // warm rim
+  row(g, 5, 10, 14, PAL.horizon);
+  addOutline(g, PAL.outline);
+  return bake(g);
+}
+
+// ---------------------------------------------------------------------------
+// GIANT ROBOT FARMER — 22x36, 2 frames walk, bottom-center anchor
+// ---------------------------------------------------------------------------
+function drawRobotFarmer(frame) {
+  const g = G(22, 36);
+  const stride = frame === 0 ? 1 : -1;
+  // boots
+  box(g, 4 + stride, 33, 8 + stride, 35, PAL.metal4);
+  box(g, 13 - stride, 33, 17 - stride, 35, PAL.metal4);
+  // legs
+  box(g, 5 + stride, 24, 8 + stride, 33, PAL.metal3);
+  box(g, 13 - stride, 24, 16 - stride, 33, PAL.metal3);
+  // overalls torso
+  box(g, 4, 14, 17, 24, PAL.army1);
+  box(g, 5, 15, 16, 22, PAL.army2);
+  // overall straps
+  col(g, 7, 12, 15, PAL.army1);
+  col(g, 14, 12, 15, PAL.army1);
+  // chest plate
+  box(g, 7, 16, 14, 20, PAL.metal2);
+  px(g, 10, 18, PAL.red); // power core
+  // head / straw hat
+  box(g, 7, 6, 14, 12, PAL.metal1);
+  box(g, 8, 7, 13, 11, PAL.metal2);
+  // eyes
+  px(g, 9, 9, PAL.zap1); px(g, 12, 9, PAL.zap1);
+  // straw hat brim + crown
+  row(g, 5, 4, 17, PAL.fat);
+  box(g, 7, 2, 14, 5, PAL.fat);
+  row(g, 2, 8, 13, PAL.horizon);
+  // pitchfork arm (right)
+  if (frame === 0) {
+    row(g, 16, 17, 21, PAL.metal3);
+    col(g, 21, 12, 16, PAL.metal2);
+    px(g, 20, 12, PAL.metal1); px(g, 21, 12, PAL.metal1); px(g, 22, 12, PAL.metal1);
+  } else {
+    row(g, 14, 17, 20, PAL.metal3);
+    col(g, 20, 8, 14, PAL.metal2);
+    px(g, 19, 8, PAL.metal1); px(g, 20, 8, PAL.metal1); px(g, 21, 8, PAL.metal1);
+  }
+  // left arm
+  col(g, 3, 16, 22, PAL.metal3);
+  px(g, 3, 22, PAL.metal4);
+  addOutline(g, PAL.outline);
+  return bake(g);
+}
+
+// ---------------------------------------------------------------------------
+// SATELLITE — 20x14, 2 frames (panel tilt), center anchor
+// ---------------------------------------------------------------------------
+function drawSatellite(frame) {
+  const g = G(20, 14);
+  // body
+  box(g, 7, 5, 12, 10, PAL.metal2);
+  box(g, 8, 6, 11, 9, PAL.metal1);
+  // antenna dish
+  box(g, 9, 2, 11, 4, PAL.metal3);
+  px(g, 10, 1, PAL.red);
+  // solar panels
+  if (frame === 0) {
+    box(g, 1, 6, 6, 9, PAL.dusk1);
+    box(g, 13, 6, 18, 9, PAL.dusk1);
+    row(g, 7, 1, 6, PAL.zap3);
+    row(g, 7, 13, 18, PAL.zap3);
+  } else {
+    box(g, 1, 5, 6, 10, PAL.dusk2);
+    box(g, 13, 5, 18, 10, PAL.dusk2);
+    row(g, 6, 1, 6, PAL.zap2);
+    row(g, 8, 13, 18, PAL.zap2);
+  }
+  // laser emitter glow
+  px(g, 9, 10, PAL.fire1); px(g, 10, 11, PAL.fire2); px(g, 11, 10, PAL.fire1);
+  // rim
+  row(g, 5, 8, 11, PAL.horizon);
+  addOutline(g, PAL.outline);
+  return bake(g);
+}
+
+// ---------------------------------------------------------------------------
 export function build() {
   return {
     player_ufo:  { frames: [drawPlayerUFO(0), drawPlayerUFO(1)], fps: 6, ax: 13, ay: 7 },
@@ -307,5 +424,8 @@ export function build() {
     tank:        { frames: [drawTank(0), drawTank(1)], fps: 8, ax: 15, ay: 16 },
     tank_turret: { frames: [drawTankTurret()], fps: 1, ax: 4, ay: 5 },
     jet:         { frames: [drawJet()], fps: 1, ax: 15, ay: 6 },
+    heli:        { frames: [drawHeli(0), drawHeli(1)], fps: 12, ax: 14, ay: 8 },
+    robot_farmer:{ frames: [drawRobotFarmer(0), drawRobotFarmer(1)], fps: 5, ax: 11, ay: 35 },
+    satellite:   { frames: [drawSatellite(0), drawSatellite(1)], fps: 4, ax: 10, ay: 7 },
   };
 }

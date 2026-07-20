@@ -44,23 +44,33 @@ const LAYER_TW = 960;   // silhouette tile width (hides repetition; still seamle
 
 // ---------- module cache ----------
 let inited = false;
-let sky, mesas, hills, treeline;
+let skyDusk, skyNight, skyStorm, skyDay;
+let mesas, hills, treeline;
 let marsBody, marsGlow, moon;
+let mothership;        // far silhouette tile
 let stars;              // preallocated star records
 let clouds;            // preallocated cloud records
 let marsX, marsY, marsR, moonX, moonY;
+let flashT = 0;         // lightning flash residual
+let lastMode = 'dusk';
+
+// External hooks set by core each frame (wanted level + time-of-day phase).
+// drawBackground reads these; setBackgroundMood is the public setter.
+let moodWanted = 0;
+let moodPhase = 0;      // 0..1 day cycle
+export function setBackgroundMood(wanted, phase) {
+  moodWanted = wanted | 0;
+  moodPhase = phase || 0;
+}
 
 // ---------- build: sky ----------
-function buildSky() {
+function buildSkyFrom(cols) {
   const c = mkCanvas(K.W, K.H);
   const g = c.getContext('2d');
   const img = g.createImageData(K.W, K.H);
   const d = img.data;
   const SY = [0, 66, 120, 165, K.GROUND];
-  const SC = [
-    hexRgb(PAL.night), hexRgb(PAL.dusk1), hexRgb(PAL.dusk2),
-    hexRgb(PAL.dusk3), hexRgb(PAL.horizon),
-  ];
+  const SC = cols.map(hexRgb);
   const HZ = SC[4];
   for (let y = 0; y < K.H; y++) {
     let cur, next, f;
@@ -81,6 +91,44 @@ function buildSky() {
     }
   }
   g.putImageData(img, 0, 0);
+  return c;
+}
+function buildSky() {
+  return buildSkyFrom([PAL.night, PAL.dusk1, PAL.dusk2, PAL.dusk3, PAL.horizon]);
+}
+function buildSkyNight() {
+  return buildSkyFrom(['#0a0618', '#120a28', '#1a1030', '#2a1840', '#3b1d4f']);
+}
+function buildSkyStorm() {
+  return buildSkyFrom(['#0c0c14', '#1a1a28', '#2a2438', '#3a3048', '#4a3a50']);
+}
+function buildSkyDay() {
+  return buildSkyFrom(['#3a5a9a', '#5a7ab8', '#7a9ad0', '#b8c8e0', '#e8d0a0']);
+}
+
+// Giant mothership silhouette for high-wanted skies
+function buildMothership() {
+  const tw = 200, th = 60;
+  const c = mkCanvas(tw, th);
+  const g = c.getContext('2d');
+  g.fillStyle = '#05030c';
+  // saucer hull
+  g.beginPath();
+  g.ellipse(tw / 2, th * 0.55, tw * 0.45, th * 0.28, 0, 0, Math.PI * 2);
+  g.fill();
+  // dome
+  g.beginPath();
+  g.ellipse(tw / 2, th * 0.38, tw * 0.18, th * 0.22, 0, Math.PI, 0);
+  g.fill();
+  // underside lights (dim)
+  g.fillStyle = PAL.alien;
+  for (let i = 0; i < 7; i++) {
+    const lx = tw * 0.2 + i * (tw * 0.1);
+    g.fillRect(lx | 0, (th * 0.7) | 0, 2, 1);
+  }
+  // rim catch
+  g.fillStyle = PAL.dusk1;
+  g.fillRect((tw * 0.15) | 0, (th * 0.45) | 0, (tw * 0.7) | 0, 1);
   return c;
 }
 
@@ -265,7 +313,10 @@ function buildCloud(w, h, rng) {
 function init() {
   const rng = mulberry32(0x51E7);
 
-  sky = buildSky();
+  skyDusk = buildSky();
+  skyNight = buildSkyNight();
+  skyStorm = buildSkyStorm();
+  skyDay = buildSkyDay();
 
   mesas = buildLayer({
     baseY: 150,
@@ -291,6 +342,7 @@ function init() {
 
   moonX = 96; moonY = 40;
   moon = buildMoon(8);
+  mothership = buildMothership();
 
   // stars (upper third)
   const N = 80;
@@ -316,6 +368,17 @@ function init() {
   inited = true;
 }
 
+function pickSky(t) {
+  // cycle: day -> dusk -> night -> storm(at high wanted) -> ...
+  // moodPhase 0..1 over ~90s; wanted>=3 forces storm more often
+  const p = moodPhase;
+  if (moodWanted >= 3 && (p > 0.55 && p < 0.85)) return skyStorm;
+  if (p < 0.22) return skyDay;
+  if (p < 0.48) return skyDusk;
+  if (p < 0.78) return skyNight;
+  return moodWanted >= 2 ? skyStorm : skyDusk;
+}
+
 // ---------- per-frame blit of a wrapping tile ----------
 function blitLayer(ctx, tile, camX, par, w) {
   const tw = tile.width;
@@ -330,49 +393,106 @@ function blitLayer(ctx, tile, camX, par, w) {
 export function drawBackground(ctx, camX, w, h, t) {
   if (!inited) init();
 
+  const sky = pickSky(t);
+  const isStorm = sky === skyStorm;
+  const isDay = sky === skyDay;
+  const isNight = sky === skyNight || isStorm;
+  lastMode = isStorm ? 'storm' : isDay ? 'day' : isNight ? 'night' : 'dusk';
+
   // 1. sky (fixed to screen)
   ctx.drawImage(sky, 0, 0);
 
-  // 2. stars — slight parallax + twinkle
-  const starScroll = -camX * P_STAR;
-  ctx.fillStyle = PAL.star;
-  for (let i = 0; i < stars.length; i++) {
-    const s = stars[i];
-    let sx = (s.x + starScroll) % K.W;
-    if (sx < 0) sx += K.W;
-    const tw = 0.5 + 0.5 * Math.sin(t * s.sp + s.ph);
-    const on = s.mag * tw;
-    if (on <= 0.34) continue;
-    const px = sx | 0;
-    ctx.fillRect(px, s.y | 0, 1, 1);
-    if (s.big && on > 0.8) {          // sparkle cross for the brightest
-      ctx.fillRect(px - 1, s.y | 0, 1, 1);
-      ctx.fillRect(px + 1, s.y | 0, 1, 1);
-      ctx.fillRect(px, (s.y | 0) - 1, 1, 1);
-      ctx.fillRect(px, (s.y | 0) + 1, 1, 1);
+  // lightning flashes in storm
+  if (isStorm) {
+    if (flashT > 0) flashT -= 0.016;
+    else if (Math.random() < 0.008) flashT = 0.12 + Math.random() * 0.1;
+    if (flashT > 0) {
+      ctx.globalAlpha = Math.min(0.55, flashT * 4);
+      ctx.fillStyle = '#c8d8ff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.globalAlpha = 1;
     }
   }
 
-  // 3. moon + Mars (fixed in the sky; Mars glow breathes)
-  ctx.drawImage(moon, moonX - moon.width / 2, moonY - moon.height / 2);
+  // 2. stars — slight parallax + twinkle (dim in day)
+  if (!isDay) {
+    const starScroll = -camX * P_STAR;
+    ctx.fillStyle = PAL.star;
+    const starA = isStorm ? 0.55 : 1;
+    for (let i = 0; i < stars.length; i++) {
+      const s = stars[i];
+      let sx = (s.x + starScroll) % K.W;
+      if (sx < 0) sx += K.W;
+      const tw = 0.5 + 0.5 * Math.sin(t * s.sp + s.ph);
+      const on = s.mag * tw * starA;
+      if (on <= 0.34) continue;
+      const px = sx | 0;
+      ctx.fillRect(px, s.y | 0, 1, 1);
+      if (s.big && on > 0.8) {
+        ctx.fillRect(px - 1, s.y | 0, 1, 1);
+        ctx.fillRect(px + 1, s.y | 0, 1, 1);
+        ctx.fillRect(px, (s.y | 0) - 1, 1, 1);
+        ctx.fillRect(px, (s.y | 0) + 1, 1, 1);
+      }
+    }
+  }
+
+  // 3. moon + Mars (Mars always; moon dimmer by day)
+  if (!isDay) {
+    ctx.globalAlpha = isNight ? 1 : 0.7;
+    ctx.drawImage(moon, moonX - moon.width / 2, moonY - moon.height / 2);
+    ctx.globalAlpha = 1;
+  }
   ctx.globalAlpha = 0.55 + 0.2 * Math.sin(t * 1.3);
   ctx.drawImage(marsGlow, marsX - marsGlow.width / 2, marsY - marsGlow.height / 2);
   ctx.globalAlpha = 1;
   ctx.drawImage(marsBody, marsX - marsBody.width / 2, marsY - marsBody.height / 2);
 
-  // 4. drifting clouds (in front of the sky/celestial, behind the land)
+  // 3b. mothership silhouette on horizon at high wanted
+  if (moodWanted >= 2) {
+    const bob = Math.sin(t * 0.4) * 2;
+    const mx = (w * 0.5 - 40 + Math.sin(t * 0.15) * 20 - camX * 0.04) % (w + 200);
+    const my = 28 + bob + (moodWanted >= 3 ? 0 : 8);
+    ctx.globalAlpha = moodWanted >= 3 ? 0.85 : 0.5;
+    ctx.drawImage(mothership, mx | 0, my | 0);
+    // running lights blink
+    if (moodWanted >= 3 && ((t * 4) | 0) % 2 === 0) {
+      ctx.fillStyle = PAL.alien;
+      ctx.fillRect((mx + 60) | 0, (my + 42) | 0, 2, 1);
+      ctx.fillRect((mx + 100) | 0, (my + 42) | 0, 2, 1);
+      ctx.fillRect((mx + 140) | 0, (my + 42) | 0, 2, 1);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // 4. drifting clouds (faster/darker in storm)
+  const stormMul = isStorm ? 1.8 : 1;
   for (let i = 0; i < clouds.length; i++) {
     const cl = clouds[i];
     const cw = cl.c.width;
     const span = w + cw + 40;
-    let x = (cl.baseX - camX * cl.par + t * cl.drift) % span;
+    let x = (cl.baseX - camX * cl.par + t * cl.drift * stormMul) % span;
     if (x < 0) x += span;
     x -= cw;
-    ctx.drawImage(cl.c, x | 0, cl.y);
+    if (isStorm) ctx.globalAlpha = 0.85;
+    ctx.drawImage(cl.c, x | 0, cl.y - (isStorm ? 6 : 0));
+    ctx.globalAlpha = 1;
   }
 
   // 5. three parallax silhouette layers, far -> near
   blitLayer(ctx, mesas, camX, P_MESA, w);
   blitLayer(ctx, hills, camX, P_HILL, w);
   blitLayer(ctx, treeline, camX, P_TREE, w);
+
+  // rain streaks in storm
+  if (isStorm) {
+    ctx.fillStyle = 'rgba(180,190,220,0.35)';
+    const seed = ((t * 60) | 0);
+    for (let i = 0; i < 40; i++) {
+      const rx = ((i * 97 + seed * 13) % w);
+      const ry = ((i * 53 + seed * 29) % h);
+      if (ry > K.GROUND) continue;
+      ctx.fillRect(rx, ry, 1, 3);
+    }
+  }
 }

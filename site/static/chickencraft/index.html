@@ -32,13 +32,30 @@
             display: none !important;
         }
     </style>
-  <script type="module" crossorigin src="/chickencraft/assets/index-CI64OH9c.js"></script>
+  <script type="module" crossorigin src="/chickencraft/assets/index-BLHfW85t.js"></script>
 </head>
 <body>
     <div id="loadingScreen">Loading Chickencraft...</div>
     <canvas id="renderCanvas"></canvas>
 
-<script>window.ARCADE_CONTROLS={};</script>
+<script>
+  window.ARCADE_SPLASH = {
+    image: '/arcade/splashes/chickencraft.png',
+    title: 'CHICKENCRAFT',
+    subtitle: 'TAP / PRESS START',
+    credit: 'Pink Horse of Whimsy'
+  };
+  window.ARCADE_CONTROLS = {
+    dpad: { up: 'w', down: 's', left: 'a', right: 'd' },
+    buttons: [
+      { label: 'Jump', keys: ' ' },
+      { label: 'Mine', keys: 'e' },
+      { label: 'Place', keys: 'q' },
+      { label: 'Inv', keys: 'Tab' }
+    ]
+  };
+</script>
+<script src="/arcade/splash.js"></script>
 <script src="/arcade/controls.js" defer></script>
 </body>
 </html>

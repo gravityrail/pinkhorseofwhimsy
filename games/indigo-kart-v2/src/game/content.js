@@ -23,6 +23,14 @@ export const CARS = [
     accent: 0x4b2e83,
     stats: { acceleration: 5, handling: 5, weight: 10, topSpeed: 10 },
   },
+  {
+    id: 'sugar',
+    name: 'Sugar Pop',
+    tagline: 'Sprinkle-powered chaos',
+    color: 0xff6ad5,
+    accent: 0x7dffb3,
+    stats: { acceleration: 8, handling: 8, weight: 5, topSpeed: 8 },
+  },
 ];
 
 // Track points are [x, elevation, z]. The renderer interpolates them as a closed
@@ -247,6 +255,43 @@ export const TRACKS = [
     zones: [
       { from: 0.02, to: 0.5, type: 'outback', density: 0.55 },
       { from: 0.5, to: 0.98, type: 'outback', density: 0.65 },
+    ],
+  },
+  {
+    id: 'candy-canyon',
+    name: 'Candy Canyon',
+    description: 'A sticky-sweet gorge of gumdrops, candy canes, and lollipop forests. Mind the frosting fog!',
+    badge: 'SUGAR RUSH',
+    seed: 77721,
+    width: 14,
+    laps: 3,
+    time: 'day',
+    music: 'candy',
+    road: { style: 'street' },
+    palette: {
+      sky: 0xffb6d9,
+      fog: 0xffd0e8,
+      ground: 0xf5a0c8,
+      road: 0x6b3d7a,
+      shoulder: 0xffe08a,
+      stripeA: 0xffffff,
+      stripeB: 0xff4fa3,
+      water: 0xff8ec8,
+      dust: 0xffc0e0,
+    },
+    terrain: { kind: 'island', foliage: 'candy', roughness: 0.55 },
+    boosts: [0.1, 0.34, 0.58, 0.76, 0.92],
+    powerups: [0.22, 0.48, 0.7, 0.88],
+    points: [
+      [0, 2, 86], [48, 3, 78], [92, 6, 46], [104, 12, 4],
+      [86, 18, -42], [42, 22, -78], [-8, 16, -90], [-54, 14, -68],
+      [-94, 10, -28], [-100, 5, 22], [-72, 3, 60], [-30, 2, 80],
+    ],
+    zones: [
+      { from: 0.0, to: 0.18, type: 'grandstands', density: 0.45 },
+      { from: 0.18, to: 0.48, type: 'candy', density: 0.95 },
+      { from: 0.48, to: 0.72, type: 'lollipops', density: 0.9 },
+      { from: 0.72, to: 0.98, type: 'candy', density: 0.85 },
     ],
   },
 ];

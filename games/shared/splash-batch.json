@@ -1,0 +1,69 @@
+{
+  "splashes": [
+    {
+      "name": "worm",
+      "title": "WORM",
+      "prompt": "A giant segmented pink earthworm hero bursting up through rich dark soil under a huge golden sun, treasure coins and jewels raining from its tunnel, a menacing giant crow diving from stormy sky. Whimsical but epic underground adventure. Dirt clumps and roots flying. Retro computer game energy."
+    },
+    {
+      "name": "alien-from-mars",
+      "title": "THE ALIEN FROM MARS",
+      "prompt": "A chrome flying saucer beaming up a startled cow over a twilight countryside, mutated two-headed fire-breathing steak monster rampaging below, tanks and jets scrambling, purple Martian skies, chaos and comedy mixed with sci-fi pulp cover intensity."
+    },
+    {
+      "name": "maze-explorer",
+      "title": "MAZE EXPLORER",
+      "prompt": "First-person dungeon horror box art: a terrified adventurer's hands gripping a glowing blaster, facing a gigantic multi-eyed floating BEHOLDER demon in a torchlit stone labyrinth. Blood-red gems, gothic arches, green eye-beams, pure Wolfenstein / Doom era intensity with fantasy monsters."
+    },
+    {
+      "name": "pinball",
+      "title": "PINBALL",
+      "prompt": "A dazzling chrome pinball machine erupting with light and sparks, silver ball mid-flight hitting a bumper, neon score digits exploding, carnival colors, 1980s arcade cabinet energy, metal and glass reflections painted in classic game-box style."
+    },
+    {
+      "name": "indigokart2",
+      "title": "INDIGO KART",
+      "prompt": "Cute cartoon racers in colorful go-karts drifting around a sunset tropical island track, neon city and rainbow road in the sky behind them, motion blur speed lines, Mario Kart era box art energy but original characters, pink horse mascot waving a checkered flag."
+    },
+    {
+      "name": "star-bean",
+      "title": "STAR BEAN",
+      "prompt": "A heroic fluffy white mohawked dog in a sleek starfighter blasting through neon space, giant mechanical boss ship ahead, lasers and explosions, Star Fox / After Burner box art drama, cosmic pink and teal colors, Space Bean defender of the galaxy."
+    },
+    {
+      "name": "bean-quiz",
+      "title": "BEAN QUIZ",
+      "prompt": "A glittery kids game-show stage with a tiny white mohawked dog host in a sparkly jacket and a smug orange tabby cat sidekick with a microphone, confetti cannons, giant glowing question marks, 80s Saturday morning cartoon meets game show box art."
+    },
+    {
+      "name": "coin-collector",
+      "title": "COIN COLLECTOR",
+      "prompt": "A brave little blue-clad platformer hero leaping between floating islands collecting giant gold coins, green hills and blue sky, classic 8-bit adventure box painting style like Super Mario Bros cover energy but original art."
+    },
+    {
+      "name": "platform-runner",
+      "title": "PLATFORM RUNNER",
+      "prompt": "A speedy hero sprinting across collapsing platforms, dodging spikes and cartoon enemies, night city rooftops, dynamic diagonal action composition, classic NES action platformer box art intensity."
+    },
+    {
+      "name": "chickencraft",
+      "title": "CHICKENCRAFT",
+      "prompt": "A brave chicken miner in a blocky voxel world swinging a pickaxe, diamonds and dirt cubes flying, Minecraft-era sandbox adventure box art but with a heroic chicken protagonist under a blocky sunset."
+    },
+    {
+      "name": "bean-simulator",
+      "title": "BEAN SIMULATOR",
+      "prompt": "A tiny fluffy white dog with a mohawk exploring a cozy oversized living room from dog's-eye view, golden afternoon light through curtains, toys and treats, warm whimsical first-person adventure box art."
+    },
+    {
+      "name": "vibekart",
+      "title": "VIBEKART",
+      "prompt": "Surreal neon dream-race: go-karts on a procedurally melting rainbow highway through vaporwave clouds, synthwave sunset, chrome rims and glowing trails, 80s futurism box art."
+    },
+    {
+      "name": "indigokart",
+      "title": "INDIGO KART CLASSIC",
+      "prompt": "Charming miniature 3D kart racer box art, small colorful karts racing a simple loop track, cheerful sky, classic early 3D console racing game cover painting."
+    }
+  ]
+}

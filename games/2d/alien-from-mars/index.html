@@ -21,12 +21,28 @@
 <body>
   <canvas id="game" width="480" height="270"></canvas>
 
+  <script>
+    window.ARCADE_SPLASH = {
+      image: '/arcade/splashes/alien-from-mars.png',
+      title: 'THE ALIEN FROM MARS',
+      subtitle: 'TAP / PRESS START',
+      credit: 'Pink Horse Arcade',
+      music: '/arcade/sfx/alien-music.mp3',
+      musicVolume: 0.4,
+    };
+  </script>
+  <script src="/arcade/splash.js"></script>
+
   <script type="module" src="./js/main.js"></script>
 
   <script>window.ARCADE_CONTROLS = {
     dpad: { up:'ArrowUp', down:'ArrowDown', left:'ArrowLeft', right:'ArrowRight' },
-    buttons: [ { label:'⚡', keys:' ' }, { label:'🛸', keys:'a' } ],
+    buttons: [
+      { label:'⚡', keys:' ' },
+      { label:'🛸', keys:'a' },
+    ],
     start: 'Enter',
+    showOnDesktop: false,
   };</script>
   <script src="/arcade/controls.js" defer></script>
 </body>

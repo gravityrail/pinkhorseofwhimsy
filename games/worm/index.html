@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>WORM 🐛</title>
+<style>
+  :root {
+    --bg: #0b1021;
+    --panel: rgba(8, 12, 30, 0.72);
+    --accent: #5ef38c;
+    --accent2: #ffd54a;
+    --danger: #ff5a7a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    height: 100%;
+    background: radial-gradient(circle at 50% -10%, #1a2350 0%, #0b1021 55%, #05070f 100%);
+    font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+    color: #fff;
+    overflow: hidden;
+    user-select: none;
+    touch-action: none;
+  }
+  #stage {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* 4:3 game frame, centered & scaled */
+  #frame {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    width: min(100vw, calc(100vh * 4 / 3));
+    height: min(100vh, calc(100vw * 3 / 4));
+    background: #0c1430;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 0 0 2px rgba(94,243,140,.25), 0 24px 60px rgba(0,0,0,.6);
+  }
+  canvas { display: block; width: 100%; height: 100%; }
+
+  /* HUD */
+  #hud {
+    position: absolute; top: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: clamp(6px, 1.6vmin, 16px);
+    pointer-events: none;
+    z-index: 5;
+  }
+  #inv {
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+    gap: clamp(2px, .8vmin, 8px);
+    background: var(--panel);
+    padding: clamp(4px, 1vmin, 10px);
+    border-radius: 12px;
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,.08);
+  }
+  .slot {
+    display: flex; align-items: center; gap: 3px;
+    font-size: clamp(11px, 2.1vmin, 20px);
+    font-weight: bold;
+    line-height: 1;
+    min-width: 2.6em;
+  }
+  .slot .ic { font-size: clamp(13px, 2.6vmin, 24px); filter: drop-shadow(0 1px 1px rgba(0,0,0,.6)); }
+  .slot .n { color: var(--accent2); min-width: 1ch; transition: transform .12s; }
+  .slot.pulse .n { transform: scale(1.5); color: #fff; }
+
+  #right { display: flex; flex-direction: column; align-items: flex-end; gap: clamp(4px,1vmin,10px); }
+  #lives { font-size: clamp(16px, 3vmin, 30px); letter-spacing: 2px; filter: drop-shadow(0 2px 3px rgba(0,0,0,.6)); }
+  #coords {
+    background: var(--panel); border-radius: 10px;
+    padding: 3px 8px; font-size: clamp(9px,1.7vmin,15px);
+    color: var(--accent); font-family: ui-monospace, monospace;
+    border: 1px solid rgba(255,255,255,.08);
+  }
+  #fsBtn {
+    pointer-events: auto;
+    background: var(--panel); color: #fff; border: 1px solid rgba(255,255,255,.15);
+    border-radius: 10px; padding: clamp(4px,1vmin,8px) clamp(8px,1.5vmin,14px);
+    font-size: clamp(11px,2vmin,17px); cursor: pointer; font-weight: bold;
+  }
+  #fsBtn:active { transform: scale(.94); }
+
+  /* D-Pad */
+  #pad {
+    position: absolute; z-index: 6;
+    right: clamp(10px, 3vmin, 38px); bottom: clamp(10px, 3vmin, 38px);
+    width: clamp(140px, 30vmin, 260px); height: clamp(140px, 30vmin, 260px);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: clamp(3px,.8vmin,7px);
+    pointer-events: none;
+    opacity: .9;
+  }
+  .dbtn {
+    pointer-events: auto;
+    background: linear-gradient(180deg, rgba(94,243,140,.22), rgba(94,243,140,.08));
+    border: 1px solid rgba(94,243,140,.4);
+    border-radius: 16px;
+    color: var(--accent);
+    font-size: clamp(20px, 5vmin, 44px);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.15);
+    transition: transform .06s, background .1s;
+  }
+  .dbtn:active, .dbtn.on { transform: scale(.9); background: rgba(94,243,140,.5); color:#04210f; }
+  #up    { grid-area: 1 / 2 / 2 / 3; }
+  #left  { grid-area: 2 / 1 / 3 / 2; }
+  #right2{ grid-area: 2 / 3 / 3 / 4; }
+  #down  { grid-area: 3 / 2 / 4 / 3; }
+  #padc  { grid-area: 2 / 2 / 3 / 3; }
+  #padc { background: none; border: none; box-shadow: none; pointer-events: none;
+    color: rgba(94,243,140,.5); font-size: clamp(14px,3vmin,26px);}
+
+  /* Overlays */
+  .overlay {
+    position: absolute; inset: 0; z-index: 20;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; gap: 14px; padding: 20px;
+    background: radial-gradient(circle at 50% 40%, rgba(11,16,33,.7), rgba(5,7,15,.94));
+    backdrop-filter: blur(3px);
+  }
+  .overlay h1 {
+    font-size: clamp(40px, 12vmin, 120px);
+    background: linear-gradient(180deg, var(--accent), #2bc46a);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    text-shadow: 0 0 30px rgba(94,243,140,.4);
+    letter-spacing: 6px;
+  }
+  .overlay h1 .wig { display:inline-block; animation: wig 1.6s ease-in-out infinite; }
+  @keyframes wig { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-8px) rotate(-6deg)} }
+  .overlay p { font-size: clamp(13px, 2.6vmin, 22px); max-width: 30em; opacity: .9; line-height: 1.5; }
+  .overlay .icons { font-size: clamp(22px, 5vmin, 44px); letter-spacing: 4px; }
+  .btn {
+    margin-top: 6px;
+    background: linear-gradient(180deg, var(--accent), #2bc46a);
+    color: #04210f; border: none; border-radius: 999px;
+    padding: clamp(10px,2vmin,16px) clamp(26px,5vmin,48px);
+    font-size: clamp(16px,3vmin,26px); font-weight: 900; cursor: pointer;
+    box-shadow: 0 8px 24px rgba(94,243,140,.4);
+    letter-spacing: 1px;
+  }
+  .btn:active { transform: scale(.95); }
+  .hidden { display: none !important; }
+  #gameOver h1 { background: linear-gradient(180deg, var(--danger), #b3243f); -webkit-background-clip: text; background-clip:text; text-shadow:0 0 30px rgba(255,90,122,.4);}
+  .stat { font-size: clamp(14px,2.6vmin,22px); }
+  .stat b { color: var(--accent2); }
+  #flash {
+    position:absolute; inset:0; z-index:15; pointer-events:none;
+    background: var(--danger); opacity:0; transition: opacity .12s;
+  }
+  #toast {
+    position:absolute; top: 18%; left:50%; transform:translateX(-50%);
+    z-index:12; background: var(--panel); padding: 8px 18px; border-radius: 999px;
+    font-size: clamp(13px,2.4vmin,20px); font-weight:bold; pointer-events:none;
+    border:1px solid rgba(255,255,255,.12); opacity:0; transition:opacity .3s, transform .3s;
+    white-space:nowrap;
+  }
+  #toast.show { opacity:1; transform:translateX(-50%) translateY(-6px); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="frame">
+    <canvas id="game"></canvas>
+    <div id="flash"></div>
+
+    <div id="hud">
+      <div id="inv"></div>
+      <div id="right">
+        <button id="fsBtn">⛶ Fullscreen</button>
+        <div id="lives"></div>
+        <div id="coords">screen 0,0</div>
+      </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <div id="pad">
+      <div class="dbtn" id="up">▲</div>
+      <div class="dbtn" id="left">◀</div>
+      <div id="padc">⊕</div>
+      <div class="dbtn" id="right2">▶</div>
+      <div class="dbtn" id="down">▼</div>
+    </div>
+
+    <!-- Start -->
+    <div class="overlay" id="start">
+      <h1><span class="wig">🐛</span>WORM</h1>
+      <div class="icons">🔩 🍎 🥕 💎 🦴 🧸 📱 🐛</div>
+      <p>Slither across an endless world and gobble up treasure. Each screen hides random loot — collect it all! Watch out for <b>birds</b> 🐦 swooping across: a hit costs a life. You have 3.</p>
+      <p style="opacity:.7">Use the on-screen arrows or your keyboard (WASD / arrow keys).</p>
+      <button class="btn" id="startBtn">PLAY ▶</button>
+    </div>
+
+    <!-- Game Over -->
+    <div class="overlay hidden" id="gameOver">
+      <h1>GAME OVER</h1>
+      <div class="stat" id="goStats"></div>
+      <button class="btn" id="retryBtn">PLAY AGAIN ↻</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+(function () {
+// ---------- Config ----------
+const COLS = 20, ROWS = 15;            // 4:3 grid
+const TYPES = [
+  { key:"metal",  icon:"🔩", name:"Scrap Metal" },
+  { key:"fruit",  icon:"🍎", name:"Fruit" },
+  { key:"veg",    icon:"🥕", name:"Vegetables" },
+  { key:"gem",    icon:"💎", name:"Gems" },
+  { key:"bone",   icon:"🦴", name:"Dino Bones" },
+  { key:"teddy",  icon:"🧸", name:"Teddy Bears" },
+  { key:"phone",  icon:"📱", name:"Mobile Phones" },
+  { key:"bug",    icon:"🐛", name:"Bugs" },
+];
+const WORM_LEN = 6;
+const BASE_TICK = 130;                  // ms per worm step
+const BIRD_AVG_MS = 60000;              // avg one bird per minute
+
+// ---------- Canvas ----------
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+let cell = 32, W = COLS*cell, H = ROWS*cell;
+function resize() {
+  const r = canvas.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = Math.round(r.width * dpr);
+  canvas.height = Math.round(r.height * dpr);
+  cell = canvas.width / COLS;
+  W = canvas.width; H = canvas.height;
+  ctx.setTransform(dpr,0,0,dpr,0,0); // not used; we draw in device px
+  ctx.setTransform(1,0,0,1,0,0);
+}
+window.addEventListener("resize", resize);
+
+// ---------- Audio (synth) ----------
+let AC = null;
+function audio(){ if(!AC){ try{ AC = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return AC; }
+function beep(freq, dur=0.12, type="square", vol=0.18, slideTo=null){
+  const ac = audio(); if(!ac) return;
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = type; o.frequency.setValueAtTime(freq, ac.currentTime);
+  if(slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, ac.currentTime+dur);
+  g.gain.setValueAtTime(vol, ac.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime+dur);
+  o.connect(g); g.connect(ac.destination);
+  o.start(); o.stop(ac.currentTime+dur);
+}
+function eatSound(i){ beep(420 + i*40, 0.1, "square", 0.16, 760 + i*40); }
+function transitionSound(){ beep(300,0.18,"sine",0.14,520); }
+function hurtSound(){ beep(220,0.4,"sawtooth",0.25,70); setTimeout(()=>beep(160,0.4,"sawtooth",0.22,50),80); }
+function birdSound(){ beep(900,0.18,"triangle",0.1,1500); }
+function gameOverSound(){ [440,330,262,196].forEach((f,i)=>setTimeout(()=>beep(f,0.3,"triangle",0.2),i*160)); }
+function startSound(){ [392,523,659,784].forEach((f,i)=>setTimeout(()=>beep(f,0.18,"square",0.16),i*90)); }
+
+// ---------- Deterministic RNG per screen ----------
+function hashSeed(x,y){
+  let h = 2166136261 ^ ((x*73856093) ^ (y*19349663));
+  h = Math.imul(h ^ (h>>>15), 2246822507);
+  h = Math.imul(h ^ (h>>>13), 3266489909);
+  return (h ^ (h>>>16))>>>0;
+}
+function mulberry32(a){
+  return function(){
+    a|=0; a = a+0x6D2B79F5|0;
+    let t = Math.imul(a^a>>>15, 1|a);
+    t = t+Math.imul(t^t>>>7, 61|t)^t;
+    return ((t^t>>>14)>>>0)/4294967296;
+  };
+}
+
+// ---------- World state ----------
+const screens = new Map(); // "x,y" -> {items:[{cx,cy,type,bob}], decor:[...]}
+function screenKey(x,y){ return x+","+y; }
+
+function buildScreen(sx, sy){
+  const rng = mulberry32(hashSeed(sx,sy));
+  const items = [];
+  const taken = new Set();
+  const count = 7 + Math.floor(rng()*9); // 7-15 items
+  for(let i=0;i<count;i++){
+    let cx,cy,k,tries=0;
+    do{
+      cx = 1+Math.floor(rng()*(COLS-2));
+      cy = 2+Math.floor(rng()*(ROWS-3));
+      k = cx+","+cy; tries++;
+    } while(taken.has(k) && tries<30);
+    taken.add(k);
+    const type = Math.floor(rng()*TYPES.length);
+    items.push({ cx, cy, type, phase: rng()*Math.PI*2 });
+  }
+  // decorative ground tufts
+  const decor = [];
+  const dn = 10+Math.floor(rng()*14);
+  for(let i=0;i<dn;i++){
+    decor.push({ x: rng(), y: rng(), r: 0.4+rng()*0.8, hue: 120+rng()*40, kind: rng()<0.3?1:0 });
+  }
+  return { items, decor, trail: [] };
+}
+function getScreen(x,y){
+  const k = screenKey(x,y);
+  if(!screens.has(k)) screens.set(k, buildScreen(x,y));
+  return screens.get(k);
+}
+
+// ---------- Game ----------
+let game = null;
+function newGame(){
+  screens.clear(); // fresh world each game (re-seeded identically, but trails/eaten reset)
+  game = {
+    lives: 3,
+    inv: {}, // type index -> count
+    totalCollected: 0,
+    screensVisited: new Set(["0,0"]),
+    screen: {x:0,y:0},
+    worm: [],
+    dir: {x:1,y:0},
+    nextDir: {x:1,y:0},
+    moveAcc: 0,
+    tick: BASE_TICK,
+    birds: [],
+    nextBirdAt: 0,
+    invuln: 0,
+    over: false,
+    elapsed: 0,
+    eatFx: [],
+  };
+  TYPES.forEach((_,i)=> game.inv[i]=0);
+  // place worm in center moving right
+  const hx = Math.floor(COLS/2), hy = Math.floor(ROWS/2);
+  for(let i=0;i<WORM_LEN;i++) game.worm.push({x:hx-i, y:hy, px:hx-i, py:hy});
+  // carve the starting burrow behind the worm
+  const s0 = getScreen(0,0);
+  s0.trail = [];
+  for(let i=game.worm.length-1;i>=0;i--) s0.trail.push({x:game.worm[i].x, y:game.worm[i].y});
+  scheduleBird(true);
+  buildInvHUD();
+  updateHUD();
+}
+
+function scheduleBird(first){
+  // exponential-ish interval, average BIRD_AVG_MS
+  const u = Math.random();
+  const interval = first ? (4000 + Math.random()*6000) : (-Math.log(1-u)*BIRD_AVG_MS);
+  game.nextBirdAt = game.elapsed + Math.max(3000, Math.min(interval, BIRD_AVG_MS*2.5));
+}
+function spawnBird(){
+  const horizontal = Math.random()<0.5;
+  const speed = (0.3+Math.random()*0.25); // cells per 100ms (~2x slower than before)
+  const M = 3.5;                           // off-screen margin for the big bird
+  let b;
+  if(horizontal){
+    const dir = Math.random()<0.5?1:-1;
+    const cy = 1 + Math.random()*(ROWS-2);
+    b = { x: dir>0?-M:COLS+M, y: cy, vx: dir*speed, vy:0, flap:0, dir };
+  } else {
+    const dir = Math.random()<0.5?1:-1;
+    const cx = 1 + Math.random()*(COLS-2);
+    b = { x: cx, y: dir>0?-M:ROWS+M, vx:0, vy: dir*speed, flap:0, dir };
+  }
+  game.birds.push(b);
+  birdSound();
+}
+
+// ---------- HUD ----------
+const invEl = document.getElementById("inv");
+const livesEl = document.getElementById("lives");
+const coordsEl = document.getElementById("coords");
+const toastEl = document.getElementById("toast");
+let slotEls = [];
+function buildInvHUD(){
+  invEl.innerHTML = "";
+  slotEls = TYPES.map((t,i)=>{
+    const d = document.createElement("div");
+    d.className = "slot";
+    d.innerHTML = `<span class="ic">${t.icon}</span><span class="n">0</span>`;
+    invEl.appendChild(d);
+    return d;
+  });
+}
+function updateHUD(){
+  TYPES.forEach((t,i)=>{ slotEls[i].querySelector(".n").textContent = game.inv[i]; });
+  livesEl.textContent = "❤️".repeat(game.lives) + "🖤".repeat(Math.max(0,3-game.lives));
+  coordsEl.textContent = `screen ${game.screen.x},${game.screen.y}`;
+}
+function pulseSlot(i){
+  const s = slotEls[i];
+  s.classList.add("pulse");
+  setTimeout(()=>s.classList.remove("pulse"), 160);
+}
+let toastT = null;
+function toast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  clearTimeout(toastT);
+  toastT = setTimeout(()=>toastEl.classList.remove("show"), 1400);
+}
+
+// ---------- Input ----------
+function setDir(dx,dy){
+  if(!game || game.over) return;
+  // prevent 180 reversal
+  if(dx === -game.dir.x && dy === -game.dir.y) return;
+  game.nextDir = {x:dx,y:dy};
+}
+const keyMap = {
+  ArrowUp:[0,-1], KeyW:[0,-1],
+  ArrowDown:[0,1], KeyS:[0,1],
+  ArrowLeft:[-1,0], KeyA:[-1,0],
+  ArrowRight:[1,0], KeyD:[1,0],
+};
+window.addEventListener("keydown", e=>{
+  const m = keyMap[e.code];
+  if(m){ e.preventDefault(); setDir(m[0],m[1]); audio(); }
+});
+function bindBtn(id, dx, dy){
+  const el = document.getElementById(id);
+  const press = e=>{ e.preventDefault(); setDir(dx,dy); audio(); el.classList.add("on"); };
+  const rel = ()=> el.classList.remove("on");
+  el.addEventListener("touchstart", press, {passive:false});
+  el.addEventListener("mousedown", press);
+  el.addEventListener("touchend", rel); el.addEventListener("mouseup", rel);
+  el.addEventListener("mouseleave", rel); el.addEventListener("touchcancel", rel);
+}
+bindBtn("up",0,-1); bindBtn("down",0,1); bindBtn("left",-1,0); bindBtn("right2",1,0);
+
+// swipe on canvas
+let touchStart=null;
+canvas.addEventListener("touchstart",e=>{ const t=e.touches[0]; touchStart={x:t.clientX,y:t.clientY}; audio(); },{passive:true});
+canvas.addEventListener("touchend",e=>{
+  if(!touchStart) return;
+  const t=e.changedTouches[0];
+  const dx=t.clientX-touchStart.x, dy=t.clientY-touchStart.y;
+  if(Math.abs(dx)<24 && Math.abs(dy)<24){ touchStart=null; return; }
+  if(Math.abs(dx)>Math.abs(dy)) setDir(dx>0?1:-1,0); else setDir(0,dy>0?1:-1);
+  touchStart=null;
+},{passive:true});
+
+// ---------- Update ----------
+function step(dt){
+  if(!game || game.over) return;
+  game.elapsed += dt;
+  if(game.invuln>0) game.invuln = Math.max(0, game.invuln-dt);
+
+  // worm movement
+  game.moveAcc += dt;
+  while(game.moveAcc >= game.tick){
+    game.moveAcc -= game.tick;
+    moveWorm();
+  }
+  // eat fx
+  game.eatFx = game.eatFx.filter(f=>{ f.t+=dt; return f.t<f.life; });
+
+  // birds
+  if(game.elapsed >= game.nextBirdAt){ spawnBird(); scheduleBird(false); }
+  const bs = dt/100;
+  for(const b of game.birds){
+    b.x += b.vx*bs; b.y += b.vy*bs; b.flap += dt*0.02;
+  }
+  game.birds = game.birds.filter(b=> b.x>-4 && b.x<COLS+4 && b.y>-4 && b.y<ROWS+4);
+  checkBirdHit();
+}
+
+function moveWorm(){
+  game.dir = game.nextDir;
+  const head = game.worm[0];
+  let nx = head.x + game.dir.x;
+  let ny = head.y + game.dir.y;
+
+  // screen transition
+  let crossed = null;
+  if(nx < 0){ crossed={x:-1,y:0}; nx = COLS-1; }
+  else if(nx >= COLS){ crossed={x:1,y:0}; nx = 0; }
+  else if(ny < 0){ crossed={x:0,y:-1}; ny = ROWS-1; }
+  else if(ny >= ROWS){ crossed={x:0,y:1}; ny = 0; }
+
+  if(crossed){
+    game.screen.x += crossed.x; game.screen.y += crossed.y;
+    const key = screenKey(game.screen.x, game.screen.y);
+    const fresh = !game.screensVisited.has(key);
+    game.screensVisited.add(key);
+    getScreen(game.screen.x, game.screen.y);
+    transitionSound();
+    if(fresh) toast(`New area  ${game.screen.x},${game.screen.y}  🌍`);
+    // re-lay the worm straight in from the edge; snap (no interpolation) this frame
+    game.worm = [];
+    for(let i=0;i<WORM_LEN;i++){
+      const sx = nx - game.dir.x*i, sy = ny - game.dir.y*i;
+      game.worm.push({ x: sx, y: sy, px: sx, py: sy });
+    }
+    // continue carving in this screen (or seed a fresh burrow if never visited)
+    const cur = getScreen(game.screen.x, game.screen.y);
+    if(cur.trail.length === 0){
+      for(let i=game.worm.length-1;i>=0;i--) cur.trail.push({x:game.worm[i].x, y:game.worm[i].y});
+    } else {
+      cur.trail.push({x:nx, y:ny});
+    }
+    updateHUD();
+    eat(nx,ny);
+    return;
+  }
+
+  // follow-the-leader: remember each segment's current cell, then each body
+  // segment steps into the cell the one ahead of it just left (smoothly tweened in render)
+  for(const seg of game.worm){ seg.px = seg.x; seg.py = seg.y; }
+  for(let i=game.worm.length-1;i>0;i--){
+    game.worm[i].x = game.worm[i-1].px;
+    game.worm[i].y = game.worm[i-1].py;
+  }
+  game.worm[0].x = nx; game.worm[0].y = ny;
+  // carve the tunnel: record the head's new cell
+  const scr = getScreen(game.screen.x, game.screen.y);
+  scr.trail.push({x:nx, y:ny});
+  if(scr.trail.length > 1800) scr.trail.shift();
+  eat(nx,ny);
+}
+
+function eat(cx,cy){
+  const scr = getScreen(game.screen.x, game.screen.y);
+  for(let i=0;i<scr.items.length;i++){
+    const it = scr.items[i];
+    if(it.cx===cx && it.cy===cy){
+      game.inv[it.type]++;
+      game.totalCollected++;
+      eatSound(it.type);
+      pulseSlot(it.type);
+      game.eatFx.push({ cx, cy, type: it.type, t:0, life:520 });
+      scr.items.splice(i,1);
+      updateHUD();
+      break;
+    }
+  }
+}
+
+function checkBirdHit(){
+  if(game.invuln>0) return;
+  const hitR = 1.6;          // big bird -> generous strike radius (in cells)
+  for(const b of game.birds){
+    for(const seg of game.worm){
+      const dx = seg.x - b.x, dy = seg.y - b.y;
+      if(dx*dx + dy*dy <= hitR*hitR){
+        loseLife();
+        return;
+      }
+    }
+  }
+}
+function loseLife(){
+  game.lives--;
+  game.invuln = 1800;
+  hurtSound();
+  flash();
+  updateHUD();
+  if(game.lives<=0){ endGame(); }
+  else toast("Ouch! 🐦  -1 life");
+}
+
+// ---------- Render ----------
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  const scr = getScreen(game.screen.x, game.screen.y);
+  ctx.drawImage(getDirt(game.screen.x, game.screen.y), 0, 0);
+  drawTunnel(scr);
+  drawItems(scr);
+  drawEatFx();
+  drawWorm();
+  drawBirds();
+}
+
+// ---- Dirt texture, baked once per screen (re-baked on resize) ----
+const dirtCache = new Map();
+let dirtSizeKey = "";
+function getDirt(sx, sy){
+  const sizeKey = W + "x" + H;
+  if(dirtSizeKey !== sizeKey){ dirtCache.clear(); dirtSizeKey = sizeKey; }
+  const key = sx + "," + sy;
+  if(dirtCache.has(key)) return dirtCache.get(key);
+
+  const c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  const g = c.getContext("2d");
+  const rng = mulberry32((hashSeed(sx,sy) ^ 0x9e3779b9) >>> 0);
+  const sc = cell/32;                       // scale grain sizes to cell size
+  const hue = 22 + rng()*10;                // earthy brown
+
+  // base vertical gradient — lighter near top, deeper/darker toward bottom
+  const grd = g.createLinearGradient(0,0,0,H);
+  grd.addColorStop(0, `hsl(${hue+5},36%,25%)`);
+  grd.addColorStop(1, `hsl(${hue-3},44%,14%)`);
+  g.fillStyle = grd; g.fillRect(0,0,W,H);
+
+  // large soft tonal blotches (patches of damp / dry earth)
+  for(let i=0;i<26;i++){
+    const x=rng()*W, y=rng()*H, r=(0.10+rng()*0.26)*W;
+    const l=12+rng()*16, h=hue-5+rng()*14, a=0.10+rng()*0.13;
+    const rg=g.createRadialGradient(x,y,0,x,y,r);
+    rg.addColorStop(0,`hsla(${h},42%,${l}%,${a})`);
+    rg.addColorStop(1,`hsla(${h},42%,${l}%,0)`);
+    g.fillStyle=rg; g.fillRect(0,0,W,H);
+  }
+
+  // fine speckled grains — the dirt texture
+  const grains = Math.floor(W*H/850);
+  for(let i=0;i<grains;i++){
+    const x=rng()*W, y=rng()*H;
+    const s=(0.5+rng()*1.7)*sc;
+    const l=8+rng()*36, h=hue-8+rng()*22, sat=28+rng()*32;
+    g.fillStyle=`hsla(${h},${sat}%,${l}%,${0.22+rng()*0.5})`;
+    g.beginPath(); g.arc(x,y,s,0,7); g.fill();
+  }
+
+  // scattered pebbles with little highlights & shadows
+  for(let i=0;i<28;i++){
+    const x=rng()*W, y=rng()*H, r=(2+rng()*4)*sc;
+    g.fillStyle="rgba(0,0,0,0.25)";
+    g.beginPath(); g.ellipse(x+r*0.3, y+r*0.4, r, r*0.8, 0,0,7); g.fill();
+    const pl=42+rng()*28;
+    const pr=g.createRadialGradient(x-r*0.35,y-r*0.35,r*0.1,x,y,r);
+    pr.addColorStop(0,`hsl(32,14%,${pl}%)`);
+    pr.addColorStop(1,`hsl(28,20%,${pl-26}%)`);
+    g.fillStyle=pr; g.beginPath(); g.arc(x,y,r,0,7); g.fill();
+  }
+
+  // depth vignette
+  const vg=g.createRadialGradient(W/2,H*0.4,Math.min(W,H)*0.18,W/2,H/2,Math.max(W,H)*0.78);
+  vg.addColorStop(0,"rgba(0,0,0,0)");
+  vg.addColorStop(1,"rgba(0,0,0,0.42)");
+  g.fillStyle=vg; g.fillRect(0,0,W,H);
+
+  dirtCache.set(key, c);
+  return c;
+}
+
+// ---- Tunnel the worm has carved through the dirt ----
+function tunnelPath(pts){
+  if(pts.length === 1){ ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y); ctx.lineTo(pts[0].x,pts[0].y); ctx.stroke(); return; }
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for(let i=1;i<pts.length-1;i++){
+    const mx=(pts[i].x+pts[i+1].x)/2, my=(pts[i].y+pts[i+1].y)/2;
+    ctx.quadraticCurveTo(pts[i].x, pts[i].y, mx, my);
+  }
+  ctx.lineTo(pts[pts.length-1].x, pts[pts.length-1].y);
+  ctx.stroke();
+}
+function drawTunnel(scr){
+  const tr = scr.trail;
+  if(!tr || !tr.length) return;
+  const pts = tr.map(p=>({x:p.x*cell+cell/2, y:p.y*cell+cell/2}));
+  // extend tunnel to the worm's interpolated head so no undug dirt shows beneath it
+  const t = Math.max(0, Math.min(1, game.moveAcc/game.tick));
+  const h = game.worm[0];
+  pts.push({x: lerp(h.px,h.x,t)*cell+cell/2, y: lerp(h.py,h.y,t)*cell+cell/2});
+
+  const w = cell*0.95;
+  ctx.lineJoin = "round"; ctx.lineCap = "round";
+
+  // 1) soft contact shadow / ambient occlusion around the trench
+  ctx.save();
+  ctx.shadowColor = "rgba(0,0,0,0.55)";
+  ctx.shadowBlur = cell*0.55;
+  ctx.shadowOffsetY = cell*0.06;
+  ctx.strokeStyle = "rgba(15,9,5,0.95)";
+  ctx.lineWidth = w*1.02;
+  tunnelPath(pts);
+  ctx.restore();
+
+  // 2) dark trench walls
+  ctx.strokeStyle = "hsl(22,46%,7%)";
+  ctx.lineWidth = w;
+  tunnelPath(pts);
+
+  // 3) tunnel floor — recessed earth, darker than the surface dirt
+  ctx.strokeStyle = "hsl(24,40%,13%)";
+  ctx.lineWidth = w*0.72;
+  tunnelPath(pts);
+
+  // 4) ambient bounce on the floor centre (soft concave sheen)
+  ctx.strokeStyle = "hsla(30,34%,24%,0.55)";
+  ctx.lineWidth = w*0.42;
+  tunnelPath(pts);
+
+  // 5) lit top lip — light catches the upper rim of the trench
+  ctx.save();
+  ctx.translate(0, -w*0.40);
+  ctx.strokeStyle = "hsla(36,42%,46%,0.30)";
+  ctx.lineWidth = Math.max(1.5, cell*0.07);
+  tunnelPath(pts);
+  ctx.restore();
+
+  // 6) deep shadow on the lower lip
+  ctx.save();
+  ctx.translate(0, w*0.40);
+  ctx.strokeStyle = "rgba(0,0,0,0.30)";
+  ctx.lineWidth = Math.max(1.5, cell*0.06);
+  tunnelPath(pts);
+  ctx.restore();
+}
+
+function emoji(ch, x, y, size){
+  ctx.font = `${size}px serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(ch, x, y);
+}
+
+function drawItems(scr){
+  const t = game.elapsed*0.004;
+  for(const it of scr.items){
+    const bob = Math.sin(t + it.phase)*cell*0.12;
+    const x = it.cx*cell + cell/2;
+    const y = it.cy*cell + cell/2 + bob;
+    // glow
+    ctx.save();
+    ctx.shadowColor = "rgba(255,255,255,0.5)";
+    ctx.shadowBlur = cell*0.3;
+    // shadow on ground
+    ctx.restore();
+    ctx.globalAlpha = 0.3;
+    ctx.fillStyle = "#000";
+    ctx.beginPath(); ctx.ellipse(x, it.cy*cell+cell*0.82, cell*0.28, cell*0.1, 0,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 1;
+    emoji(TYPES[it.type].icon, x, y, cell*0.78);
+  }
+}
+
+function drawEatFx(){
+  for(const f of game.eatFx){
+    const p = f.t/f.life;
+    const x = f.cx*cell+cell/2, y = f.cy*cell+cell/2 - p*cell*1.2;
+    ctx.globalAlpha = 1-p;
+    // sparkle ring
+    ctx.strokeStyle = "rgba(255,255,255,0.8)";
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(f.cx*cell+cell/2, f.cy*cell+cell/2, p*cell*0.9, 0, Math.PI*2); ctx.stroke();
+    emoji("+1", x, y, cell*0.5);
+    ctx.globalAlpha = 1;
+  }
+}
+
+function lerp(a,b,t){ return a + (b-a)*t; }
+function catmull(p0,p1,p2,p3,t){
+  const t2=t*t, t3=t2*t;
+  return {
+    x: 0.5*((2*p1.x)+(-p0.x+p2.x)*t+(2*p0.x-5*p1.x+4*p2.x-p3.x)*t2+(-p0.x+3*p1.x-3*p2.x+p3.x)*t3),
+    y: 0.5*((2*p1.y)+(-p0.y+p2.y)*t+(2*p0.y-5*p1.y+4*p2.y-p3.y)*t2+(-p0.y+3*p1.y-3*p2.y+p3.y)*t3)
+  };
+}
+
+function drawWorm(){
+  const blink = game.invuln>0 && Math.floor(game.elapsed/120)%2===0;
+  if(blink) ctx.globalAlpha = 0.45;
+
+  // tween factor through the current grid step -> smooth gliding motion
+  const t = Math.max(0, Math.min(1, game.moveAcc/game.tick));
+  // interpolated segment centers in device pixels, head (0) -> tail
+  const centers = game.worm.map(seg=>({
+    x: lerp(seg.px, seg.x, t)*cell + cell/2,
+    y: lerp(seg.py, seg.y, t)*cell + cell/2
+  }));
+
+  // dense, smooth spine through the centers
+  const PER = 7;
+  const PAD = [centers[0], ...centers, centers[centers.length-1]];
+  const pts = [];
+  for(let i=1;i<PAD.length-2;i++){
+    for(let s=0;s<PER;s++) pts.push(catmull(PAD[i-1],PAD[i],PAD[i+1],PAD[i+2], s/PER));
+  }
+  pts.push(centers[centers.length-1]);
+  const n = pts.length;
+
+  const rHead = cell*0.5, rTail = cell*0.22;
+  const amp = cell*0.10;
+  for(let i=0;i<n;i++){
+    const p = pts[i];
+    const a = i/(n-1);
+    const prev = pts[Math.max(0,i-1)], next = pts[Math.min(n-1,i+1)];
+    let tx = next.x-prev.x, ty = next.y-prev.y;
+    const len = Math.hypot(tx,ty)||1; tx/=len; ty/=len;
+    // gentle undulation, faded out near the head so steering stays crisp
+    const off = Math.sin(game.elapsed*0.008 + a*7)*amp*Math.min(1, a*2.2);
+    p.wx = p.x + (-ty)*off;
+    p.wy = p.y + ( tx)*off;
+    p.r  = lerp(rHead, rTail, a);
+  }
+
+  // 1) dark outline silhouette
+  ctx.fillStyle = "rgba(4,46,20,0.9)";
+  const olw = Math.max(2, cell*0.07);
+  for(let i=n-1;i>=0;i--){ const p=pts[i]; ctx.beginPath(); ctx.arc(p.wx,p.wy,p.r+olw,0,Math.PI*2); ctx.fill(); }
+  // 2) body fill (overlapping discs read as one continuous tube)
+  for(let i=n-1;i>=0;i--){
+    const p=pts[i], a=i/(n-1);
+    ctx.fillStyle = `hsl(${138+a*8},68%,${52-a*12}%)`;
+    ctx.beginPath(); ctx.arc(p.wx,p.wy,p.r,0,Math.PI*2); ctx.fill();
+  }
+  // 3) glossy top-lit sheen (consistent light from above -> continuous band)
+  for(let i=n-1;i>=0;i--){
+    const p=pts[i];
+    ctx.fillStyle = "rgba(200,255,216,0.16)";
+    ctx.beginPath(); ctx.arc(p.wx, p.wy - p.r*0.42, p.r*0.5,0,Math.PI*2); ctx.fill();
+  }
+  // 4) faint ridges to suggest segments
+  ctx.fillStyle = "rgba(4,46,20,0.16)";
+  for(let i=1;i<centers.length;i++){
+    const p = pts[Math.min(n-1, i*PER)];
+    if(p){ ctx.beginPath(); ctx.arc(p.wx, p.wy, p.r*0.92, 0, Math.PI*2); ctx.fill(); }
+  }
+
+  // head features oriented to travel direction
+  const h = pts[0], rad = h.r, hx = h.wx, hy = h.wy;
+  const dx = game.dir.x, dy = game.dir.y;
+  const px = -dy, py = dx; // perpendicular to heading
+  for(const s of [-1,1]){
+    const eyeX = hx + px*rad*0.42*s + dx*rad*0.2;
+    const eyeY = hy + py*rad*0.42*s + dy*rad*0.2;
+    ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(eyeX, eyeY, rad*0.26,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle="#06210f"; ctx.beginPath(); ctx.arc(eyeX+dx*rad*0.1, eyeY+dy*rad*0.1, rad*0.13,0,Math.PI*2); ctx.fill();
+  }
+  ctx.strokeStyle="hsl(140,55%,38%)"; ctx.lineWidth=Math.max(2,cell*0.05);
+  for(const s of [-1,1]){
+    const baseX = hx + px*rad*0.35*s, baseY = hy + py*rad*0.35*s;
+    const tipX = baseX + dx*rad*0.75 + px*rad*0.3*s;
+    const tipY = baseY + dy*rad*0.75 + py*rad*0.3*s;
+    ctx.beginPath(); ctx.moveTo(baseX,baseY); ctx.lineTo(tipX,tipY); ctx.stroke();
+    ctx.fillStyle="#ffd54a"; ctx.beginPath(); ctx.arc(tipX,tipY,rad*0.13,0,Math.PI*2); ctx.fill();
+  }
+
+  ctx.globalAlpha = 1;
+}
+
+function drawBirds(){
+  const size = cell*4.25;             // ~5x bigger than before
+  for(const b of game.birds){
+    const x = b.x*cell+cell/2, y = b.y*cell+cell/2;
+    const flap = Math.sin(b.flap)*0.5;
+    ctx.save();
+    ctx.translate(x,y);
+    // big moving shadow on the ground below
+    ctx.globalAlpha = 0.22; ctx.fillStyle="#000";
+    ctx.beginPath(); ctx.ellipse(0, size*0.55, size*0.42, size*0.12,0,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 1;
+    // body, facing travel direction, with a gentle wing-flap squash
+    if(b.vx<0) ctx.scale(-1,1);
+    ctx.scale(1, 1 - flap*0.12);
+    emoji("🐦", 0, 0, size);
+    ctx.restore();
+  }
+}
+
+// ---------- FX ----------
+const flashEl = document.getElementById("flash");
+function flash(){ flashEl.style.opacity="0.55"; setTimeout(()=>flashEl.style.opacity="0",120); }
+
+// ---------- Loop ----------
+let last = 0, raf = null, running=false;
+function loop(ts){
+  if(!last) last = ts;
+  let dt = ts-last; last = ts;
+  if(dt>100) dt=100; // clamp after tab switch
+  if(running){ step(dt); draw(); }
+  raf = requestAnimationFrame(loop);
+}
+
+// ---------- Screens / overlays ----------
+const startOv = document.getElementById("start");
+const goOv = document.getElementById("gameOver");
+const goStats = document.getElementById("goStats");
+
+function startGame(){
+  audio(); startSound();
+  resize();
+  newGame();
+  startOv.classList.add("hidden");
+  goOv.classList.add("hidden");
+  running = true;
+  last = 0;
+  if(!raf) raf = requestAnimationFrame(loop);
+}
+function endGame(){
+  game.over = true;
+  running = false;
+  gameOverSound();
+  const lines = TYPES.filter((_,i)=>game.inv[i]>0)
+    .map(t=>`${t.icon} ${game.inv[TYPES.indexOf(t)]}`).join("   ");
+  goStats.innerHTML =
+    `<div class="stat">You collected <b>${game.totalCollected}</b> things across <b>${game.screensVisited.size}</b> areas.</div>`+
+    `<div class="stat" style="margin-top:10px;font-size:1.4em">${lines||"nothing 😢"}</div>`;
+  goOv.classList.remove("hidden");
+}
+
+document.getElementById("startBtn").addEventListener("click", startGame);
+document.getElementById("retryBtn").addEventListener("click", startGame);
+
+// fullscreen
+const fsBtn = document.getElementById("fsBtn");
+fsBtn.addEventListener("click", ()=>{
+  const el = document.documentElement;
+  if(!document.fullscreenElement){
+    (el.requestFullscreen||el.webkitRequestFullscreen||function(){}).call(el);
+  } else {
+    (document.exitFullscreen||document.webkitExitFullscreen||function(){}).call(document);
+  }
+});
+document.addEventListener("fullscreenchange", ()=>{
+  fsBtn.textContent = document.fullscreenElement ? "⛶ Exit" : "⛶ Fullscreen";
+  setTimeout(resize, 100);
+});
+
+// init
+resize();
+// idle preview render
+window.addEventListener("load", resize);
+})();
+</script>
+
+<script>window.ARCADE_CONTROLS={disableTouch:true};</script>
+<script src="/arcade/controls.js" defer></script>
+</body>
+</html>

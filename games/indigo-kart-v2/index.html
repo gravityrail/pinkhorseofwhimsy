@@ -9,15 +9,5 @@
   <body>
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
-    <!-- Pink Horse Arcade universal controls (gamepad). The game has its own
-         touch UI, so the on-screen overlay is disabled. Injected at runtime so
-         the root-absolute path survives Vite's base rewriting. -->
-    <script type="module">
-      window.ARCADE_CONTROLS = { disableTouch: true };
-      const s = document.createElement('script');
-      s.src = '/arcade/controls.js';
-      s.defer = true;
-      document.body.appendChild(s);
-    </script>
   </body>
 </html>

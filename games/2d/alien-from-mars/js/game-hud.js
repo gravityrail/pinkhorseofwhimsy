@@ -16,7 +16,10 @@ function drawBitmap(ctx, rows, x, y, color, s) {
       if (rows[r][c] === '#') ctx.fillRect(x + c * s, y + r * s, s, s);
 }
 
-const MUT_ICON = { steak: 'S', drumstick: 'D', cloudsheep: 'C', karatepig: 'K' };
+const MUT_ICON = {
+  steak: 'S', drumstick: 'D', cloudsheep: 'C', karatepig: 'K',
+  disco: 'O', tornado: 'T', mecha: 'M',
+};
 
 export function drawHUD(ctx) {
   // hearts top-left
@@ -31,7 +34,12 @@ export function drawHUD(ctx) {
   if (G.combo > 1 && G.comboTimer > 0) {
     const ct = '×' + G.combo;
     const col = G.combo >= 6 ? PAL.fire1 : G.combo >= 4 ? PAL.fire2 : PAL.beam;
-    drawTextShadow(ctx, ct, K.W / 2 - textWidth(ct, 2) / 2, 14, 2, col);
+    const pulse = G.combo >= 4 && ((G.frame >> 2) & 1) ? 2 : (G.combo >= 6 ? 2 : 1);
+    drawTextShadow(ctx, ct, K.W / 2 - textWidth(ct, pulse) / 2, 14, pulse, col);
+    if (G.combo >= 4) {
+      const tag = G.combo >= 8 ? 'MAX CHAOS!' : G.combo >= 6 ? 'ON FIRE!' : 'COMBO!';
+      drawTextShadow(ctx, tag, K.W / 2 - textWidth(tag, 1) / 2, 28, 1, col);
+    }
   }
   // wanted stars top-right
   const label = 'WANTED';
@@ -41,12 +49,29 @@ export function drawHUD(ctx) {
     drawBitmap(ctx, STAR, x, 13, PAL.outline, 1);
     drawBitmap(ctx, STAR, x, 12, i < G.wanted ? PAL.horizon : PAL.metal4, 1);
   }
-  // jet warning arrow
+  // threat warning arrow
   if (G.wantArrow > 0 && ((G.frame >> 2) & 1)) {
     const side = G.wantArrowSide || 1;
     const ax = side < 0 ? 6 : K.W - 12;
     drawBitmap(ctx, side < 0 ? ['..#', '.##', '###', '.##', '..#'] : ['#..', '##.', '###', '##.', '#..'], ax, K.H / 2 - 6, PAL.red, 2);
-    drawTextCentered(ctx, 'JET', K.W / 2, K.H / 2 - 40, 1, PAL.red, PAL.outline);
+    const wl = G.wantArrowLabel || 'JET';
+    drawTextCentered(ctx, wl, K.W / 2, K.H / 2 - 40, 1, PAL.red, PAL.outline);
+  }
+  // mission ticker (under score)
+  if (G.mission) {
+    const m = G.mission;
+    const done = m.done;
+    const txt = done
+      ? 'DONE! +' + m.reward
+      : m.text + '  ' + m.have + '/' + m.need;
+    const tw = textWidth(txt, 1);
+    const bx = Math.round(K.W / 2 - tw / 2) - 4;
+    const by = 36;
+    ctx.fillStyle = PAL.outline;
+    ctx.fillRect(bx - 1, by - 1, tw + 10, 11);
+    ctx.fillStyle = done ? PAL.dusk2 : PAL.dusk1;
+    ctx.fillRect(bx, by, tw + 8, 9);
+    drawText(ctx, txt, bx + 4, by + 1, 1, done ? PAL.horizon : PAL.beam);
   }
   // mutant roster chips (bottom)
   const n = G.mutants.length;
@@ -58,12 +83,17 @@ export function drawHUD(ctx) {
     const eng = mu.stage >= K.MUTANT_MAX_STAGE;
     const pulse = eng && ((G.frame >> 2) & 1);
     ctx.fillStyle = PAL.outline; ctx.fillRect(bx, by, cw - 2, 10);
-    ctx.fillStyle = pulse ? PAL.fire3 : PAL.dusk1; ctx.fillRect(bx + 1, by + 1, cw - 4, 8);
-    drawText(ctx, MUT_ICON[mu.kind] || '?', bx + 2, by + 2, 1, pulse ? PAL.fire1 : PAL.ui);
+    ctx.fillStyle = pulse ? PAL.fire3 : (mu.pink ? PAL.pinkshade : PAL.dusk1);
+    ctx.fillRect(bx + 1, by + 1, cw - 4, 8);
+    drawText(ctx, MUT_ICON[mu.kind] || '?', bx + 2, by + 2, 1, pulse ? PAL.fire1 : (mu.pink ? PAL.pinkskin : PAL.ui));
     // size pips
-    for (let s = 0; s < mu.stage; s++) { ctx.fillStyle = s >= 4 ? PAL.fire2 : PAL.beam; ctx.fillRect(bx + 8 + s * 2, by + 6, 1, 2); }
+    for (let s = 0; s < mu.stage; s++) {
+      ctx.fillStyle = s >= 4 ? PAL.fire2 : PAL.beam;
+      ctx.fillRect(bx + 8 + s * 2, by + 6, 1, 2);
+    }
   }
   if (G.calm) drawText(ctx, 'CALM', 6, K.H - 12, 1, PAL.glow);
+  if (G.pinkHorseFound) drawText(ctx, 'PONY', 6, K.H - 22, 1, PAL.pinkskin);
 }
 
 // ---- title ---------------------------------------------------------------
@@ -101,11 +131,14 @@ export function drawTitle(ctx, t, reg) {
 export function drawGameOver(ctx) {
   ctx.fillStyle = 'rgba(11,8,23,0.72)'; ctx.fillRect(0, 0, K.W, K.H);
   drawTextCentered(ctx, 'GAME OVER', K.W / 2, 40, 4, PAL.red, PAL.outline);
-  drawTextCentered(ctx, 'YOUR CHAOS: ' + G.score, K.W / 2, 96, 2, PAL.fire1, PAL.outline);
-  drawTextCentered(ctx, 'BEST: ' + G.best, K.W / 2, 118, 1, PAL.ui, PAL.outline);
-  drawTextCentered(ctx, 'MUTANTS CREATED: ' + G.mutantsCreated, K.W / 2, 134, 1, PAL.beam, PAL.outline);
+  drawTextCentered(ctx, 'YOUR CHAOS: ' + G.score, K.W / 2, 88, 2, PAL.fire1, PAL.outline);
+  drawTextCentered(ctx, 'BEST: ' + G.best, K.W / 2, 110, 1, PAL.ui, PAL.outline);
+  drawTextCentered(ctx, 'MUTANTS CREATED: ' + G.mutantsCreated, K.W / 2, 126, 1, PAL.beam, PAL.outline);
   const dist = Math.max(0, Math.round(G.distance));
-  drawTextCentered(ctx, 'DISTANCE: ' + dist + ' M', K.W / 2, 148, 1, PAL.cloud2, PAL.outline);
+  drawTextCentered(ctx, 'DISTANCE: ' + dist + ' M', K.W / 2, 140, 1, PAL.cloud2, PAL.outline);
+  drawTextCentered(ctx, 'MISSIONS: ' + G.missionsDone, K.W / 2, 154, 1, PAL.horizon, PAL.outline);
+  if (G.pinkHorseFound)
+    drawTextCentered(ctx, 'PINK HORSE FOUND!', K.W / 2, 170, 1, PAL.pinkskin, PAL.outline);
   if ((G.frame >> 4) & 1)
     drawTextCentered(ctx, 'ANY KEY / TAP TO PLAY AGAIN', K.W / 2, 200, 1, PAL.horizon, PAL.outline);
 }
@@ -117,7 +150,6 @@ export function drawSpriteGrid(ctx, reg, t, scroll) {
   const names = Object.keys(reg);
   const cell = 56, cols = Math.floor((K.W - 8) / cell);
   const zoom = 3;
-  let ix = 4, iy = 16 - scroll;
   for (let i = 0; i < names.length; i++) {
     const col = i % cols, row = Math.floor(i / cols);
     const cxp = 4 + col * cell + cell / 2;

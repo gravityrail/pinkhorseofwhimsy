@@ -455,6 +455,228 @@ function karatepig(f, chop) {
 }
 
 // ---------------------------------------------------------------------------
+// NEW ANIMALS — goat, duck, horse (+ rare pink horse)
+// ---------------------------------------------------------------------------
+
+function goat(f) {
+  const w = 18, h = 15;
+  return frame(w, h, (x) => {
+    const bob = f ? 1 : 0;
+    legs4(x, [4, 7, 11, 14], 9 + bob, 15, f, PAL.wool, PAL.outline);
+    // body
+    disc(x, 9, 7 + bob, 7, 3.8, PAL.wool);
+    // beard
+    px(x, 16, 10 + bob, PAL.wool); px(x, 16, 11 + bob, PAL.wool);
+    // head
+    disc(x, 15, 6 + bob, 3, 2.8, PAL.wool);
+    // curved horns
+    px(x, 13, 2 + bob, PAL.bone); px(x, 12, 1 + bob, PAL.bone); px(x, 12, 2 + bob, PAL.bone);
+    px(x, 16, 2 + bob, PAL.bone); px(x, 17, 1 + bob, PAL.bone); px(x, 17, 2 + bob, PAL.bone);
+    // snout
+    rect(x, 16, 7 + bob, 2, 2, PAL.pinkshade);
+  }, (x) => {
+    const bob = f ? 1 : 0;
+    eye2(x, 15, 5 + bob);
+    px(x, 16, 8 + bob, PAL.outline);
+    // wool tuft
+    px(x, 6, 4 + bob, PAL.cloud1); px(x, 10, 4 + bob, PAL.cloud1);
+  }, PAL.cloud1);
+}
+
+function duck(f) {
+  const w = 14, h = 12;
+  return frame(w, h, (x) => {
+    const bob = f ? 1 : 0;
+    // webbed feet
+    const lx = f ? [4, 8] : [5, 7];
+    rect(x, lx[0], 9, 1, 3, PAL.fire2);
+    rect(x, lx[1], 9, 1, 3, PAL.fire2);
+    px(x, lx[0] - 1, 11, PAL.fire2); px(x, lx[0] + 1, 11, PAL.fire2);
+    px(x, lx[1] - 1, 11, PAL.fire2); px(x, lx[1] + 1, 11, PAL.fire2);
+    // body
+    disc(x, 6, 6 + bob, 5, 3.5, PAL.white);
+    // tail
+    rect(x, 1, 5 + bob, 2, 2, PAL.white);
+    // head
+    disc(x, 11, 4 + bob, 2.6, 2.4, PAL.white);
+    // orange bill
+    rect(x, 12, 5 + bob, 2, 2, PAL.fire2);
+  }, (x) => {
+    const bob = f ? 1 : 0;
+    eye2(x, 11, 3 + bob);
+    // wing
+    line(x, 4, 6 + bob, 8, 7 + bob, PAL.wool);
+    // bill tip
+    px(x, 13, 6 + bob, PAL.fire3);
+  }, PAL.fat);
+}
+
+function horse(f, pink) {
+  const w = 26, h = 18;
+  const hide = pink ? PAL.pinkskin : PAL.dirt1;
+  const shade = pink ? PAL.pinkshade : PAL.dirt2;
+  const mane = pink ? PAL.horizon : PAL.dirt3;
+  return frame(w, h, (x) => {
+    const bob = f ? 1 : 0;
+    legs4(x, [6, 10, 16, 20], 11 + bob, 18, f, hide, PAL.outline);
+    // body
+    disc(x, 13, 8 + bob, 9, 4.5, hide);
+    // neck
+    rect(x, 19, 3 + bob, 3, 6, hide);
+    // head
+    disc(x, 23, 4 + bob, 3, 2.6, hide);
+    // snout
+    rect(x, 24, 5 + bob, 2, 2, shade);
+    // mane
+    for (let i = 0; i < 4; i++) px(x, 19 + (i % 2), 2 + bob + i, mane);
+    // tail
+    line(x, 4, 7 + bob, 1, 12 + bob, mane);
+  }, (x) => {
+    const bob = f ? 1 : 0;
+    eye2(x, 22, 3 + bob);
+    // nostril
+    px(x, 25, 6 + bob, PAL.outline);
+    // belly shade
+    line(x, 8, 11 + bob, 17, 11 + bob, shade);
+    if (pink) {
+      // sparkle stars
+      px(x, 10, 5 + bob, PAL.star); px(x, 14, 6 + bob, PAL.star);
+      px(x, 12, 4 + bob, PAL.zap1);
+    }
+  }, pink ? PAL.star : PAL.fat);
+}
+
+// DISCO COW — bell-bottom bovine with disco ball and platform boots
+function discoCow(f, boogie) {
+  const w = 28, h = 20;
+  return frame(w, h, (x) => {
+    const bob = f ? 1 : 0;
+    const dance = boogie ? (f ? -1 : 1) : 0;
+    // platform boots
+    rect(x, 5 + dance, 16 + bob, 4, 4, PAL.dusk2);
+    rect(x, 18 - dance, 16 + bob, 4, 4, PAL.dusk2);
+    rect(x, 5 + dance, 18 + bob, 4, 2, PAL.outline);
+    rect(x, 18 - dance, 18 + bob, 4, 2, PAL.outline);
+    // legs in flared pants
+    rect(x, 6 + dance, 11 + bob, 3, 6, PAL.dusk1);
+    rect(x, 19 - dance, 11 + bob, 3, 6, PAL.dusk1);
+    // body in sequin jacket
+    disc(x, 14, 9 + bob, 9, 5, PAL.dusk2);
+    // head
+    disc(x, 23, 7 + bob, 3.5, 3.2, PAL.white);
+    // afro / big hair
+    disc(x, 23, 4 + bob, 4, 3, PAL.dusk1);
+    // horns with glitter
+    rect(x, 21, 2 + bob, 1, 2, PAL.star);
+    rect(x, 25, 2 + bob, 1, 2, PAL.star);
+    // snout
+    rect(x, 25, 8 + bob, 2, 2, PAL.pinkskin);
+    // disco ball floating above
+    disc(x, 10, 3 + bob, 3, 3, PAL.metal1);
+  }, (x) => {
+    const bob = f ? 1 : 0;
+    // sequin sparkles on jacket
+    const sparkCols = [PAL.zap2, PAL.fire1, PAL.beam, PAL.horizon];
+    for (let i = 0; i < 6; i++) {
+      px(x, 8 + (i * 3) % 12, 7 + bob + (i % 3), sparkCols[i % 4]);
+    }
+    // disco ball facets
+    px(x, 9, 2 + bob, PAL.zap1); px(x, 11, 3 + bob, PAL.glow);
+    px(x, 10, 4 + bob, PAL.fire1);
+    // eyes with shades
+    rect(x, 22, 6 + bob, 4, 1, PAL.outline);
+    px(x, 23, 6 + bob, PAL.zap2); px(x, 25, 6 + bob, PAL.zap2);
+    // big smile
+    rect(x, 24, 9 + bob, 3, 1, PAL.outline);
+    if (boogie) {
+      // light rays
+      line(x, 10, 6 + bob, 6, 10 + bob, PAL.zap2);
+      line(x, 10, 6 + bob, 14, 10 + bob, PAL.fire1);
+    }
+  }, PAL.star);
+}
+
+// TORNADO SHEEP — spinning wool funnel with sheep face
+function tornadoSheep(f, spin) {
+  const w = 24, h = 28;
+  return frame(w, h, (x) => {
+    const phase = f ? 1 : 0;
+    // funnel body — stacked ellipses narrowing upward
+    disc(x, 12, 22, 10, 4, PAL.cloud3);
+    disc(x, 12, 18, 8, 4, PAL.cloud2);
+    disc(x, 12, 14, 6, 3.5, PAL.cloud1);
+    disc(x, 12, 10, 4.5, 3, PAL.cloud1);
+    disc(x, 12, 6, 3.5, 3, PAL.wool);
+    // sheep face near top
+    disc(x, 12 + (phase ? 1 : -1), 5, 3, 2.8, PAL.dusk1);
+    // dangling legs
+    for (const lx of [8, 12, 16]) {
+      rect(x, lx + (phase ? 1 : -1), 24, 1, 3, PAL.dusk2);
+    }
+  }, (x) => {
+    const phase = f ? 1 : 0;
+    // swirl lines
+    line(x, 4, 20, 10, 18, PAL.cloud1);
+    line(x, 20, 20, 14, 18, PAL.cloud1);
+    line(x, 6, 14, 11, 12, PAL.zap2);
+    line(x, 18, 14, 13, 12, PAL.zap2);
+    // eyes
+    const ex = 12 + (phase ? 1 : -1);
+    eye2(x, ex - 1, 4);
+    if (spin) {
+      rect(x, 8, 16, 8, 1, PAL.zap1);
+      px(x, 12, 12, PAL.zap1);
+    }
+    // wool tufts
+    px(x, 10, 3, PAL.cloud1); px(x, 14, 3, PAL.cloud1);
+  }, PAL.zap1);
+}
+
+// LASER CHICKEN MECHA — bipedal armored chicken with shoulder cannons
+function laserMecha(f, fire) {
+  const w = 22, h = 26;
+  return frame(w, h, (x) => {
+    const bob = f ? 1 : 0;
+    // mech legs
+    rect(x, 6, 18 + bob, 3, 7, PAL.metal3);
+    rect(x, 13, 18 + bob, 3, 7, PAL.metal3);
+    rect(x, 5, 24 + bob, 5, 2, PAL.metal4);
+    rect(x, 12, 24 + bob, 5, 2, PAL.metal4);
+    // torso armor
+    rect(x, 5, 10 + bob, 12, 9, PAL.metal2);
+    rect(x, 6, 11 + bob, 10, 7, PAL.metal1);
+    // chicken head cockpit
+    disc(x, 11, 6 + bob, 5, 4.5, PAL.white);
+    // comb
+    px(x, 10, 1 + bob, PAL.red); px(x, 11, 1 + bob, PAL.red); px(x, 12, 2 + bob, PAL.red);
+    // beak
+    rect(x, 15, 6 + bob, 3, 2, PAL.fire2);
+    // shoulder cannons
+    rect(x, 1, 10 + bob, 4, 3, PAL.metal4);
+    rect(x, 17, 10 + bob, 4, 3, PAL.metal4);
+    if (fire) {
+      rect(x, 0, 10 + bob, 2, 3, PAL.zap1);
+      rect(x, 20, 10 + bob, 2, 3, PAL.zap1);
+    }
+  }, (x) => {
+    const bob = f ? 1 : 0;
+    // armor panels
+    line(x, 7, 12 + bob, 14, 12 + bob, PAL.metal3);
+    line(x, 7, 15 + bob, 14, 15 + bob, PAL.metal3);
+    // glowing core
+    rect(x, 10, 14 + bob, 2, 2, fire ? PAL.zap1 : PAL.glow);
+    // eyes
+    eye2(x, 9, 5 + bob);
+    eye2(x, 12, 5 + bob);
+    // cannon glow
+    px(x, 2, 11 + bob, fire ? PAL.fire1 : PAL.red);
+    px(x, 19, 11 + bob, fire ? PAL.fire1 : PAL.red);
+    // wing vents
+    px(x, 6, 13 + bob, PAL.metal4); px(x, 15, 13 + bob, PAL.metal4);
+  }, PAL.metal1);
+}
+
+// ---------------------------------------------------------------------------
 // export
 // ---------------------------------------------------------------------------
 export function build() {
@@ -463,6 +685,10 @@ export function build() {
     chicken: { frames: [chicken(0), chicken(1)], fps: 6, ax: 5, ay: 11 },
     sheep: { frames: [sheep(0), sheep(1)], fps: 6, ax: 8, ay: 13 },
     pig: { frames: [pig(0), pig(1)], fps: 6, ax: 8, ay: 12 },
+    goat: { frames: [goat(0), goat(1)], fps: 6, ax: 9, ay: 15 },
+    duck: { frames: [duck(0), duck(1)], fps: 6, ax: 7, ay: 12 },
+    horse: { frames: [horse(0, false), horse(1, false)], fps: 6, ax: 13, ay: 18 },
+    pink_horse: { frames: [horse(0, true), horse(1, true)], fps: 6, ax: 13, ay: 18 },
 
     steak_walk: { frames: [steak(0, false), steak(1, false)], fps: 6, ax: 15, ay: 20 },
     steak_fire: { frames: [steak(0, true), steak(1, true)], fps: 6, ax: 15, ay: 20 },
@@ -475,5 +701,13 @@ export function build() {
 
     karatepig_walk: { frames: [karatepig(0, 0), karatepig(1, 0)], fps: 6, ax: 9, ay: 19 },
     karatepig_chop: { frames: [karatepig(0, 1), karatepig(0, 2)], fps: 8, ax: 9, ay: 19 },
+
+    disco_walk: { frames: [discoCow(0, false), discoCow(1, false)], fps: 8, ax: 14, ay: 20 },
+    disco_boogie: { frames: [discoCow(0, true), discoCow(1, true)], fps: 10, ax: 14, ay: 20 },
+
+    tornado_spin: { frames: [tornadoSheep(0, false), tornadoSheep(1, true)], fps: 10, ax: 12, ay: 28 },
+
+    mecha_walk: { frames: [laserMecha(0, false), laserMecha(1, false)], fps: 6, ax: 11, ay: 26 },
+    mecha_fire: { frames: [laserMecha(0, true), laserMecha(1, true)], fps: 8, ax: 11, ay: 26 },
   };
 }

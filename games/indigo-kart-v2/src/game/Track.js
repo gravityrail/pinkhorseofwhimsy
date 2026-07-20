@@ -1041,6 +1041,102 @@ export class TrackWorld {
     return group;
   }
 
+  makeLollipop() {
+    const group = new THREE.Group();
+    const stick = mesh(new THREE.CylinderGeometry(0.07, 0.09, 3.4, 6), material(0xf5f0e6, { roughness: 0.6 }));
+    stick.position.y = 1.7;
+    group.add(stick);
+    const candyColors = [0xff4f7b, 0x7dffb3, 0xffd166, 0x6ad5ff, 0xff6ad5, 0xff9f1c];
+    const color = candyColors[Math.floor(this.random() * candyColors.length)];
+    const head = mesh(
+      new THREE.SphereGeometry(0.85 + this.random() * 0.35, 14, 12),
+      material(color, { roughness: 0.35, metalness: 0.15, emissive: color, emissiveIntensity: 0.12 }),
+    );
+    head.position.y = 3.5;
+    head.scale.y = 0.55 + this.random() * 0.15;
+    group.add(head);
+    // Swirl stripe ring
+    const swirl = mesh(
+      new THREE.TorusGeometry(0.55, 0.08, 6, 18),
+      material(0xffffff, { roughness: 0.4, emissive: 0xffffff, emissiveIntensity: 0.08 }),
+    );
+    swirl.position.y = 3.5;
+    swirl.rotation.x = Math.PI / 2;
+    group.add(swirl);
+    group.userData.freeRotate = true;
+    return group;
+  }
+
+  makeGumdrop() {
+    const colors = [0xff6ad5, 0x7dffb3, 0xffd166, 0x6ad5ff, 0xff4f7b, 0xc792ff];
+    const color = colors[Math.floor(this.random() * colors.length)];
+    const drop = mesh(
+      new THREE.SphereGeometry(0.9 + this.random() * 0.7, 12, 10),
+      material(color, { roughness: 0.45, metalness: 0.05, emissive: color, emissiveIntensity: 0.1 }),
+    );
+    drop.scale.y = 0.7;
+    drop.position.y = 0.65;
+    const group = new THREE.Group();
+    group.add(drop);
+    // Sugar dust cap
+    const sugar = mesh(new THREE.SphereGeometry(0.35, 8, 6), material(0xffffff, { roughness: 1 }));
+    sugar.position.y = 1.15;
+    sugar.scale.set(1.2, 0.4, 1.2);
+    group.add(sugar);
+    group.userData.freeRotate = true;
+    return group;
+  }
+
+  makeCandyCane() {
+    const group = new THREE.Group();
+    const red = material(0xff3b5c, { roughness: 0.4 });
+    const white = material(0xfff8f0, { roughness: 0.4 });
+    const h = 3.2 + this.random() * 1.4;
+    // Striped pole from stacked discs
+    const segments = 10;
+    for (let i = 0; i < segments; i += 1) {
+      const band = mesh(new THREE.CylinderGeometry(0.18, 0.2, h / segments, 8), i % 2 ? red : white);
+      band.position.y = (i + 0.5) * (h / segments);
+      group.add(band);
+    }
+    // Hook at the top
+    const hook = mesh(new THREE.TorusGeometry(0.55, 0.16, 8, 14, Math.PI), red);
+    hook.position.set(0.45, h, 0);
+    hook.rotation.z = Math.PI / 2;
+    group.add(hook);
+    return group;
+  }
+
+  makeChocolateBar() {
+    const group = new THREE.Group();
+    const wrap = mesh(new THREE.BoxGeometry(1.6, 0.35, 0.95), material(0x6b3a1f, { roughness: 0.7 }));
+    wrap.position.y = 0.2;
+    group.add(wrap);
+    const foil = mesh(new THREE.BoxGeometry(1.65, 0.08, 1.0), material(0xffd166, { metalness: 0.7, roughness: 0.3 }));
+    foil.position.y = 0.42;
+    group.add(foil);
+    group.userData.freeRotate = true;
+    return group;
+  }
+
+  makeCupcake() {
+    const group = new THREE.Group();
+    const liner = mesh(new THREE.CylinderGeometry(0.55, 0.4, 0.7, 10), material(0xfff0f8, { roughness: 0.8 }));
+    liner.position.y = 0.35;
+    group.add(liner);
+    const frosting = mesh(
+      new THREE.SphereGeometry(0.62, 12, 10),
+      material(0xff6ad5, { roughness: 0.55, emissive: 0xff6ad5, emissiveIntensity: 0.08 }),
+    );
+    frosting.position.y = 0.95;
+    frosting.scale.y = 0.7;
+    group.add(frosting);
+    const cherry = mesh(new THREE.SphereGeometry(0.16, 8, 6), material(0xff2d55, { roughness: 0.3 }));
+    cherry.position.y = 1.4;
+    group.add(cherry);
+    return group;
+  }
+
   makeDecorFor(type) {
     const r = this.random();
     if (type === 'palms' || type === 'festival') return this.makePalm();
@@ -1066,6 +1162,18 @@ export class TrackWorld {
                   : r < 0.94 ? this.makeWindmill() : this.makeHayBale();
     }
     if (type === 'space') return r < 0.55 ? this.makeSatellite() : this.makeAsteroid();
+    if (type === 'candy') {
+      return r < 0.28 ? this.makeGumdrop()
+        : r < 0.48 ? this.makeLollipop()
+          : r < 0.62 ? this.makeCandyCane()
+            : r < 0.78 ? this.makeCupcake()
+              : r < 0.9 ? this.makeChocolateBar() : this.makeGumdrop();
+    }
+    if (type === 'lollipops') {
+      return r < 0.55 ? this.makeLollipop()
+        : r < 0.78 ? this.makeCandyCane()
+          : r < 0.9 ? this.makeGumdrop() : this.makeCupcake();
+    }
     return this.makeRock();
   }
 
