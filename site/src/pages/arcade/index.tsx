@@ -183,13 +183,15 @@ function GameCardComponent({ game }: { game: GameCard }) {
               rel="noopener noreferrer"
               style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}
             >
-              {/* Full box art, never cropped — painted titles stay readable */}
+              {/* Covers are authored at consistent 4:3 */}
               <div
                 style={{
                   background: '#0a0a14',
                   borderRadius: '8px',
                   boxShadow: '0 4px 18px rgba(0,0,0,0.25)',
                   lineHeight: 0,
+                  aspectRatio: '4 / 3',
+                  overflow: 'hidden',
                 }}
               >
                 <img
@@ -197,10 +199,10 @@ function GameCardComponent({ game }: { game: GameCard }) {
                   alt={`${game.title} cover art`}
                   style={{
                     width: '100%',
-                    height: 'auto',
+                    height: '100%',
+                    objectFit: 'contain',
+                    objectPosition: 'center',
                     display: 'block',
-                    borderRadius: '8px',
-                    verticalAlign: 'top',
                   }}
                 />
               </div>
@@ -231,6 +233,8 @@ function GameCardComponent({ game }: { game: GameCard }) {
                   borderRadius: '8px',
                   boxShadow: '0 4px 18px rgba(0,0,0,0.25)',
                   lineHeight: 0,
+                  aspectRatio: '4 / 3',
+                  overflow: 'hidden',
                 }}
               >
                 <img
@@ -238,10 +242,10 @@ function GameCardComponent({ game }: { game: GameCard }) {
                   alt={`Screenshot of ${game.title}`}
                   style={{
                     width: '100%',
-                    height: 'auto',
+                    height: '100%',
+                    objectFit: 'contain',
+                    objectPosition: 'center',
                     display: 'block',
-                    borderRadius: '8px',
-                    verticalAlign: 'top',
                   }}
                 />
               </div>
