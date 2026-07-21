@@ -1,7 +1,7 @@
 (function () {
   var T = {
     id: 'rockets',
-    name: 'Rockets & Space',
+    name: 'Space & Rockets',
     emoji: '🚀',
     color: '#f97316',
     questions: [

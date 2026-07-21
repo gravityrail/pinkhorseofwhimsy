@@ -4,11 +4,10 @@
  * Car-trip friendly space facts kids love — complements Rockets & Space.
  */
 (function () {
+  // Consolidated into the 'rockets' topic (renamed "Space & Rockets") so the
+  // topic grid stays a tidy 4x4. Question ids unchanged — VO stays valid.
   var T = {
-    id: 'spaceody',
-    name: 'Space Odyssey',
-    emoji: '🌌',
-    color: '#4f46e5',
+    extend: 'rockets',
     questions: [
       { id: 'spo1', q: "Which planet is famous for its big, beautiful rings?", a: ["Saturn", "Mercury", "Earth", "Pluto's cousin Steve"], correct: 0, fact: "Saturn's rings are mostly ice chunks — a cosmic jewelry collection millions of kilometers wide!" },
       { id: 'spo2', q: "What do we call a giant ball of hot glowing gas in space, like our Sun?", a: ["A star", "A comet", "A sandwich", "A very bright rock"], correct: 0, fact: "Stars fuse hydrogen into helium and shine for billions of years. Our Sun is a medium star — just right for dogs and pizza." },
