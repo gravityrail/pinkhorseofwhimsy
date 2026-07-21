@@ -11,11 +11,80 @@
 
   const TREASURES = W.TREASURES;
   const BIRDS = W.BIRDS;
+  const SPRITES = W.SPRITES;
   const Audio = W.Audio;
   const Particles = W.Particles;
   const biomeAt = W.biomeAt;
   const depthOf = W.depthOf;
   const dailySeed = W.dailySeed;
+
+  // ---------- Sprite atlas ----------
+  const spriteCache = Object.create(null);
+  let spritesReady = false;
+
+  function loadImage(src) {
+    return new Promise(function (resolve) {
+      if (!src) {
+        resolve(null);
+        return;
+      }
+      if (spriteCache[src]) {
+        resolve(spriteCache[src]);
+        return;
+      }
+      const img = new Image();
+      img.onload = function () {
+        spriteCache[src] = img;
+        resolve(img);
+      };
+      img.onerror = function () {
+        console.warn("Worm sprite failed to load:", src);
+        resolve(null);
+      };
+      img.src = src;
+    });
+  }
+
+  function preloadSprites() {
+    const urls = [];
+    TREASURES.forEach(function (t) {
+      if (t.sprite) urls.push(t.sprite);
+    });
+    Object.keys(BIRDS).forEach(function (k) {
+      if (BIRDS[k].sprite) urls.push(BIRDS[k].sprite);
+    });
+    Object.keys(SPRITES).forEach(function (k) {
+      if (SPRITES[k]) urls.push(SPRITES[k]);
+    });
+    return Promise.all(urls.map(loadImage)).then(function () {
+      spritesReady = true;
+    });
+  }
+
+  function getSprite(src) {
+    return src ? spriteCache[src] || null : null;
+  }
+
+  /** Draw a preloaded PNG centered at (x,y) with height `size` (width preserves aspect). */
+  function drawSprite(src, x, y, size) {
+    const img = getSprite(src);
+    if (!img || !img.complete || !img.naturalWidth) return false;
+    const aspect = img.naturalWidth / img.naturalHeight;
+    const h = size;
+    const w = size * aspect;
+    ctx.drawImage(img, x - w / 2, y - h / 2, w, h);
+    return true;
+  }
+
+  function spriteImgTag(src, cls) {
+    return (
+      '<img class="' +
+      (cls || "ic-img") +
+      '" src="' +
+      src +
+      '" alt="" draggable="false" />'
+    );
+  }
 
   // ---------- RNG ----------
   function hashSeed(x, y, salt) {
@@ -411,7 +480,7 @@
       const d = document.createElement("div");
       d.className = "slot" + (t.rare ? " rare hidden-slot" : "");
       d.dataset.idx = i;
-      d.innerHTML = '<span class="ic">' + t.icon + '</span><span class="n">0</span>';
+      d.innerHTML = spriteImgTag(t.sprite, "ic-img") + '<span class="n">0</span>';
       invEl.appendChild(d);
       return d;
     });
@@ -427,7 +496,17 @@
         if (n > 0) el.classList.remove("hidden-slot");
       }
     });
-    livesEl.textContent = "❤️".repeat(game.lives) + "🖤".repeat(Math.max(0, 3 - game.lives));
+    // Lives as heart sprites
+    if (livesEl) {
+      let hearts = "";
+      for (let i = 0; i < 3; i++) {
+        hearts += spriteImgTag(
+          i < game.lives ? SPRITES.heart : SPRITES.heartEmpty,
+          "life-img"
+        );
+      }
+      livesEl.innerHTML = hearts;
+    }
     const b = biomeAt(game.screen.x, game.screen.y);
     coordsEl.textContent = "depth " + depthOf(game.screen.x, game.screen.y) + " · " + game.screen.x + "," + game.screen.y;
     if (biomeEl) {
@@ -436,7 +515,9 @@
       biomeEl.style.color = b.accent;
     }
     if (scoreEl) scoreEl.textContent = String(game.score);
-    if (dailyEl) dailyEl.textContent = "🌱 " + game.dailyLabel;
+    if (dailyEl) {
+      dailyEl.innerHTML = spriteImgTag(SPRITES.sprout, "hud-inline") + " " + game.dailyLabel;
+    }
     if (comboEl) {
       if (game.combo >= 2) {
         comboEl.textContent = "×" + game.combo + " COMBO";
@@ -704,7 +785,7 @@
       transition = { t: 0, life: 420, dir: crossed, biome: biome };
 
       if (newBiome) {
-        toast("🌍 " + biome.name + "!", 2200);
+        toast(biome.name + "!", 2200);
         Audio.milestone();
         game.score += 100;
       } else if (fresh) {
@@ -714,7 +795,7 @@
       const cur = getScreen(game.screen.x, game.screen.y);
       if (cur.secret && !cur.secret.done) {
         setTimeout(function () {
-          if (game && !game.over) toast("🔮 Secret runes! Eat treasures in order", 2400);
+          if (game && !game.over) toast("Secret runes! Eat treasures in order", 2400);
         }, 500);
       }
 
@@ -796,19 +877,19 @@
               game.score += 500 * game.multiplier;
               game.multiplier = Math.min(5, game.multiplier + 0.5);
               Audio.secret();
-              toast("🔮 Rune puzzle solved! ×" + game.multiplier.toFixed(1) + " mult", 2400);
+              toast("Rune puzzle solved! ×" + game.multiplier.toFixed(1) + " mult", 2400);
               particles.burstEat(cx, cy, "rgba(200,160,255,0.95)");
               particles.burstEat(cx, cy, "rgba(255,220,100,0.9)");
             } else {
-              toast("🔮 " + scr.secret.next + "/" + scr.secret.order.length, 1000);
+              toast(scr.secret.next + "/" + scr.secret.order.length, 1000);
             }
           } else {
             // Wrong order — reset puzzle progress but still collect
             scr.secret.next = it.secretIdx === 0 ? 1 : 0;
             if (it.secretIdx === 0) {
-              toast("🔮 Sequence restarted", 1000);
+              toast("Sequence restarted", 1000);
             } else {
-              toast("🔮 Wrong order — watch the runes!", 1400);
+              toast("Wrong order — watch the runes!", 1400);
               scr.secret.next = 0;
             }
           }
@@ -842,12 +923,12 @@
 
   function checkMilestones() {
     const marks = [
-      { n: 10, msg: "🐛 Snacky worm!", grow: 1 },
-      { n: 25, msg: "🐛 Growing strong!", grow: 1 },
-      { n: 50, msg: "🐛 Treasure hog!", grow: 2 },
-      { n: 75, msg: "🐛 Legendary burrower!", grow: 1 },
-      { n: 100, msg: "🐛 HUNDRED! Fabulous!", grow: 2 },
-      { n: 150, msg: "🐛 Mythic tunnel-wyrm!", grow: 1 },
+      { n: 10, msg: "Snacky worm!", grow: 1 },
+      { n: 25, msg: "Growing strong!", grow: 1 },
+      { n: 50, msg: "Treasure hog!", grow: 2 },
+      { n: 75, msg: "Legendary burrower!", grow: 1 },
+      { n: 100, msg: "HUNDRED! Fabulous!", grow: 2 },
+      { n: 150, msg: "Mythic tunnel-wyrm!", grow: 1 },
     ];
     for (let i = 0; i < marks.length; i++) {
       const m = marks[i];
@@ -900,7 +981,7 @@
         d.wake -= dt;
         if (d.wake <= 0) {
           d.asleep = true;
-          toast("🐉 Dragon dozed off again…", 1400);
+          toast("Dragon dozed off again…", 1400);
         }
         continue;
       }
@@ -912,7 +993,7 @@
         // Quiet tip once
         if (!d.warned) {
           d.warned = true;
-          toast("🤫 Shh… sleeping dragon nearby", 1600);
+          toast("Shh… sleeping dragon nearby", 1600);
         }
       }
       if (dx * dx + dy * dy <= 1.1 * 1.1) {
@@ -939,10 +1020,10 @@
       endGame();
     } else {
       const msgs = {
-        bird: "Ouch! Bird strike! 🐦  −1 life",
-        mole: "Bonk! Grumpy mole! 🐹  −1 life",
-        acid: "Sizzle! Acid drip! 🟢  −1 life",
-        dragon: "ROAR! Dragon woke up! 🐉  −1 life",
+        bird: "Ouch! Bird strike!  −1 life",
+        mole: "Bonk! Grumpy mole!  −1 life",
+        acid: "Sizzle! Acid drip!  −1 life",
+        dragon: "ROAR! Dragon woke up!  −1 life",
       };
       toast(msgs[reason] || "Ouch! −1 life", 1600);
     }
@@ -1217,13 +1298,6 @@
     ctx.restore();
   }
 
-  function emoji(ch, x, y, size) {
-    ctx.font = size + "px serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(ch, x, y);
-  }
-
   function drawItems(scr) {
     const t = game.elapsed * 0.004;
     // Secret rune order display
@@ -1245,10 +1319,12 @@
         const done = i < scr.secret.next;
         const x = bx - ((order.length - 1) * cell * 0.7) / 2 + i * cell * 0.7;
         ctx.globalAlpha = done ? 0.35 : 1;
-        emoji(TREASURES[order[i]].icon, x, by, cell * 0.55);
+        drawSprite(TREASURES[order[i]].sprite, x, by, cell * 0.55);
         if (done) {
           ctx.fillStyle = "#5ef38c";
-          ctx.font = cell * 0.35 + "px sans-serif";
+          ctx.font = "bold " + cell * 0.35 + "px sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
           ctx.fillText("✓", x, by);
         }
       }
@@ -1284,11 +1360,11 @@
       ctx.fill();
       ctx.globalAlpha = 1;
 
-      // Soft glow
+      // Soft glow behind sprite
       ctx.save();
       ctx.shadowColor = tdef.rare ? "rgba(255,220,100,0.7)" : "rgba(255,255,255,0.35)";
       ctx.shadowBlur = cell * 0.35;
-      emoji(tdef.icon, x, y, cell * 0.78);
+      drawSprite(tdef.sprite, x, y, cell * 0.78);
       ctx.restore();
 
       if (it.secretIdx != null) {
@@ -1323,7 +1399,7 @@
       ctx.ellipse(x, m.cy * cell + cell * 0.8, cell * 0.35, cell * 0.12, 0, 0, 7);
       ctx.fill();
       ctx.globalAlpha = 1;
-      emoji("🐹", x, y, cell * 0.85);
+      drawSprite(SPRITES.mole, x, y, cell * 0.85);
     }
     // Dragons
     for (let i = 0; i < scr.dragons.length; i++) {
@@ -1339,7 +1415,7 @@
         ctx.fillText("z", x + cell * 0.45, y - cell * 0.5 + snore * 4);
         ctx.fillText("z", x + cell * 0.6, y - cell * 0.75 + snore * 4);
         ctx.globalAlpha = 1;
-        emoji("🐉", x, y, cell * 1.1);
+        drawSprite(SPRITES.dragon, x, y, cell * 1.1);
       } else {
         // Awake — angry glow
         const rg = ctx.createRadialGradient(x, y, 0, x, y, cell * 1.4);
@@ -1349,7 +1425,7 @@
         ctx.beginPath();
         ctx.arc(x, y, cell * 1.4, 0, 7);
         ctx.fill();
-        emoji("🐉", x, y + Math.sin(game.elapsed * 0.02) * 3, cell * 1.2);
+        drawSprite(SPRITES.dragon, x, y + Math.sin(game.elapsed * 0.02) * 3, cell * 1.2);
       }
     }
     // Acid
@@ -1626,7 +1702,7 @@
         ctx.arc(0, 0, size * 0.55, 0, 7);
         ctx.fill();
       }
-      emoji(def.icon, 0, 0, size);
+      drawSprite(def.sprite, 0, 0, size);
       ctx.restore();
     }
   }
@@ -1776,9 +1852,15 @@
       return game.inv[i] > 0;
     })
       .map(function (t) {
-        return t.icon + " " + game.inv[TREASURES.indexOf(t)];
+        return (
+          '<span class="loot-item">' +
+          spriteImgTag(t.sprite, "loot-img") +
+          " " +
+          game.inv[TREASURES.indexOf(t)] +
+          "</span>"
+        );
       })
-      .join("   ");
+      .join(" ");
 
     goStats.innerHTML =
       '<div class="stat">Score <b>' +
@@ -1795,13 +1877,13 @@
       game.maxCombo +
       "</b></div>" +
       (game.secretsSolved
-        ? '<div class="stat">🔮 Secrets solved <b>' + game.secretsSolved + "</b></div>"
+        ? '<div class="stat">Secrets solved <b>' + game.secretsSolved + "</b></div>"
         : "") +
       '<div class="stat biome-path">' +
       biomeNames +
       "</div>" +
-      '<div class="stat loot" style="margin-top:10px;font-size:1.35em">' +
-      (lines || "nothing 😢") +
+      '<div class="stat loot" style="margin-top:10px">' +
+      (lines || "<span class='loot-empty'>nothing this time…</span>") +
       "</div>" +
       '<div class="stat daily-note">Daily seed ' +
       game.dailyLabel +
@@ -1882,7 +1964,7 @@
   resize();
   if (dailyEl) {
     const d = dailySeed();
-    dailyEl.textContent = "🌱 " + d.label;
+    dailyEl.innerHTML = spriteImgTag(SPRITES.sprout, "hud-inline") + " " + d.label;
   }
 
   // Splash integration: hide start until splash done, then show tutorial overlay
@@ -1895,6 +1977,13 @@
   }
 
   startOv.classList.add("hidden");
+  preloadSprites().then(function () {
+    // Re-paint HUD icons once assets are ready
+    if (dailyEl && !game) {
+      const d = dailySeed();
+      dailyEl.innerHTML = spriteImgTag(SPRITES.sprout, "hud-inline") + " " + d.label;
+    }
+  });
   window.addEventListener("arcade-splash-done", revealStart, { once: true });
   // Fallback if splash.js is missing / blocked
   setTimeout(function () {

@@ -3,21 +3,22 @@
   "use strict";
 
   // Base treasures (always available) + rare biome-flavored finds
+  // sprite paths are relative to the game root (…/worm/)
   const TREASURES = [
-    { key: "metal", icon: "🔩", name: "Scrap Metal", pts: 10 },
-    { key: "fruit", icon: "🍎", name: "Fruit", pts: 12 },
-    { key: "veg", icon: "🥕", name: "Vegetables", pts: 10 },
-    { key: "gem", icon: "💎", name: "Gems", pts: 25 },
-    { key: "bone", icon: "🦴", name: "Dino Bones", pts: 18 },
-    { key: "teddy", icon: "🧸", name: "Teddy Bears", pts: 15 },
-    { key: "phone", icon: "📱", name: "Mobile Phones", pts: 14 },
-    { key: "bug", icon: "🐛", name: "Bugs", pts: 8 },
+    { key: "metal", sprite: "assets/treasures/metal.png", name: "Scrap Metal", pts: 10 },
+    { key: "fruit", sprite: "assets/treasures/fruit.png", name: "Fruit", pts: 12 },
+    { key: "veg", sprite: "assets/treasures/veg.png", name: "Vegetables", pts: 10 },
+    { key: "gem", sprite: "assets/treasures/gem.png", name: "Gems", pts: 25 },
+    { key: "bone", sprite: "assets/treasures/bone.png", name: "Dino Bones", pts: 18 },
+    { key: "teddy", sprite: "assets/treasures/teddy.png", name: "Teddy Bears", pts: 15 },
+    { key: "phone", sprite: "assets/treasures/phone.png", name: "Mobile Phones", pts: 14 },
+    { key: "bug", sprite: "assets/treasures/bug.png", name: "Bugs", pts: 8 },
     // New whimsical finds
-    { key: "diamond", icon: "💠", name: "Diamonds", pts: 40, rare: true },
-    { key: "fossil", icon: "🦕", name: "Fossils", pts: 30, rare: true },
-    { key: "gapple", icon: "✨", name: "Golden Apples", pts: 50, rare: true },
-    { key: "helm", icon: "⛑️", name: "Tiny Helmets", pts: 35, rare: true },
-    { key: "radio", icon: "☢️", name: "Radioactive Snacks", pts: 45, rare: true },
+    { key: "diamond", sprite: "assets/treasures/diamond.png", name: "Diamonds", pts: 40, rare: true },
+    { key: "fossil", sprite: "assets/treasures/fossil.png", name: "Fossils", pts: 30, rare: true },
+    { key: "gapple", sprite: "assets/treasures/gapple.png", name: "Golden Apples", pts: 50, rare: true },
+    { key: "helm", sprite: "assets/treasures/helm.png", name: "Tiny Helmets", pts: 35, rare: true },
+    { key: "radio", sprite: "assets/treasures/radio.png", name: "Radioactive Snacks", pts: 45, rare: true },
   ];
 
   const BIOMES = [
@@ -115,7 +116,7 @@
   const BIRDS = {
     sparrow: {
       id: "sparrow",
-      icon: "🐦",
+      sprite: "assets/birds/sparrow.png",
       name: "Sparrow",
       size: 4.0,
       speed: [0.28, 0.48],
@@ -124,7 +125,7 @@
     },
     owl: {
       id: "owl",
-      icon: "🦉",
+      sprite: "assets/birds/owl.png",
       name: "Cave Owl",
       size: 4.6,
       speed: [0.18, 0.32],
@@ -134,7 +135,7 @@
     },
     ptero: {
       id: "ptero",
-      icon: "🦖",
+      sprite: "assets/birds/ptero.png",
       name: "Pterodactyl",
       size: 5.2,
       speed: [0.4, 0.62],
@@ -144,7 +145,7 @@
     },
     drill: {
       id: "drill",
-      icon: "🤖",
+      sprite: "assets/birds/drill.png",
       name: "Drill-Bird",
       size: 4.4,
       speed: [0.22, 0.38],
@@ -152,6 +153,17 @@
       score: 0,
       chase: true,
     },
+  };
+
+  // Shared hazard / UI sprites (paths relative to game root)
+  const SPRITES = {
+    mole: "assets/hazards/mole.png",
+    dragon: "assets/hazards/dragon.png",
+    heart: "assets/ui/heart.png",
+    heartEmpty: "assets/ui/heart-empty.png",
+    sprout: "assets/ui/sprout.png",
+    star: "assets/ui/star.png",
+    wormHead: "assets/ui/worm-head.png",
   };
 
   function depthOf(sx, sy) {
@@ -184,6 +196,7 @@
   W.TREASURES = TREASURES;
   W.BIOMES = BIOMES;
   W.BIRDS = BIRDS;
+  W.SPRITES = SPRITES;
   W.depthOf = depthOf;
   W.biomeAt = biomeAt;
   W.dailySeed = dailySeed;

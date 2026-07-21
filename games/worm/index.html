@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <meta name="description" content="WORM — burrow through dirt, clay, crystal caves, magma tunnels and moon soil. Gobble treasure, dodge birds, solve secret rune rooms. Touch-friendly arcade on Pink Horse of Whimsy." />
 <meta name="theme-color" content="#0b1021" />
-<title>WORM 🐛 — Pink Horse Arcade</title>
+<title>WORM — Pink Horse Arcade</title>
 <style>
   :root {
     --bg: #0b1021;
@@ -71,19 +71,34 @@
     line-height: 1;
     min-width: 2.6em;
   }
-  .slot.rare .ic { filter: drop-shadow(0 0 4px rgba(200,160,255,.8)); }
+  .slot.rare .ic-img { filter: drop-shadow(0 0 4px rgba(200,160,255,.8)); }
   .slot.hidden-slot { display: none; }
-  .slot .ic { font-size: clamp(13px, 2.6vmin, 24px); filter: drop-shadow(0 1px 1px rgba(0,0,0,.6)); }
+  .slot .ic-img {
+    width: clamp(16px, 3vmin, 28px);
+    height: clamp(16px, 3vmin, 28px);
+    object-fit: contain;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,.6));
+    flex-shrink: 0;
+  }
   .slot .n { color: var(--accent2); min-width: 1ch; transition: transform .12s; }
   .slot.pulse .n { transform: scale(1.5); color: #fff; }
 
   #right { display: flex; flex-direction: column; align-items: flex-end; gap: clamp(4px,1vmin,8px); }
-  #lives { font-size: clamp(16px, 3vmin, 30px); letter-spacing: 2px; filter: drop-shadow(0 2px 3px rgba(0,0,0,.6)); }
+  #lives {
+    display: flex; gap: 2px; align-items: center;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,.6));
+  }
+  #lives .life-img {
+    width: clamp(18px, 3.2vmin, 30px);
+    height: clamp(18px, 3.2vmin, 30px);
+    object-fit: contain;
+  }
   #coords, #biomeTag, #scoreBox, #daily {
     background: var(--panel); border-radius: 10px;
     padding: 3px 8px; font-size: clamp(9px,1.7vmin,15px);
     color: var(--accent); font-family: ui-monospace, monospace;
     border: 1px solid rgba(255,255,255,.08);
+    display: inline-flex; align-items: center; gap: 4px;
   }
   #biomeTag {
     color: var(--accent2);
@@ -93,7 +108,42 @@
   }
   #scoreBox { color: #fff; }
   #scoreBox b { color: var(--accent2); }
+  #scoreBox .hud-inline,
+  #daily .hud-inline {
+    width: clamp(12px, 2.2vmin, 18px);
+    height: clamp(12px, 2.2vmin, 18px);
+    object-fit: contain;
+  }
   #daily { opacity: .75; font-size: clamp(8px,1.4vmin,13px); }
+  .title-worm {
+    width: clamp(48px, 12vmin, 100px);
+    height: clamp(48px, 12vmin, 100px);
+    object-fit: contain;
+    vertical-align: middle;
+    filter: drop-shadow(0 4px 12px rgba(94,243,140,.35));
+  }
+  .overlay .icons {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(6px, 1.4vmin, 12px);
+    max-width: 28em;
+  }
+  .overlay .icons img {
+    width: clamp(28px, 5.5vmin, 48px);
+    height: clamp(28px, 5.5vmin, 48px);
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,.4));
+  }
+  .loot-item {
+    display: inline-flex; align-items: center; gap: 4px;
+    margin: 0 6px 4px 0;
+    font-weight: bold;
+  }
+  .loot-img {
+    width: clamp(22px, 4vmin, 34px);
+    height: clamp(22px, 4vmin, 34px);
+    object-fit: contain;
+    vertical-align: middle;
+  }
+  .loot-empty { opacity: .7; font-style: italic; }
 
   .iconBtn {
     pointer-events: auto;
@@ -170,10 +220,10 @@
     text-shadow: 0 0 30px rgba(94,243,140,.4);
     letter-spacing: 6px;
   }
-  .overlay h1 .wig { display:inline-block; animation: wig 1.6s ease-in-out infinite; }
+  .overlay h1 .wig { display:inline-block; animation: wig 1.6s ease-in-out infinite; vertical-align: middle; }
+  .overlay h1 .wig .title-worm { display: block; }
   @keyframes wig { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-8px) rotate(-6deg)} }
   .overlay p { font-size: clamp(13px, 2.5vmin, 20px); max-width: 34em; opacity: .9; line-height: 1.5; }
-  .overlay .icons { font-size: clamp(20px, 4.5vmin, 40px); letter-spacing: 3px; }
   .overlay .tip {
     font-size: clamp(12px, 2.2vmin, 17px);
     opacity: .7;
@@ -247,10 +297,10 @@
           <button class="iconBtn" id="fsBtn" title="Fullscreen" aria-label="Fullscreen">⛶</button>
         </div>
         <div id="lives"></div>
-        <div id="scoreBox">★ <b id="score">0</b></div>
+        <div id="scoreBox"><img class="hud-inline" src="assets/ui/star.png" alt="" draggable="false" /> <b id="score">0</b></div>
         <div id="biomeTag">Soft Dirt</div>
         <div id="coords">depth 0 · 0,0</div>
-        <div id="daily">🌱 —</div>
+        <div id="daily"><img class="hud-inline" src="assets/ui/sprout.png" alt="" draggable="false" /> —</div>
       </div>
     </div>
 
@@ -267,8 +317,17 @@
 
     <!-- Start (shown after splash) -->
     <div class="overlay hidden" id="start">
-      <h1><span class="wig">🐛</span>WORM</h1>
-      <div class="icons">🔩 🍎 💎 💠 🦕 ⛑️ ☢️ 🐉</div>
+      <h1><span class="wig"><img class="title-worm" src="assets/ui/worm-head.png" alt="" draggable="false" /></span>WORM</h1>
+      <div class="icons">
+        <img src="assets/treasures/metal.png" alt="Scrap metal" draggable="false" />
+        <img src="assets/treasures/fruit.png" alt="Fruit" draggable="false" />
+        <img src="assets/treasures/gem.png" alt="Gem" draggable="false" />
+        <img src="assets/treasures/diamond.png" alt="Diamond" draggable="false" />
+        <img src="assets/treasures/fossil.png" alt="Fossil" draggable="false" />
+        <img src="assets/treasures/helm.png" alt="Helmet" draggable="false" />
+        <img src="assets/treasures/radio.png" alt="Snack" draggable="false" />
+        <img src="assets/hazards/dragon.png" alt="Dragon" draggable="false" />
+      </div>
       <p>
         Burrow an endless underground! Gobble treasure through
         <b>dirt</b>, <b>clay</b>, <b>crystal caves</b>, <b>magma</b> &amp; <b>moon soil</b>.
