@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { GameSound } from './sound.js';
 import './style.css';
 
 const canvas = document.getElementById('game');
@@ -48,7 +49,15 @@ const ui = {
   antCount: document.getElementById('ant-count'),
   status: document.getElementById('status'),
   toast: document.getElementById('toast'),
+  sound: document.getElementById('sound-toggle'),
 };
+const sound = new GameSound();
+function updateSoundButton() {
+  ui.sound.textContent = sound.muted ? 'SOUND OFF' : 'SOUND ON';
+  ui.sound.setAttribute('aria-pressed', String(!sound.muted));
+}
+updateSoundButton();
+ui.sound.addEventListener('click', () => { sound.setMuted(!sound.muted); updateSoundButton(); });
 let mode = 'loading';
 let cat = null;
 let flapHinge = null;
@@ -72,6 +81,7 @@ const cameraFocus = new THREE.Vector3();
 const cameraRay = new THREE.Raycaster();
 const cameraObstacles = [];
 const cameraFoliage = [];
+const patioCanopy = [];
 const windMaterials = [];
 let worldTime = 0;
 let catFacing = 0;
@@ -195,14 +205,19 @@ try {
     obj.castShadow = !/Lawn|Grass patch|Terracotta|Warm brick|Drive concrete/i.test(obj.material?.name || '');
     const name = obj.material?.name || '';
     if (/Leaf green|Sunlit leaf|Deep leaf/.test(name)) {
-      obj.material.transparent = true;
-      obj.material.opacity = .84;
-      obj.material.depthWrite = false;
+      obj.material.transparent = false;
+      obj.material.opacity = 1;
+      obj.material.depthWrite = true;
       cameraFoliage.push(obj);
     }
     if (/Grass blades/.test(name)) {
       obj.material.side = THREE.DoubleSide;
       obj.castShadow = false;
+    }
+    if (/Patio canopy roof/.test(name)) {
+      obj.material.transparent = true;
+      obj.material.depthWrite = false;
+      patioCanopy.push(obj);
     }
     if (/Leaf green|Sunlit leaf|Deep leaf|Grass blades/.test(name)) {
       const isGrass = /Grass blades/.test(name);
@@ -227,7 +242,7 @@ try {
       };
       obj.material.needsUpdate = true;
     }
-    if (!/Lawn|Grass patch|Grass blades|Leaf green|Sunlit leaf|Deep leaf|Terracotta brick|Warm brick|Drive concrete|Warm indoor floor/i.test(name)) {
+    if (!/Lawn|Grass patch|Grass blades|Leaf green|Sunlit leaf|Deep leaf|Terracotta brick|Warm brick|Drive concrete|Warm indoor floor|Patio canopy roof/i.test(name)) {
       cameraObstacles.push(obj);
     }
   });
@@ -258,7 +273,9 @@ try {
     scene.add(model);
     const brains = [];
     model.traverse((o) => { if (o.name.startsWith('brain pip')) brains.push(o); });
-    ants.push({ model, brains, x, z, homeX:x, homeZ:z, health:3, awake:true,
+    const legs = [];
+    model.traverse((o) => { if (o.name.startsWith('ant_leg_')) legs.push(o); });
+    ants.push({ model, brains, legs, x, z, homeX:x, homeZ:z, health:3, awake:true,
       phase:rand(i+4)*10, targetX:x, targetZ:z, decision:0, attackCooldown:0,
       hitCooldown:0, fall:0 });
   });
@@ -272,6 +289,7 @@ try {
 
 function startGame() {
   if (mode !== 'title') return;
+  sound.start();
   mode = 'intro';
   introTime = 0;
   cat.visible = true;
@@ -323,7 +341,7 @@ canvas.addEventListener('pointermove', (e) => {
   dragX = e.clientX;
 });
 for (const button of document.querySelectorAll('#touch-controls button')) {
-  const code = button.dataset.key || ({jump:'Space',swipe:'KeyJ',pounce:'KeyK'})[button.dataset.action];
+  const code = button.dataset.key || ({run:'ShiftLeft',jump:'Space',swipe:'KeyJ',pounce:'KeyK'})[button.dataset.action];
   button.addEventListener('pointerdown', (e) => {
     e.preventDefault(); keys.add(code); button.setPointerCapture(e.pointerId);
     if (code === 'Space') tryJump();
@@ -347,6 +365,7 @@ const effects = [];
 function hitAnt(ant) {
   if (!ant.awake || ant.hitCooldown > 0) return;
   ant.health--;
+  sound.hit();
   ant.hitCooldown = .48;
   if (ant.brains[ant.health]) ant.brains[ant.health].visible = false;
   pulseAt(ant.model.position, 0xffdc6c, 1.1);
@@ -365,6 +384,7 @@ function trySwipe() {
   if (swipeCooldown > 0 || mode !== 'playing') return;
   swipeCooldown = .48;
   swipeTime = .42;
+  sound.swipe();
   swipeSide *= -1;
   const front = new THREE.Vector3(Math.sin(catFacing),0,-Math.cos(catFacing));
   const at = cat.position.clone().addScaledVector(front, 1.25);
@@ -446,6 +466,7 @@ function updateLeap(dt) {
   leap.time += dt;
   if (leap.phase === 'crouch' && leap.time >= .17) {
     leap.phase = 'air'; leap.time = 0;
+    sound.effort();
     verticalVelocity = leap.kind === 'pounce' ? 5.4 : 6.3;
     if (leap.kind === 'pounce') {
       pounceTime = .50;
@@ -466,7 +487,7 @@ function updateLeap(dt) {
 function animateRig(dt, locomotion) {
   const amount = clamp(locomotion / 4.4, 0, 1);
   tailTime += dt * (1 + amount*.36);
-  if (amount > .05) walkTime += dt * (6 + amount * 6);
+  if (amount > .05) walkTime += dt * (6 + locomotion * 1.48);
   const gait = Math.sin(walkTime);
   const step = {
     leg_front_left:gait, leg_hind_right:gait,
@@ -479,9 +500,11 @@ function animateRig(dt, locomotion) {
     const rest = legRest[name];
     let bend = (step[name] || 0) * .52 * amount;
     let sweep = 0;
-    if (leap?.phase === 'crouch') bend = name.includes('front') ? .55 : -.52;
-    if (leap?.phase === 'air') bend = name.includes('front') ? .86 : -.80;
-    if (leap?.phase === 'land') bend = (name.includes('front') ? .42 : -.36)
+    if (leap?.phase === 'crouch') bend = name.includes('front') ? .28 : -.78;
+    if (leap?.phase === 'air') bend = verticalVelocity > 0
+      ? (name.includes('front') ? .83 : .34)
+      : (name.includes('front') ? .22 : -.48);
+    if (leap?.phase === 'land') bend = (name.includes('front') ? .66 : -.28)
       * (1 - smoothstep(0,.22,leap.time));
     if (swipeTime > 0 && name === swipeName) {
       bend += Math.sin(swipeProgress*Math.PI) * 1.05;
@@ -527,7 +550,7 @@ function updateCat(dt) {
   const direction = new THREE.Vector3(Math.sin(catFacing),0,-Math.cos(catFacing))
     .multiplyScalar(moving);
   updateLeap(dt);
-  const speed = pounceTime > 0 ? 10.5 : keys.has('ShiftLeft') ? 2.2 : 4.4;
+  const speed = pounceTime > 0 ? 10.5 : keys.has('ShiftLeft') || keys.has('ShiftRight') ? 7.2 : 5.2;
   const old = cat.position.clone();
   cat.position.addScaledVector(direction, speed * dt * (leap?.phase === 'crouch' ? .45 : 1));
   if (pounceTime > 0) {
@@ -540,6 +563,10 @@ function updateCat(dt) {
   // Three.js positive yaw sends local -Z toward -X.
   cat.rotation.y = -catFacing;
   animateRig(dt,moving ? speed : 0);
+  const jumpPitch = leap?.phase === 'crouch' ? -.07
+    : leap?.phase === 'air' ? (verticalVelocity > 0 ? .21 : -.17)
+    : leap?.phase === 'land' ? -.13*(1-smoothstep(0,.22,leap.time)) : 0;
+  cat.rotation.x += (jumpPitch-cat.rotation.x)*(1-Math.exp(-dt*13));
   let stretch = 1;
   if (leap?.phase === 'crouch') stretch = 1 - .17 * smoothstep(0,.17,leap.time);
   if (leap?.phase === 'air') stretch = verticalVelocity > 0 ? 1.08 : .96;
@@ -586,13 +613,23 @@ function updateAnts(dt, time) {
     const tz = chase ? cat.position.z : ant.targetZ;
     const dx = tx-ant.model.position.x, dz = tz-ant.model.position.z;
     const dist = Math.hypot(dx,dz);
-    if (dist > (chase ? .85 : .25)) {
+    const walking = dist > (chase ? .85 : .25);
+    if (walking) {
       const speed = chase ? 1.05 : .62;
       ant.model.position.x += dx/dist * speed*dt;
       ant.model.position.z += dz/dist * speed*dt;
       ant.model.rotation.y = angleApproach(ant.model.rotation.y,-angleTo(dx,dz),dt*7);
     }
-    ant.model.position.y = Math.sin(time*9+ant.phase)*.025 + (ant.hitCooldown>0 ? Math.sin(time*34)*.05 : 0);
+    ant.model.position.y = ant.hitCooldown>0 ? Math.abs(Math.sin(time*34))*.04 : 0;
+    for (const leg of ant.legs) {
+      const index=Number(leg.name.slice(-1));
+      const left=leg.name.includes('_left_');
+      const tripod=(index+(left?0:1))%2 ? Math.PI : 0;
+      const cycle=time*(chase?12:8)+ant.phase+tripod;
+      const target=walking ? Math.sin(cycle)*.37 : 0;
+      leg.rotation.x += (target-leg.rotation.x)*(1-Math.exp(-dt*15));
+      leg.rotation.y = walking ? Math.max(0,Math.cos(cycle))*(left?-.17:.17) : 0;
+    }
     if (chase && distance < .78 && ant.attackCooldown <= 0 && catHeight < .5 && pounceTime <= 0) {
       takeDamage(ant); ant.attackCooldown = 4.5;
     }
@@ -713,6 +750,22 @@ function animate() {
   for (const uniforms of windMaterials) {
     uniforms.windTime.value = worldTime;
     if (cat) uniforms.catWorld.value.set(cat.position.x,cat.position.z);
+  }
+  for (const roof of patioCanopy) {
+    const inCameraPath=mode!=='title' && camera.position.z>11 && camera.position.z<24
+      && Math.abs(camera.position.x)<14;
+    const wanted=inCameraPath ? 0 : 1;
+    roof.material.opacity += (wanted-roof.material.opacity)*(1-Math.exp(-dt*14));
+    roof.castShadow = !inCameraPath;
+  }
+  if (cat) {
+    const x=cat.position.x, z=cat.position.z;
+    const surface = z>20 && Math.abs(x)<12.2 ? 'wood'
+      : z>15.4 && Math.abs(x)<12.2 || x>18.8 && z>1.4 ? 'concrete' : 'grass';
+    const walking = mode==='intro' || (mode==='playing' &&
+      (keys.has('KeyW') || keys.has('ArrowUp') || keys.has('KeyS') || keys.has('ArrowDown')));
+    sound.update(mode,walkTime,walking,catHeight<.05 && leap?.phase!=='air',surface,
+      cat.position,ants);
   }
   renderer.render(scene,camera);
 }

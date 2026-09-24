@@ -35,6 +35,66 @@ def mat(name, color, roughness=0.85, metallic=0, emission=None):
     return m
 
 
+def pbr_mat(name, color, kind, roughness=.9):
+    """Pack tileable albedo, roughness and tangent-space normal maps into glTF."""
+    size = 128
+    heights, colors, roughs = [], [], []
+    for y in range(size):
+        v = y / size
+        for x in range(size):
+            u = x / size
+            broad = math.sin(math.tau * (u*3+v*2)) * math.sin(math.tau * (u*2-v*3))
+            fine = math.sin(math.tau*u*17) * math.sin(math.tau*v*19)
+            grain = math.sin(math.tau*(u*31+v*7)) * math.sin(math.tau*(v*27-u*5))
+            if kind == 'wood':
+                detail = .57*math.sin(math.tau*(u*16+.025*math.sin(v*math.tau*4))) + .23*fine + .2*broad
+            elif kind == 'bark':
+                detail = .58*math.sin(math.tau*(u*23+.03*math.sin(v*math.tau*6))) + .27*grain + .15*broad
+            elif kind == 'leaf':
+                vein = math.exp(-((u-.5)/.027)**2) + .37*math.exp(-((v-.52-abs(u-.5)*.66)/.038)**2)
+                detail = .24*broad + .19*fine + .48*vein
+            elif kind == 'grass':
+                detail = .82*broad + .18*fine
+            else:
+                detail = .48*broad + .28*fine + .24*grain
+            height = detail * (.68 if kind in ('bark','wood') else .42)
+            heights.append(height)
+            tint = max(.65, min(1.30, 1 + detail*(.10 if kind == 'grass' else .21 if kind != 'concrete' else .09)))
+            colors.extend((*[max(0,min(1,c*tint)) for c in color],1))
+            r = max(.35,min(1,roughness + detail*.085))
+            roughs.extend((r,r,r,1))
+    normals = []
+    for y in range(size):
+        for x in range(size):
+            left=heights[y*size+(x-1)%size]
+            right=heights[y*size+(x+1)%size]
+            below=heights[((y-1)%size)*size+x]
+            above=heights[((y+1)%size)*size+x]
+            strength=.45 if kind == 'leaf' else .7
+            nx=(left-right)*strength
+            ny=(below-above)*strength
+            n=Vector((nx,ny,1)).normalized()
+            normals.extend(((n.x+1)*.5,(n.y+1)*.5,(n.z+1)*.5,1))
+    m=mat(name,color,roughness)
+    nodes=m.node_tree.nodes
+    bsdf=nodes.get('Principled BSDF')
+    for suffix,pixels,input_name in (('albedo',colors,'Base Color'),('roughness',roughs,'Roughness')):
+        image=bpy.data.images.new(f'{name} {suffix}',width=size,height=size)
+        image.pixels.foreach_set(pixels)
+        image.pack()
+        if suffix == 'roughness': image.colorspace_settings.name='Non-Color'
+        texture=nodes.new('ShaderNodeTexImage'); texture.image=image
+        texture.interpolation='Linear'; texture.extension='REPEAT'
+        m.node_tree.links.new(texture.outputs['Color'],bsdf.inputs[input_name])
+    image=bpy.data.images.new(f'{name} normal',width=size,height=size)
+    image.pixels.foreach_set(normals); image.pack(); image.colorspace_settings.name='Non-Color'
+    texture=nodes.new('ShaderNodeTexImage'); texture.image=image; texture.extension='REPEAT'
+    normal_node=nodes.new('ShaderNodeNormalMap'); normal_node.inputs['Strength'].default_value=.42
+    m.node_tree.links.new(texture.outputs['Color'],normal_node.inputs['Color'])
+    m.node_tree.links.new(normal_node.outputs['Normal'],bsdf.inputs['Normal'])
+    return m
+
+
 def coat_material():
     """Make a packed, UV mapped short-fur texture in Blender for glTF."""
     width, height = 768, 512
@@ -113,22 +173,22 @@ cream = mat("Tiger white bib and paws", (0.91, 0.86, 0.73))
 pink = mat("Soft pink", (0.77, 0.37, 0.42))
 green_eye = mat("Tiger green eyes", (0.34, 0.65, 0.3), 0.2)
 black = mat("Ink black", (0.035, 0.045, 0.035))
-brown = mat("Tree bark", (0.36, 0.24, 0.15))
+brown = pbr_mat("Tree bark", (0.36, 0.24, 0.15), 'bark')
 brown_dark = mat("Bark shadows", (0.21, 0.16, 0.1))
-leaf = mat("Leaf green", (0.18, 0.38, 0.12))
-leaf_light = mat("Sunlit leaf", (0.33, 0.53, 0.17))
-leaf_dark = mat("Deep leaf", (0.10, 0.27, 0.13))
-grass = mat("Lawn", (0.24, 0.44, 0.14))
-grass_light = mat("Grass patch", (0.36, 0.54, 0.20))
-grass_blade = mat("Grass blades", (0.27, 0.43, 0.12), roughness=1)
-brick = mat("Terracotta brick", (0.49, 0.24, 0.17))
+leaf = pbr_mat("Leaf green", (0.27, 0.49, 0.16), 'leaf')
+leaf_light = pbr_mat("Sunlit leaf", (0.40, 0.59, 0.22), 'leaf')
+leaf_dark = pbr_mat("Deep leaf", (0.17, 0.33, 0.13), 'leaf')
+grass = pbr_mat("Lawn", (0.24, 0.44, 0.14), 'grass')
+grass_light = pbr_mat("Grass patch", (0.36, 0.54, 0.20), 'grass')
+grass_blade = pbr_mat("Grass blades", (0.27, 0.43, 0.12), 'grass', roughness=1)
+brick = pbr_mat("Terracotta brick", (0.49, 0.24, 0.17), 'stone')
 brick_light = mat("Warm brick", (0.61, 0.35, 0.25))
 stucco = mat("House siding cream", (0.70, 0.72, 0.58))
 trim = mat("House white trim", (0.88, 0.85, 0.72))
 roof = mat("Weathered roof", (0.39, 0.39, 0.36))
-wood = mat("Fence weathered wood", (0.39, 0.31, 0.20))
-wood_alt = mat("Fence light wood", (0.47, 0.37, 0.25))
-concrete = mat("Drive concrete", (0.59, 0.56, 0.49))
+wood = pbr_mat("Fence weathered wood", (0.39, 0.31, 0.20), 'wood')
+wood_alt = pbr_mat("Fence light wood", (0.47, 0.37, 0.25), 'wood')
+concrete = pbr_mat("Drive concrete", (0.59, 0.56, 0.49), 'concrete')
 interior_wood = mat("Warm indoor floor", (0.29, 0.20, 0.13))
 interior_wall = mat("Quiet indoor plaster", (0.47, 0.47, 0.39))
 truck_paint = mat("Old dark green truck", (0.10, 0.22, 0.21), 0.4, 0.22)
@@ -141,6 +201,11 @@ ant_dark = mat("Soldier ant dark", (0.17, 0.045, 0.035))
 helmet = mat("Ant helmet olive", (0.29, 0.33, 0.16), 0.65, 0.15)
 brain = mat("Ant brain glow", (0.83, 0.86, 0.34), 0.3, emission=(0.46, 0.53, 0.1))
 flower = mat("Tiny wildflowers", (0.86, 0.62, 0.67))
+flower_gold = mat("Marigold petals", (0.96, 0.64, 0.12))
+flower_violet = mat("Violet petals", (0.63, 0.38, 0.77))
+flower_coral = mat("Coral petals", (0.93, 0.34, 0.27))
+soil = mat("Planter earth", (0.23, 0.17, 0.105))
+patio_roof = pbr_mat("Patio canopy roof", (0.37, 0.36, 0.32), 'wood')
 coat = coat_material()
 tail_coat = tail_coat_material()
 
@@ -169,6 +234,11 @@ def cube(name, loc, size, material, bevel=0):
     o.dimensions = size
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     o.data.materials.append(material)
+    if material in (grass, brick, concrete, interior_wood):
+        layer=o.data.uv_layers.active or o.data.uv_layers.new(name='ground tile UV')
+        for loop in o.data.loops:
+            vertex=o.data.vertices[loop.vertex_index].co
+            layer.data[loop.index].uv=((vertex.x+loc[0])/2.6,(vertex.y+loc[1])/2.6)
     if bevel:
         mod = o.modifiers.new("soft edges", "BEVEL")
         mod.width = bevel
@@ -417,9 +487,13 @@ uv("ant head", (0,.40,.33), (.28,.27,.26), ant_red)
 for side in (-1,1):
     uv("ant eye", (side*.20,.55,.42), (.055,.04,.055), black)
     rod("mandible", (side*.12,.60,.20), (side*.23,.77,.13), .028, ant_dark)
-    for yi in (-.20,.04,.29):
-        rod("upper leg", (side*.14,yi,.26), (side*.38,yi-.05,.20), .035, ant_dark)
-        rod("lower leg", (side*.38,yi-.05,.20), (side*.50,yi-.13,.04), .028, ant_dark)
+    for index,yi in enumerate((-.20,.04,.29)):
+        leg_root=pivot(f"ant_leg_{'left' if side<0 else 'right'}_{index}",
+            (side*.14,yi,.26))
+        upper=rod("upper leg", (side*.14,yi,.26), (side*.38,yi-.05,.20), .035, ant_dark)
+        lower=rod("lower leg", (side*.38,yi-.05,.20), (side*.50,yi-.13,.04), .028, ant_dark)
+        parent_keep_world(upper,leg_root)
+        parent_keep_world(lower,leg_root)
     rod("antenna", (side*.14,.56,.50), (side*.22,.78,.69), .018, ant_dark)
     rod("antenna tip", (side*.22,.78,.69), (side*.34,.86,.66), .015, ant_dark)
 uv("helmet dome", (0,.39,.56), (.29,.28,.17), helmet)
@@ -475,6 +549,68 @@ bpy.context.collection.objects.link(grass_obj)
 cube("brick patio", (0,-17.8,.02), (24,4.5,.16), brick)
 for i in range(13):
     cube("patio grout", (-11.4+i*1.9,-17.8,.103), (.025,4.4,.01), brick_light)
+# The photographed patio has an angled canopy. Three timber supports sit on
+# concrete plinths; the center walkway from the cat flap stays clear.
+awning=cube('angled patio canopy',(0,-17.5,6.16),(24.0,5.4,.19),patio_roof)
+awning.rotation_euler.x=-math.atan2(1.82,5.4)
+for x in (-10.3,-4.4,10.3):
+    cube('patio post concrete block',(x,-14.95,.38),(.64,.64,.76),concrete,.05)
+    cube('patio timber post',(x,-14.95,3.01),(.23,.23,4.58),wood,.035)
+    rod('patio diagonal strut',(x,-14.95,4.56),(x,-16.18,5.9),.075,wood,8)
+for x in (-11.4,11.4):
+    rod('patio side fascia',(x,-20.13,7.05),(x,-14.88,5.27),.11,wood,8)
+
+def outdoor_bench(label,x,y,length,along_x=True):
+    if along_x:
+        cube(label+' seat',(x,y,.70),(length,.62,.17),wood_alt,.045)
+        for dx in (-length*.42,length*.42):
+            cube(label+' leg',(x+dx,y,.36),(.17,.48,.72),wood,.025)
+        cube(label+' edge',(x,y-.31,.73),(length,.07,.09),wood,.025)
+    else:
+        cube(label+' seat',(x,y,.70),(.62,length,.17),wood_alt,.045)
+        for dy in (-length*.42,length*.42):
+            cube(label+' leg',(x,y+dy,.36),(.48,.17,.72),wood,.025)
+        cube(label+' edge',(x-.31,y,.73),(.07,length,.09),wood,.025)
+
+# Two seats make an L against the house; the third faces the flower planter.
+outdoor_bench('wall bench',-7.25,-18.70,4.5)
+outdoor_bench('return bench',-10.35,-17.15,2.5,False)
+outdoor_bench('planter bench',6.10,-14.62,3.8)
+
+def flower_plant(x,y,base,scale,petal):
+    top=base+scale*random.uniform(.72,1.15)
+    rod('flower stem',(x,y,base),(x,y,top),.012,leaf_dark,5)
+    for sign in (-1,1):
+        uv('flower leaves',(x+sign*scale*.17,y,base+scale*.38),
+           (scale*.21,scale*.10,scale*.055),leaf,10,6)
+    uv('flower center',(x,y,top),(.055,.055,.052),flower_gold,8,5)
+    for petal_index in range(5):
+        angle=math.tau*petal_index/5
+        uv('flower petal',(x+.09*math.cos(angle),y+.09*math.sin(angle),top),
+           (.087,.087,.055),petal,8,5)
+
+# Six by two foot raised timber planter, with several types of flowering plant.
+px,py=6.0,-16.05
+cube('planter soil',(px,py,.59),(3.68,1.22,.12),soil)
+for side in (-1,1):
+    cube('planter long plank',(px,py+side*.66,.36),(3.88,.13,.72),wood_alt,.025)
+    cube('planter end plank',(px+side*1.91,py,.36),(.13,1.32,.72),wood,.025)
+for i in range(23):
+    x=px+random.uniform(-1.66,1.66)
+    y=py+random.uniform(-.48,.48)
+    flower_plant(x,y,.67,random.uniform(.38,.68),
+                 (flower,flower_gold,flower_violet,flower_coral)[i%4])
+
+# Terracotta pots add smaller patches of color to the patio itself.
+for i,(x,y) in enumerate(((-11.3,-18.35),(-2.6,-18.4),(2.5,-18.6),
+                          (11.1,-18.4),(-11.2,-16.0))):
+    cyl('flower pot',(x,y,.27),.31,.54,brick,12)
+    cyl('pot rim',(x,y,.52),.36,.10,brick_light,12)
+    cyl('potted soil',(x,y,.57),.28,.025,soil,12)
+    for n in range(5):
+        angle=math.tau*n/5
+        flower_plant(x+.18*math.cos(angle),y+.18*math.sin(angle),.59,
+            random.uniform(.34,.52),(flower,flower_violet,flower_coral)[(i+n)%3])
 # A true opening runs all the way through the wall so Tiger and the camera
 # can leave the house at their real size.
 for side in (-1,1):
@@ -526,6 +662,16 @@ for i in range(66):
     cube("back fence picket", (x,19.7,1.3), (.67,.24,2.6), wood if i%3 else wood_alt)
 for z in (1.15,2.25):
     cube("back fence rail", (6.8,19.82,z), (52.5,.18,.16), wood)
+# Return the perimeter to the house. The driveway remains open to the yard
+# along its inner edge; the right return closes the far end behind the truck.
+for x0,x1,y in ((-19.7,-13.05,-19.68),(13.05,33.2,-21.05)):
+    for z in (1.15,2.25):
+        cube('house-side fence return rail',((x0+x1)/2,y,z),(x1-x0,.18,.16),wood)
+    count=math.ceil((x1-x0)/.77)
+    for i in range(count+1):
+        x=x0+(x1-x0)*i/count
+        cube('house-side fence return picket',(x,y,1.3),(.60,.24,2.6),
+             wood if i%3 else wood_alt)
 
 # The large central tree, circular brick border, and low planted bed.
 cyl("tree trunk", (0,2.5,2.7), .68, 5.4, brown, 14)
@@ -561,55 +707,29 @@ for i in range(17):
        random.choice((leaf,leaf_light,leaf_dark)), 12, 6)
     scatter_surface_leaves(center,radii,25,.42)
 
-# Leafy areas form visible cover and routes through open grass.
+# Leafy areas form visible cover and routes through open grass. Every hedge has
+# a single rounded crown, a common woody root, and ordered leaf sprays.
 shrub_centers=[(-16,-15),(-15,-10),(-17,-3),(-15,9),(-13,16),
                (15,-14),(16,-7),(15,1),(16,11),(12,16),(-7,16),(5,15),
                (-8,-4),(-9,6),(10,5),(8,-9)]
 for j,(sx,sy) in enumerate(shrub_centers):
-    count=9 if j<12 else 6
-    for k in range(count):
-        x=sx+random.uniform(-1.4,1.4); y=sy+random.uniform(-1.3,1.3)
-        z=random.uniform(.45,1.05)
-        radii=(random.uniform(.46,.88),random.uniform(.43,.8),random.uniform(.47,.94))
-        uv("tiger jungle shrub", (x,y,z), radii,
-           random.choice((leaf,leaf_light,leaf_dark)), 10, 6)
-        scatter_surface_leaves((x,y,z),radii,10,.20)
-    for k in range(4):
-        x=sx+random.uniform(-1.2,1.2); y=sy+random.uniform(-1.2,1.2)
-        rod("wildflower stem", (x,y,.05), (x,y,.48), .02, leaf_dark, 5)
-        uv("wildflower", (x,y,.5), (.09,.09,.07), flower, 8, 4)
-
-# Curved lance leaves grow from the shrub bases. Each has a raised center vein,
-# tapered outline, and cup rather than an isolated rectangular plane.
-for leaf_material in (leaf,leaf_light,leaf_dark):
-    vertices, faces = [], []
-    for sx,sy in shrub_centers:
-        for i in range(5):
-            angle = random.uniform(0,math.tau)
-            x,y=sx+random.uniform(-.85,.85),sy+random.uniform(-.85,.85)
-            height=random.uniform(.75,1.45)
-            spread=random.uniform(.50,1.15)
-            width=random.uniform(.16,.30)
-            dx,dy=math.cos(angle),math.sin(angle)
-            start=len(vertices)
-            for k in range(6):
-                t=k/5
-                edge=width * math.sin(math.pi*t)**.78
-                center_x=x+dx*spread*t
-                center_y=y+dy*spread*t
-                center_z=.10+height*(.18*t+.82*math.sin(t*math.pi*.68))
-                vertices.extend(((center_x-dy*edge,center_y+dx*edge,center_z-.025),
-                    (center_x,center_y,center_z+.035*math.sin(math.pi*t)),
-                    (center_x+dy*edge,center_y-dx*edge,center_z-.025)))
-            for k in range(5):
-                a=start+k*3
-                faces.extend(((a,a+1,a+4,a+3),(a+1,a+2,a+5,a+4)))
-    mesh=bpy.data.meshes.new("cupped garden leaves")
-    mesh.from_pydata(vertices,[],faces)
-    mesh.materials.append(leaf_material)
-    for poly in mesh.polygons: poly.use_smooth=True
-    obj=bpy.data.objects.new("cupped garden leaves",mesh)
-    bpy.context.collection.objects.link(obj)
+    # A grounded, softly irregular oval canopy reads as a hedge at game-camera
+    # distance. Avoid alpha cards and exposed radial sticks entirely.
+    spread=1.48 if j<12 else 1.22
+    height=1.52 if j<12 else 1.27
+    rod('shrub stem',(sx,sy,.05),(sx,sy,.59),.11,brown,8)
+    canopy=uv('textured garden shrub',(sx,sy,height*.68),
+        (spread,spread*.83,height*.67),leaf if j%3 else leaf_light,28,18)
+    for vertex in canopy.data.vertices:
+        angle=math.atan2(vertex.co.y,vertex.co.x)
+        outline=1+.025*math.sin(angle*7+j)+.018*math.sin(angle*11-j*2)
+        vertex.co.x*=outline
+        vertex.co.y*=outline
+    for k in range(2):
+        angle=math.tau*k/2+j
+        x,y=sx+(spread+.25)*math.cos(angle),sy+(spread+.25)*math.sin(angle)
+        rod('wildflower stem',(x,y,.04),(x,y,.37),.012,leaf_dark,5)
+        uv('wildflower',(x,y,.39),(.052,.052,.05),flower,8,4)
 
 finish_surface_leaves()
 
