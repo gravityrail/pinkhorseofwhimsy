@@ -223,6 +223,11 @@ try {
     }
     if (/Leaf green|Sunlit leaf|Deep leaf|Grass blades/.test(name)) {
       const isGrass = /Grass blades/.test(name);
+      // Grass roots are authored at y=.012. Give them zero bend weight so a
+      // gust rotates the silhouette above the ground instead of sliding it.
+      const bendWeight = isGrass
+        ? 'pow(clamp((transformed.y - 0.012) / 0.378, 0.0, 1.0), 1.6)'
+        : '1.0';
       obj.material.onBeforeCompile = (shader) => {
         shader.uniforms.windTime = { value:0 };
         shader.uniforms.catWorld = { value:new THREE.Vector2(0,25) };
@@ -230,7 +235,7 @@ try {
           '#include <common>\nuniform float windTime;\nuniform vec2 catWorld;');
         shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>',
           `#include <begin_vertex>
-          float blade = ${isGrass ? 'clamp(transformed.y / 0.42, 0.0, 1.0)' : '1.0'};
+          float blade = ${bendWeight};
           float breeze = sin(windTime * 1.85 + transformed.x * 0.72 + transformed.z * 0.43)
             + 0.35 * sin(windTime * 3.7 + transformed.z * 1.31);
           float canopy = ${isGrass ? '0.0' : 'clamp((transformed.y - 2.0) / 5.0, 0.0, 1.0)'};
