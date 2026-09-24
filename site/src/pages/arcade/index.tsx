@@ -22,6 +22,16 @@ interface GameCard {
 // and output to site/static/arcade/games/<slug>/
 const GAMES: GameCard[] = [
   {
+    title: 'Tiger Simulator',
+    author: 'Pink Horse of Whimsy',
+    description:
+      'Step through Tiger’s cat flap into a larger-than-life backyard jungle. Explore from behind the ginger cat, jump and pounce through leafy cover, and swipe helmeted soldier ants three times to knock them out. Nine lives, six ants, one very real backyard.',
+    type: '3D',
+    slug: 'tiger-simulator',
+    href: '/tiger-simulator/',
+    cover: '/arcade/splashes/tiger-simulator.jpg',
+  },
+  {
     title: 'Bean Quiz',
     author: 'Pink Horse of Whimsy',
     description:

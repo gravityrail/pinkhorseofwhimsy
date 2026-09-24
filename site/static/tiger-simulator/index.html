@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#13291c" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>Tiger Simulator — The Backyard Is a Jungle</title>
+    <script type="module" crossorigin src="./assets/index-DxhD-4uQ.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BE3bq7JN.css">
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="game" aria-label="Tiger Simulator 3D game"></canvas>
+      <div class="vignette"></div>
+      <div id="hud" class="hud hidden">
+        <div class="hud-left">
+          <div class="brand"><span class="paw">✦</span><span>TIGER <em>SIMULATOR</em></span></div>
+          <div class="life-label">LIVES <span id="life-count">9 / 9</span></div>
+          <div id="lives" class="lives" aria-label="9 lives"></div>
+        </div>
+        <div class="hud-right">
+          <div class="mission-label">BACKYARD PATROL</div>
+          <div class="mission">Soldier ants asleep <strong id="ant-count">0 / 6</strong></div>
+          <div id="status" class="status">Explore the jungle</div>
+        </div>
+      </div>
+      <div id="crosshair" class="crosshair hidden"></div>
+      <button id="sound-toggle" class="sound-toggle" aria-label="Toggle game sound" aria-pressed="true">SOUND ON</button>
+      <div id="toast" class="toast hidden" role="status"></div>
+      <div id="controls" class="controls hidden">
+        <span><kbd>W / S</kbd> walk</span>
+        <span><kbd>A / D</kbd> look / steer</span>
+        <span><kbd>SPACE</kbd> hold, release to jump</span>
+        <span><kbd>J</kbd> / <kbd>CLICK</kbd> swipe</span>
+        <span><kbd>K</kbd> jump + landing swipe</span>
+        <span><kbd>SHIFT</kbd> run</span>
+        <span><kbd>DRAG</kbd> camera</span>
+      </div>
+      <div id="touch-controls" class="touch-controls hidden">
+        <div class="dpad"><button data-key="KeyW">▲</button><div><button data-key="KeyA">◀</button><button data-key="KeyS">▼</button><button data-key="KeyD">▶</button></div></div>
+        <div class="actions"><button data-action="run">RUN</button><button data-action="jump" aria-label="Hold to crouch, release to jump">JUMP</button><button data-action="swipe">SWIPE</button><button data-action="pounce" aria-label="Hold to crouch, release to jump and swipe on landing">POUNCE</button></div>
+      </div>
+      <div id="start-screen" class="screen">
+        <div class="screen-shade"></div>
+        <div class="intro-card">
+          <div class="eyebrow">AN ADVENTURE JUST OUTSIDE THE CAT FLAP</div>
+          <h1>TIGER<br><span>SIMULATOR</span></h1>
+          <p class="tagline">One backyard. Nine lives. A jungle full of tiny enemies.</p>
+          <div class="rule"></div>
+          <p class="story">The soldier ants have claimed Tiger’s territory. Slip through the flap, stalk the grass, and knock all three brains out of each little helmet.</p>
+          <button id="start-button" class="primary">LET’S GO <span>↗</span></button>
+          <p class="press-enter">PRESS <kbd>ENTER</kbd> TO START</p>
+        </div>
+        <div class="intro-foot">INSPIRED BY TIGER’S REAL BACKYARD</div>
+      </div>
+      <div id="end-screen" class="screen hidden">
+        <div class="screen-shade"></div>
+        <div class="intro-card small">
+          <div id="end-eyebrow" class="eyebrow">THE BACKYARD IS YOURS</div>
+          <h1 id="end-title">NICE WORK,<br><span>TIGER!</span></h1>
+          <p id="end-copy" class="tagline">Every soldier ant is sound asleep.</p>
+          <button id="restart-button" class="primary">PLAY AGAIN <span>↗</span></button>
+        </div>
+      </div>
+      <div id="loading" class="loading">GROWING TIGER’S JUNGLE…</div>
+    </div>
+  </body>
+</html>
