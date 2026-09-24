@@ -16,14 +16,14 @@ Open the local Vite URL. Press **Enter** or **Let's Go** to leave the house.
 | --- | --- |
 | Walk forward or backward, relative to Tiger | W / S or up / down arrows |
 | Look left or right while still; steer while walking | A / D or left / right arrows |
-| Jump | Space |
-| Swipe | J or left click |
-| Pounce | K or P |
+| Crouch, then jump on release | Hold Space, then release |
+| Swipe, or queue a swipe during a jump | J or left click |
+| Jump and swipe on landing | Hold K or P, then release |
 | Orbit camera temporarily | Right mouse drag or drag on touch screen |
 | Run | Shift or touch RUN |
 | Toggle sound | SOUND ON / SOUND OFF button |
 
-Each of the six helmeted soldier ants has three brains and animated tripod legs. A swipe or pounce removes one brain; after three hits the ant falls unconscious. Tiger has nine lives. Shrubs hide Tiger from pursuing ants. Touch controls appear on touch devices and support simultaneous movement and action presses.
+Each of the six helmeted soldier ants has three brains and animated tripod legs. A swipe or landing pounce removes one brain; after three hits the ant falls unconscious. Tiger has nine lives. Shrubs hide Tiger from pursuing ants. Touch controls appear on touch devices and support simultaneous movement and action presses.
 
 ## Blender source and web build
 
@@ -35,6 +35,6 @@ Each of the six helmeted soldier ants has three brains and animated tripod legs.
 
 The script builds the cat, ants, and full backyard in Blender. Tiger's coat and flexible tail use packed fur and tabby textures; his head, ears, legs, and tail are modeled and animated separately. Backyard bark, foliage, grass, brick, wood, and concrete use packed albedo, roughness, and normal maps. Shrubs have smooth, textured oval canopies; the raised planter and patio pots add varied flowers. Blender also generates scattered grass and a pickup with an open tray. The browser applies wind motion to grass and foliage, and bends nearby plants as Tiger passes. The camera follows Tiger's facing direction, checks solid scene geometry for blocked sight lines, and rises above shrubs without zooming into them. The angled patio canopy fades when it blocks the camera’s view of Tiger. The original reference photos are kept in the user's workspace under `games/tiger-simulator/assets` and are not required by the running game.
 
-The original Web Audio score starts with a short jingle, then loops while exploring. Footsteps are timed to Tiger's gait and change for indoor wood, patio/driveway, and grass. Nearby awake ants chirp more often as Tiger approaches. A swipe makes a gentle swoosh, with a low thump when it hits an ant; jumping has an effort sound. Audio starts only after pressing **Let's Go**, as required by browsers, and the sound button stores the mute preference locally.
+The original Web Audio score starts with a short jingle, then loops while exploring. Footsteps are timed to Tiger's gait and change for indoor wood, patio/driveway, and grass. Nearby awake ants chirp more often as Tiger approaches. A swipe makes a gentle swoosh; a low thump plays when Tiger hits an ant or a hard part of the yard. Jumping has an effort sound. Audio starts only after pressing **Let's Go**, as required by browsers, and the sound button stores the mute preference locally.
 
 `npm run publish` copies a production build to `site/static/tiger-simulator/` for the site's `/tiger-simulator/` route.

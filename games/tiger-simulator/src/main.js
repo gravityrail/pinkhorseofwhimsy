@@ -93,16 +93,14 @@ let asleep = 0;
 let invincible = 0;
 let swipeCooldown = 0;
 let swipeTime = 0;
-let pounceTime = 0;
-let pounceHit = new Set();
 let leap = null;
 let swipeSide = 1;
 let introTime = 0;
 let walkTime = 0;
 let toastTime = 0;
 let lastSwipe = false;
-let lastPounce = false;
-let lastJump = false;
+let lastHardContact = null;
+let hardImpactCooldown = 0;
 let dragging = false;
 let dragX = 0;
 
@@ -113,6 +111,19 @@ const bushes = [
 ];
 const antStarts = [
   [-7,-4], [8,-3], [-12,-11], [11,11], [-4,10], [5,-13],
+];
+// These bounds include room for Tiger's body around the modeled solids.
+const solidBoxes = [
+  ['garage',19.1,32.5,-2.5,9.7,Infinity],
+  ['pickup',22.7,27.3,11.0,20.5,Infinity],
+  ['planter and bench',3.8,8.35,13.95,17.1,.9],
+  ['wall bench',-9.9,-4.6,18.0,19.1,.9],
+  ['return bench',-11.0,-9.9,15.5,18.0,.9],
+];
+const solidPosts = [
+  ...[-10.3,-4.4,10.3].map((x) => ['patio post',x,14.95,.67,Infinity]),
+  ...[[-11.3,18.35],[-2.6,18.4],[2.5,18.6],[11.1,18.4],[-11.2,16.0]]
+    .map(([x,z]) => ['flower pot',x,z,.52,.65]),
 ];
 
 function rand(seed) {
@@ -186,10 +197,29 @@ function hiddenInBush() {
   if (!cat) return false;
   return bushes.some(([x,z]) => Math.hypot(cat.position.x - x, cat.position.z - z) < 1.75);
 }
+function surfaceAt(position) {
+  const {x,z} = position;
+  if (z > 20 && Math.abs(x) < 12.2) return 'wood';
+  const ringDistance = Math.hypot(x,z+2.5);
+  if (ringDistance > 2.9 && ringDistance < 3.65) return 'concrete';
+  if ((z > 15.4 && Math.abs(x) < 12.2) || (x > 18.8 && z > 1.4)) return 'concrete';
+  return 'grass';
+}
+function hardSurfaceAt(position) {
+  const {x,z} = position;
+  if (x < -18.4 || x > 31.5 || z < -18.4 || z > 18.55) return true;
+  if (Math.hypot(x,z+2.5) < 1.05) return true;
+  if (solidBoxes.some(([,minX,maxX,minZ,maxZ,height]) => catHeight<=height
+      && x>minX && x<maxX && z>minZ && z<maxZ)) return true;
+  return solidPosts.some(([,px,pz,radius,height]) => catHeight<=height
+    && Math.hypot(x-px,z-pz)<radius);
+}
 function updateStatus() {
   if (mode !== 'playing') return;
   const hidden = hiddenInBush();
-  ui.status.textContent = hidden ? 'Hidden in the leaves' : (pounceTime > 0 ? 'Pouncing!' : 'Explore the jungle');
+  ui.status.textContent = hidden ? 'Hidden in the leaves'
+    : leap?.phase === 'crouch' ? 'Ready to spring…'
+    : leap?.swipeOnLand ? 'Pouncing!' : 'Explore the jungle';
   ui.status.classList.toggle('hidden-status', hidden);
 }
 
@@ -256,6 +286,8 @@ try {
   scene.add(yard);
   makeFlap("LET'S GO", '#332715', '#f4dc97');
   cat = catGltf.scene;
+  // Yaw first keeps the jump pitch aligned with Tiger's heading at every angle.
+  cat.rotation.order = 'YXZ';
   cat.traverse((obj) => { if (obj.isMesh) { obj.castShadow = true; obj.receiveShadow = true; } });
   for (const name of ['leg_front_left','leg_front_right','leg_hind_left','leg_hind_right']) {
     legPivots[name] = cat.getObjectByName(name);
@@ -323,11 +355,14 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'Enter') { if (mode === 'title') startGame(); else if (mode === 'won' || mode === 'lost') restart(); }
   if (e.code === 'KeyR' && (mode === 'won' || mode === 'lost')) restart();
   if (e.code === 'KeyJ') trySwipe();
-  if (e.code === 'KeyK' || e.code === 'KeyP') tryPounce();
-  if (e.code === 'Space') tryJump();
+  if (!e.repeat && (e.code === 'KeyK' || e.code === 'KeyP')) tryPounce(e.code);
+  if (!e.repeat && e.code === 'Space') tryJump(e.code);
 });
-window.addEventListener('keyup', (e) => keys.delete(e.code));
-window.addEventListener('blur', () => keys.clear());
+window.addEventListener('keyup', (e) => { keys.delete(e.code); releaseJump(e.code); });
+window.addEventListener('blur', () => {
+  keys.clear();
+  if (leap?.phase === 'crouch') leap = null;
+});
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 canvas.addEventListener('pointerdown', (e) => {
   if (e.button === 0 && mode === 'playing' && e.pointerType !== 'touch') {
@@ -351,12 +386,12 @@ for (const button of document.querySelectorAll('#touch-controls button')) {
   const code = button.dataset.key || ({run:'ShiftLeft',jump:'Space',swipe:'KeyJ',pounce:'KeyK'})[button.dataset.action];
   button.addEventListener('pointerdown', (e) => {
     e.preventDefault(); keys.add(code); button.setPointerCapture(e.pointerId);
-    if (code === 'Space') tryJump();
+    if (code === 'Space') tryJump(code);
     if (code === 'KeyJ') trySwipe();
-    if (code === 'KeyK') tryPounce();
+    if (code === 'KeyK') tryPounce(code);
   });
-  button.addEventListener('pointerup', (e) => { e.preventDefault(); keys.delete(code); });
-  button.addEventListener('pointercancel', () => keys.delete(code));
+  button.addEventListener('pointerup', (e) => { e.preventDefault(); keys.delete(code); releaseJump(code); });
+  button.addEventListener('pointercancel', () => { keys.delete(code); releaseJump(code); });
 }
 
 function pulseAt(position, color, size=.75) {
@@ -388,7 +423,12 @@ function hitAnt(ant) {
   }
 }
 function trySwipe() {
-  if (swipeCooldown > 0 || mode !== 'playing') return;
+  if (mode !== 'playing') return;
+  if (leap && (leap.phase === 'crouch' || leap.phase === 'air')) {
+    leap.swipeOnLand = true;
+    return;
+  }
+  if (swipeCooldown > 0) return;
   swipeCooldown = .48;
   swipeTime = .42;
   sound.swipe();
@@ -406,16 +446,24 @@ function trySwipe() {
     if (d < distance) { best=ant; distance=d; }
   }
   if (best) hitAnt(best);
+  else if (hardSurfaceAt(at)) sound.hit();
 }
-function tryPounce() {
-  if (leap || catHeight > .05 || swipeCooldown > .1 || mode !== 'playing') return;
-  leap = { kind:'pounce', phase:'crouch', time:0 };
-  pounceHit = new Set();
-  swipeCooldown = .30;
+function tryPounce(trigger='KeyK') {
+  if (mode !== 'playing') return;
+  if (leap) {
+    if (leap.phase === 'land') trySwipe();
+    else leap.swipeOnLand = true;
+    return;
+  }
+  if (catHeight > .05) return;
+  leap = { phase:'crouch', time:0, trigger, releaseRequested:false, swipeOnLand:true };
 }
-function tryJump() {
+function tryJump(trigger='Space') {
   if (leap || catHeight > .05 || mode !== 'playing') return;
-  leap = { kind:'jump', phase:'crouch', time:0 };
+  leap = { phase:'crouch', time:0, trigger, releaseRequested:false, swipeOnLand:false };
+}
+function releaseJump(trigger) {
+  if (leap?.phase === 'crouch' && leap.trigger === trigger) leap.releaseRequested = true;
 }
 function takeDamage(attacker) {
   if (invincible > 0 || mode !== 'playing') return;
@@ -442,18 +490,22 @@ function finish(won) {
 }
 
 function resolveObstacles(old) {
+  let contact = null;
+  const xBeforeClamp = cat.position.x, zBeforeClamp = cat.position.z;
   cat.position.x = clamp(cat.position.x, -18.4, 31.5);
   cat.position.z = clamp(cat.position.z, -18.4, 18.55);
+  if (cat.position.x !== xBeforeClamp || cat.position.z !== zBeforeClamp) contact = 'fence or house';
   // Central oak trunk; the low brick ring stays walkable.
   const dx = cat.position.x, dz = cat.position.z + 2.5;
   if (Math.hypot(dx,dz) < 1.05) {
     const a = Math.atan2(dz,dx);
     cat.position.x = Math.cos(a)*1.05;
     cat.position.z = -2.5 + Math.sin(a)*1.05;
+    contact = 'oak trunk';
   }
-  // The driveway is walkable; the garage walls and pickup are solid.
-  for (const [minX,maxX,minZ,maxZ] of [[19.1,32.5,-2.5,9.7],[22.7,27.3,11.0,20.5]]) {
-    if (cat.position.x>minX && cat.position.x<maxX
+  // The driveway stays walkable. Resolve modeled hard props and structures.
+  for (const [name,minX,maxX,minZ,maxZ,height] of solidBoxes) {
+    if (catHeight<=height && cat.position.x>minX && cat.position.x<maxX
         && cat.position.z>minZ && cat.position.z<maxZ) {
       const edges = [
         [Math.abs(cat.position.x-minX), 'x',minX],
@@ -463,28 +515,49 @@ function resolveObstacles(old) {
       ];
       edges.sort((a,b)=>a[0]-b[0]);
       cat.position[edges[0][1]]=edges[0][2];
+      contact = name;
     }
   }
-  if (!Number.isFinite(cat.position.x) || !Number.isFinite(cat.position.z)) cat.position.copy(old);
+  for (const [name,x,z,radius,height] of solidPosts) {
+    if (catHeight>height) continue;
+    const dx=cat.position.x-x, dz=cat.position.z-z;
+    const distance=Math.hypot(dx,dz);
+    if (distance < radius) {
+      const angle=distance > .001 ? Math.atan2(dz,dx) : Math.atan2(old.z-z,old.x-x);
+      cat.position.x=x+Math.cos(angle)*radius;
+      cat.position.z=z+Math.sin(angle)*radius;
+      contact=name;
+    }
+  }
+  if (!Number.isFinite(cat.position.x) || !Number.isFinite(cat.position.z)) {
+    cat.position.copy(old);
+    return null;
+  }
+  return contact;
 }
 
 function updateLeap(dt) {
   if (!leap) return;
   leap.time += dt;
-  if (leap.phase === 'crouch' && leap.time >= .17) {
+  if (leap.phase === 'crouch' && leap.releaseRequested && leap.time >= .18) {
     leap.phase = 'air'; leap.time = 0;
     sound.effort();
-    verticalVelocity = leap.kind === 'pounce' ? 5.4 : 6.3;
-    if (leap.kind === 'pounce') {
-      pounceTime = .50;
-      showToast('POUNCE!');
-    }
+    verticalVelocity = 6.3;
+    if (leap.swipeOnLand) showToast('POUNCE!');
   } else if (leap.phase === 'air') {
     verticalVelocity -= 16 * dt;
     catHeight += verticalVelocity * dt;
     if (catHeight <= 0) {
       catHeight = 0; verticalVelocity = 0;
       leap.phase = 'land'; leap.time = 0;
+      if (surfaceAt(cat.position) !== 'grass' && hardImpactCooldown <= 0) {
+        sound.hit();
+        hardImpactCooldown = .25;
+      }
+      if (leap.swipeOnLand) {
+        swipeCooldown = 0;
+        trySwipe();
+      }
     }
   } else if (leap.phase === 'land' && leap.time >= .22) {
     leap = null;
@@ -505,14 +578,23 @@ function animateRig(dt, locomotion) {
   for (const [name, part] of Object.entries(legPivots)) {
     if (!part) continue;
     const rest = legRest[name];
+    const hind = name.includes('hind');
     let bend = (step[name] || 0) * .52 * amount;
+    let legStretch = 1;
     let sweep = 0;
-    if (leap?.phase === 'crouch') bend = name.includes('front') ? .28 : -.78;
-    if (leap?.phase === 'air') bend = verticalVelocity > 0
-      ? (name.includes('front') ? .83 : .34)
-      : (name.includes('front') ? .22 : -.48);
-    if (leap?.phase === 'land') bend = (name.includes('front') ? .66 : -.28)
-      * (1 - smoothstep(0,.22,leap.time));
+    if (leap?.phase === 'crouch') {
+      bend = hind ? .50 : .10;
+      legStretch = hind ? .74 : .94;
+    }
+    if (leap?.phase === 'air') {
+      const pushingOff = verticalVelocity > 0;
+      bend = hind ? (pushingOff ? -1.02 : -.52) : (pushingOff ? .78 : .23);
+      legStretch = hind ? (pushingOff ? 1.22 : 1.08) : (pushingOff ? .89 : 1.04);
+    }
+    if (leap?.phase === 'land') {
+      bend = (hind ? -.14 : .67) * (1 - smoothstep(0,.22,leap.time));
+      legStretch = hind ? 1 : 1.06-.06*smoothstep(0,.22,leap.time);
+    }
     if (swipeTime > 0 && name === swipeName) {
       bend += Math.sin(swipeProgress*Math.PI) * 1.05;
       sweep = (swipeSide > 0 ? 1 : -1) * Math.cos(swipeProgress*Math.PI) * .72;
@@ -520,6 +602,7 @@ function animateRig(dt, locomotion) {
     const a = 1-Math.exp(-dt*24);
     part.rotation.x += (rest.x+bend-part.rotation.x)*a;
     part.rotation.z += (rest.z+sweep-part.rotation.z)*a;
+    part.scale.y += (legStretch-part.scale.y)*a;
   }
   if (tailPivot) {
     const lift = leap?.phase === 'air' ? -.22 : 0;
@@ -546,6 +629,7 @@ function animateRig(dt, locomotion) {
 }
 
 function updateCat(dt) {
+  hardImpactCooldown = Math.max(0,hardImpactCooldown-dt);
   const moving = Number(keys.has('KeyW') || keys.has('ArrowUp'))
     - Number(keys.has('KeyS') || keys.has('ArrowDown'));
   const turning = Number(keys.has('KeyD') || keys.has('ArrowRight'))
@@ -557,48 +641,43 @@ function updateCat(dt) {
   const direction = new THREE.Vector3(Math.sin(catFacing),0,-Math.cos(catFacing))
     .multiplyScalar(moving);
   updateLeap(dt);
-  const speed = pounceTime > 0 ? 10.5 : keys.has('ShiftLeft') || keys.has('ShiftRight') ? 7.2 : 5.2;
+  const speed = keys.has('ShiftLeft') || keys.has('ShiftRight') ? 7.2 : 5.2;
   const old = cat.position.clone();
-  cat.position.addScaledVector(direction, speed * dt * (leap?.phase === 'crouch' ? .45 : 1));
-  if (pounceTime > 0) {
-    const pounceForward = new THREE.Vector3(Math.sin(catFacing),0,-Math.cos(catFacing));
-    cat.position.addScaledVector(pounceForward, (direction.lengthSq() > 0 ? 3 : 8) * dt);
-    pounceTime = Math.max(0,pounceTime-dt);
+  cat.position.addScaledVector(direction, speed * dt * (leap?.phase === 'crouch' ? 0 : 1));
+  const attemptedSpeed = Math.hypot(cat.position.x-old.x,cat.position.z-old.z) / Math.max(dt,.001);
+  const hardContact = resolveObstacles(old);
+  if (hardContact && hardContact !== lastHardContact
+      && attemptedSpeed > 1.2 && hardImpactCooldown <= 0) {
+    sound.hit();
+    hardImpactCooldown = .25;
   }
-  resolveObstacles(old);
+  lastHardContact = hardContact;
   // A/D steer while walking; at rest they look and pan without spinning Tiger.
   // Three.js positive yaw sends local -Z toward -X.
   cat.rotation.y = -catFacing;
-  animateRig(dt,moving ? speed : 0);
-  const jumpPitch = leap?.phase === 'crouch' ? -.07
-    : leap?.phase === 'air' ? (verticalVelocity > 0 ? .21 : -.17)
-    : leap?.phase === 'land' ? -.13*(1-smoothstep(0,.22,leap.time)) : 0;
+  animateRig(dt,moving && leap?.phase !== 'crouch' ? speed : 0);
+  const jumpPitch = leap?.phase === 'crouch' ? .22
+    : leap?.phase === 'air' ? (verticalVelocity > 0 ? .16 : -.11)
+    : leap?.phase === 'land' ? -.08*(1-smoothstep(0,.22,leap.time)) : 0;
   cat.rotation.x += (jumpPitch-cat.rotation.x)*(1-Math.exp(-dt*13));
   let stretch = 1;
-  if (leap?.phase === 'crouch') stretch = 1 - .17 * smoothstep(0,.17,leap.time);
-  if (leap?.phase === 'air') stretch = verticalVelocity > 0 ? 1.08 : .96;
+  if (leap?.phase === 'crouch') stretch = 1 - .22 * smoothstep(0,.18,leap.time);
+  if (leap?.phase === 'air') stretch = verticalVelocity > 0 ? 1.04 : .98;
   if (leap?.phase === 'land') stretch = .83 + .17 * smoothstep(0,.22,leap.time);
   cat.scale.set(1,stretch,1);
-  cat.position.y = catHeight + (moving && catHeight === 0 ? Math.sin(walkTime*2)*.025 : 0);
+  cat.position.y = catHeight + (moving && !leap ? Math.sin(walkTime*2)*.025 : 0);
   if (swipeTime > 0) {
     swipeTime = Math.max(0,swipeTime-dt);
-    cat.rotation.z = Math.sin((1-swipeTime/.42)*Math.PI)*.08;
+    cat.rotation.z = leap ? 0 : Math.sin((1-swipeTime/.42)*Math.PI)*.08;
   } else cat.rotation.z = 0;
   cat.visible = invincible <= 0 || Math.floor(invincible*10)%2 === 0;
   catShadow.visible = true;
   catShadow.position.x = cat.position.x;
   catShadow.position.z = cat.position.z;
   catShadow.material.opacity = 1 - catHeight * .23;
-  if (pounceTime > 0) {
-    for (const ant of ants) {
-      if (ant.awake && !pounceHit.has(ant) && flatDistance(ant.model.position,cat.position)<1.25) {
-        hitAnt(ant); pounceHit.add(ant);
-      }
-    }
-  }
 }
 function updateAnts(dt, time) {
-  const hidden = hiddenInBush() && swipeTime <= 0 && pounceTime <= 0;
+  const hidden = hiddenInBush() && swipeTime <= 0 && !leap?.swipeOnLand;
   ants.forEach((ant, i) => {
     ant.hitCooldown = Math.max(0,ant.hitCooldown-dt);
     ant.attackCooldown = Math.max(0,ant.attackCooldown-dt);
@@ -637,7 +716,7 @@ function updateAnts(dt, time) {
       leg.rotation.x += (target-leg.rotation.x)*(1-Math.exp(-dt*15));
       leg.rotation.y = walking ? Math.max(0,Math.cos(cycle))*(left?-.17:.17) : 0;
     }
-    if (chase && distance < .78 && ant.attackCooldown <= 0 && catHeight < .5 && pounceTime <= 0) {
+    if (chase && distance < .78 && ant.attackCooldown <= 0 && catHeight < .5 && leap?.phase !== 'air') {
       takeDamage(ant); ant.attackCooldown = 4.5;
     }
   });
@@ -730,12 +809,8 @@ function animate() {
     swipeCooldown = Math.max(0,swipeCooldown-dt);
     invincible = Math.max(0,invincible-dt);
     const swipePressed = keys.has('KeyJ') || keys.has('MouseSwipe');
-    const pouncePressed = keys.has('KeyK') || keys.has('KeyP');
-    const jumpPressed = keys.has('Space');
     if (swipePressed && !lastSwipe) trySwipe();
-    if (pouncePressed && !lastPounce) tryPounce();
-    if (jumpPressed && !lastJump) tryJump();
-    lastSwipe = swipePressed; lastPounce = pouncePressed; lastJump = jumpPressed;
+    lastSwipe = swipePressed;
     updateCat(dt);
     updateAnts(dt,time);
     updateCamera(dt);
@@ -774,10 +849,8 @@ function animate() {
     roof.castShadow = !inCameraPath;
   }
   if (cat) {
-    const x=cat.position.x, z=cat.position.z;
-    const surface = z>20 && Math.abs(x)<12.2 ? 'wood'
-      : z>15.4 && Math.abs(x)<12.2 || x>18.8 && z>1.4 ? 'concrete' : 'grass';
-    const walking = mode==='intro' || (mode==='playing' &&
+    const surface = surfaceAt(cat.position);
+    const walking = mode==='intro' || (mode==='playing' && leap?.phase !== 'crouch' &&
       (keys.has('KeyW') || keys.has('ArrowUp') || keys.has('KeyS') || keys.has('ArrowDown')));
     sound.update(mode,walkTime,walking,catHeight<.05 && leap?.phase!=='air',surface,
       cat.position,ants);
