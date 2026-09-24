@@ -51,13 +51,29 @@ const ui = {
 };
 let mode = 'loading';
 let cat = null;
+let flapHinge = null;
+let tailPivot = null;
+let headPivot = null;
+let headLook = 0;
+let tailMesh = null;
+let tailBasePositions = null;
+let tailTime = 0;
+const legPivots = {};
+const legRest = {};
 let antSource = null;
 const ants = [];
 const keys = new Set();
 const clock = new THREE.Clock();
 const v1 = new THREE.Vector3();
 const v2 = new THREE.Vector3();
-let yaw = 0;
+let cameraYaw = 0;
+let cameraOrbit = 0;
+const cameraFocus = new THREE.Vector3();
+const cameraRay = new THREE.Raycaster();
+const cameraObstacles = [];
+const cameraFoliage = [];
+const windMaterials = [];
+let worldTime = 0;
 let catFacing = 0;
 let catHeight = 0;
 let verticalVelocity = 0;
@@ -68,6 +84,8 @@ let swipeCooldown = 0;
 let swipeTime = 0;
 let pounceTime = 0;
 let pounceHit = new Set();
+let leap = null;
+let swipeSide = 1;
 let introTime = 0;
 let walkTime = 0;
 let toastTime = 0;
@@ -91,13 +109,17 @@ function rand(seed) {
   return x - Math.floor(x);
 }
 function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+function smoothstep(a, b, x) {
+  const t = clamp((x-a)/(b-a),0,1);
+  return t*t*(3-2*t);
+}
 function flatDistance(a, b) { return Math.hypot(a.x - b.x, a.z - b.z); }
 function angleTo(dx, dz) { return Math.atan2(dx, -dz); }
 function angleApproach(current, target, amount) {
   let d = ((target - current + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
   return current + d * clamp(amount, 0, 1);
 }
-function makeTextPlane(text, bg, fg) {
+function makeFlap(text, bg, fg) {
   const c = document.createElement('canvas');
   c.width = 512; c.height = 256;
   const ctx = c.getContext('2d');
@@ -107,12 +129,21 @@ function makeTextPlane(text, bg, fg) {
   ctx.font = '900 64px Georgia'; ctx.fillText(text, 256, 128);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
-  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(.84, .45),
-    new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide }));
-  // The flap faces into the yard (toward negative Three.js Z).
-  mesh.rotation.y = Math.PI;
-  mesh.position.set(0, .66, 19.62);
-  scene.add(mesh);
+  flapHinge = new THREE.Group();
+  flapHinge.position.set(0,1.82,19.62);
+  const panel = new THREE.Mesh(new THREE.BoxGeometry(1.55,1.69,.07),
+    new THREE.MeshStandardMaterial({ color:0x40301d,roughness:.85 }));
+  panel.position.y = -.845;
+  panel.castShadow = true;
+  flapHinge.add(panel);
+  for (const side of [-1,1]) {
+    const sign = new THREE.Mesh(new THREE.PlaneGeometry(1.20,.43),
+      new THREE.MeshBasicMaterial({ map:tex, side:THREE.DoubleSide }));
+    sign.position.set(0,-.42,side*.04);
+    if (side < 0) sign.rotation.y = Math.PI;
+    flapHinge.add(sign);
+  }
+  scene.add(flapHinge);
 }
 function makeShadow() {
   const c = document.createElement('canvas'); c.width = c.height = 128;
@@ -167,14 +198,55 @@ try {
       obj.material.transparent = true;
       obj.material.opacity = .84;
       obj.material.depthWrite = false;
+      cameraFoliage.push(obj);
+    }
+    if (/Grass blades/.test(name)) {
+      obj.material.side = THREE.DoubleSide;
+      obj.castShadow = false;
+    }
+    if (/Leaf green|Sunlit leaf|Deep leaf|Grass blades/.test(name)) {
+      const isGrass = /Grass blades/.test(name);
+      obj.material.onBeforeCompile = (shader) => {
+        shader.uniforms.windTime = { value:0 };
+        shader.uniforms.catWorld = { value:new THREE.Vector2(0,25) };
+        shader.vertexShader = shader.vertexShader.replace('#include <common>',
+          '#include <common>\nuniform float windTime;\nuniform vec2 catWorld;');
+        shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>',
+          `#include <begin_vertex>
+          float blade = ${isGrass ? 'clamp(transformed.y / 0.42, 0.0, 1.0)' : '1.0'};
+          float breeze = sin(windTime * 1.85 + transformed.x * 0.72 + transformed.z * 0.43)
+            + 0.35 * sin(windTime * 3.7 + transformed.z * 1.31);
+          float canopy = ${isGrass ? '0.0' : 'clamp((transformed.y - 2.0) / 5.0, 0.0, 1.0)'};
+          transformed.x += breeze * blade * (${isGrass ? '.055' : '.045 + canopy * .12'});
+          transformed.z += breeze * blade * (${isGrass ? '.027' : '.025 + canopy * .06'});
+          vec2 away = transformed.xz - catWorld;
+          float nearCat = 1.0 - smoothstep(0.35, 1.85, length(away));
+          transformed.xz += normalize(away + vec2(0.001)) * nearCat * blade * ${isGrass ? '.27' : '.18'};
+          `);
+        windMaterials.push(shader.uniforms);
+      };
+      obj.material.needsUpdate = true;
+    }
+    if (!/Lawn|Grass patch|Grass blades|Leaf green|Sunlit leaf|Deep leaf|Terracotta brick|Warm brick|Drive concrete|Warm indoor floor/i.test(name)) {
+      cameraObstacles.push(obj);
     }
   });
   scene.add(yard);
-  makeTextPlane("LET'S GO", '#332715', '#f4dc97');
+  makeFlap("LET'S GO", '#332715', '#f4dc97');
   cat = catGltf.scene;
   cat.traverse((obj) => { if (obj.isMesh) { obj.castShadow = true; obj.receiveShadow = true; } });
-  cat.position.set(0, 0, 19.7);
-  cat.scale.setScalar(.55);
+  for (const name of ['leg_front_left','leg_front_right','leg_hind_left','leg_hind_right']) {
+    legPivots[name] = cat.getObjectByName(name);
+    if (legPivots[name]) legRest[name] = legPivots[name].rotation.clone();
+  }
+  tailPivot = cat.getObjectByName('tail_pivot');
+  headPivot = cat.getObjectByName('head_pivot');
+  tailMesh = cat.getObjectByName('flexible_tail');
+  if (tailMesh?.isMesh) {
+    tailBasePositions = new Float32Array(tailMesh.geometry.attributes.position.array);
+    tailMesh.geometry.attributes.position.setUsage(THREE.DynamicDrawUsage);
+  }
+  cat.position.set(0, 0, 25);
   cat.visible = false;
   scene.add(cat);
   antSource = antGltf.scene;
@@ -207,9 +279,14 @@ function startGame() {
   ui.hud.classList.remove('hidden');
   ui.controls.classList.remove('hidden');
   if (matchMedia('(pointer: coarse)').matches) ui.touch.classList.remove('hidden');
-  camera.position.set(3.8, 3.5, 15.4);
-  camera.lookAt(0, .7, 19.1);
-  showToast('Tiger squeezes through the cat flap…');
+  cat.position.set(0,0,25);
+  cat.rotation.set(0,0,0);
+  camera.position.set(0,1.48,28.9);
+  camera.lookAt(0,1.05,21);
+  cameraFocus.set(0,1.05,21);
+  cameraYaw = 0;
+  cameraOrbit = 0;
+  showToast('Follow Tiger through the cat flap…');
 }
 function restart() { location.reload(); }
 document.getElementById('start-button').addEventListener('click', startGame);
@@ -241,7 +318,8 @@ canvas.addEventListener('pointerup', (e) => {
 });
 canvas.addEventListener('pointermove', (e) => {
   if (!dragging) return;
-  yaw -= (e.clientX - dragX) * .006;
+  cameraOrbit -= (e.clientX - dragX) * .006;
+  cameraOrbit = clamp(cameraOrbit,-1.15,1.15);
   dragX = e.clientX;
 });
 for (const button of document.querySelectorAll('#touch-controls button')) {
@@ -286,7 +364,8 @@ function hitAnt(ant) {
 function trySwipe() {
   if (swipeCooldown > 0 || mode !== 'playing') return;
   swipeCooldown = .48;
-  swipeTime = .30;
+  swipeTime = .42;
+  swipeSide *= -1;
   const front = new THREE.Vector3(Math.sin(catFacing),0,-Math.cos(catFacing));
   const at = cat.position.clone().addScaledVector(front, 1.25);
   pulseAt(at, 0xffe2a7, 1.3);
@@ -302,16 +381,14 @@ function trySwipe() {
   if (best) hitAnt(best);
 }
 function tryPounce() {
-  if (pounceTime > 0 || catHeight > .05 || swipeCooldown > .1 || mode !== 'playing') return;
-  pounceTime = .52;
-  verticalVelocity = 5.7;
+  if (leap || catHeight > .05 || swipeCooldown > .1 || mode !== 'playing') return;
+  leap = { kind:'pounce', phase:'crouch', time:0 };
   pounceHit = new Set();
   swipeCooldown = .30;
-  showToast('POUNCE!');
 }
 function tryJump() {
-  if (catHeight > .05 || mode !== 'playing') return;
-  verticalVelocity = 6.1;
+  if (leap || catHeight > .05 || mode !== 'playing') return;
+  leap = { kind:'jump', phase:'crouch', time:0 };
 }
 function takeDamage(attacker) {
   if (invincible > 0 || mode !== 'playing') return;
@@ -338,7 +415,7 @@ function finish(won) {
 }
 
 function resolveObstacles(old) {
-  cat.position.x = clamp(cat.position.x, -18.4, 18.4);
+  cat.position.x = clamp(cat.position.x, -18.4, 31.5);
   cat.position.z = clamp(cat.position.z, -18.4, 18.55);
   // Central oak trunk; the low brick ring stays walkable.
   const dx = cat.position.x, dz = cat.position.z + 2.5;
@@ -347,42 +424,131 @@ function resolveObstacles(old) {
     cat.position.x = Math.cos(a)*1.05;
     cat.position.z = -2.5 + Math.sin(a)*1.05;
   }
-  // Keep Tiger out of the garage driveway until that area is built out.
+  // The driveway is walkable; the garage walls and pickup are solid.
+  for (const [minX,maxX,minZ,maxZ] of [[19.1,32.5,-2.5,9.7],[22.7,27.3,11.0,20.5]]) {
+    if (cat.position.x>minX && cat.position.x<maxX
+        && cat.position.z>minZ && cat.position.z<maxZ) {
+      const edges = [
+        [Math.abs(cat.position.x-minX), 'x',minX],
+        [Math.abs(cat.position.x-maxX), 'x',maxX],
+        [Math.abs(cat.position.z-minZ), 'z',minZ],
+        [Math.abs(cat.position.z-maxZ), 'z',maxZ],
+      ];
+      edges.sort((a,b)=>a[0]-b[0]);
+      cat.position[edges[0][1]]=edges[0][2];
+    }
+  }
   if (!Number.isFinite(cat.position.x) || !Number.isFinite(cat.position.z)) cat.position.copy(old);
 }
 
+function updateLeap(dt) {
+  if (!leap) return;
+  leap.time += dt;
+  if (leap.phase === 'crouch' && leap.time >= .17) {
+    leap.phase = 'air'; leap.time = 0;
+    verticalVelocity = leap.kind === 'pounce' ? 5.4 : 6.3;
+    if (leap.kind === 'pounce') {
+      pounceTime = .50;
+      showToast('POUNCE!');
+    }
+  } else if (leap.phase === 'air') {
+    verticalVelocity -= 16 * dt;
+    catHeight += verticalVelocity * dt;
+    if (catHeight <= 0) {
+      catHeight = 0; verticalVelocity = 0;
+      leap.phase = 'land'; leap.time = 0;
+    }
+  } else if (leap.phase === 'land' && leap.time >= .22) {
+    leap = null;
+  }
+}
+
+function animateRig(dt, locomotion) {
+  const amount = clamp(locomotion / 4.4, 0, 1);
+  tailTime += dt * (1 + amount*.36);
+  if (amount > .05) walkTime += dt * (6 + amount * 6);
+  const gait = Math.sin(walkTime);
+  const step = {
+    leg_front_left:gait, leg_hind_right:gait,
+    leg_front_right:-gait, leg_hind_left:-gait,
+  };
+  const swipeProgress = swipeTime > 0 ? 1-swipeTime/.42 : 0;
+  const swipeName = swipeSide > 0 ? 'leg_front_right' : 'leg_front_left';
+  for (const [name, part] of Object.entries(legPivots)) {
+    if (!part) continue;
+    const rest = legRest[name];
+    let bend = (step[name] || 0) * .52 * amount;
+    let sweep = 0;
+    if (leap?.phase === 'crouch') bend = name.includes('front') ? .55 : -.52;
+    if (leap?.phase === 'air') bend = name.includes('front') ? .86 : -.80;
+    if (leap?.phase === 'land') bend = (name.includes('front') ? .42 : -.36)
+      * (1 - smoothstep(0,.22,leap.time));
+    if (swipeTime > 0 && name === swipeName) {
+      bend += Math.sin(swipeProgress*Math.PI) * 1.05;
+      sweep = (swipeSide > 0 ? 1 : -1) * Math.cos(swipeProgress*Math.PI) * .72;
+    }
+    const a = 1-Math.exp(-dt*24);
+    part.rotation.x += (rest.x+bend-part.rotation.x)*a;
+    part.rotation.z += (rest.z+sweep-part.rotation.z)*a;
+  }
+  if (tailPivot) {
+    const lift = leap?.phase === 'air' ? -.22 : 0;
+    tailPivot.rotation.y += (Math.sin(tailTime*2.1)*.12-tailPivot.rotation.y)
+      * (1-Math.exp(-dt*7));
+    tailPivot.rotation.x += (lift-tailPivot.rotation.x)*(1-Math.exp(-dt*8));
+  }
+  if (tailMesh && tailBasePositions) {
+    const position = tailMesh.geometry.attributes.position;
+    const flick = swipeTime > 0 || leap ? .23 : .10 + amount*.12;
+    for (let i=0;i<position.count;i++) {
+      const at = i*3;
+      const s = clamp(tailBasePositions[at+2]/1.37,0,1);
+      const bend = s*s;
+      position.setXYZ(i,
+        tailBasePositions[at] + bend*(Math.sin(tailTime*2.9-s*2.8)*flick
+          + Math.sin(tailTime*7.4-s*4.3)*.055),
+        tailBasePositions[at+1] + bend*Math.sin(tailTime*2.3-s*2.0)*.075,
+        tailBasePositions[at+2]);
+    }
+    position.needsUpdate = true;
+    tailMesh.geometry.computeVertexNormals();
+  }
+}
+
 function updateCat(dt) {
-  const moving = Number(keys.has('KeyW') || keys.has('ArrowUp')) - Number(keys.has('KeyS') || keys.has('ArrowDown'));
-  const strafing = Number(keys.has('KeyD') || keys.has('ArrowRight')) - Number(keys.has('KeyA') || keys.has('ArrowLeft'));
-  const forward = v1.set(Math.sin(yaw),0,-Math.cos(yaw));
-  const right = v2.set(Math.cos(yaw),0,Math.sin(yaw));
-  const direction = new THREE.Vector3().addScaledVector(forward,moving).addScaledVector(right,strafing);
-  if (direction.lengthSq() > 0) direction.normalize();
+  const moving = Number(keys.has('KeyW') || keys.has('ArrowUp'))
+    - Number(keys.has('KeyS') || keys.has('ArrowDown'));
+  const turning = Number(keys.has('KeyD') || keys.has('ArrowRight'))
+    - Number(keys.has('KeyA') || keys.has('ArrowLeft'));
+  if (moving) catFacing += turning * dt * 2.25;
+  else if (turning) cameraOrbit = clamp(cameraOrbit+turning*dt*.28,-.28,.28);
+  headLook += ((moving ? 0 : turning*.65)-headLook)*(1-Math.exp(-dt*9));
+  if (headPivot) headPivot.rotation.y = -headLook;
+  const direction = new THREE.Vector3(Math.sin(catFacing),0,-Math.cos(catFacing))
+    .multiplyScalar(moving);
+  updateLeap(dt);
   const speed = pounceTime > 0 ? 10.5 : keys.has('ShiftLeft') ? 2.2 : 4.4;
   const old = cat.position.clone();
-  cat.position.addScaledVector(direction, speed * dt);
+  cat.position.addScaledVector(direction, speed * dt * (leap?.phase === 'crouch' ? .45 : 1));
   if (pounceTime > 0) {
     const pounceForward = new THREE.Vector3(Math.sin(catFacing),0,-Math.cos(catFacing));
     cat.position.addScaledVector(pounceForward, (direction.lengthSq() > 0 ? 3 : 8) * dt);
     pounceTime = Math.max(0,pounceTime-dt);
   }
   resolveObstacles(old);
-  if (direction.lengthSq() > .1) catFacing = angleApproach(catFacing, angleTo(direction.x,direction.z), dt*11);
-  cat.rotation.y = catFacing;
-  verticalVelocity -= 16 * dt;
-  catHeight = Math.max(0, catHeight + verticalVelocity * dt);
-  if (catHeight === 0) verticalVelocity = 0;
-  cat.position.y = catHeight + (direction.lengthSq() > .1 && catHeight === 0 ? Math.sin(walkTime*13)*.035 : 0);
-  if (direction.lengthSq() > .1) walkTime += dt;
-  let legIndex = 0;
-  cat.traverse((o) => {
-    if (!o.name.startsWith('leg')) return;
-    o.rotation.x = direction.lengthSq() > .1 ? Math.sin(walkTime*12 + legIndex*Math.PI)*.23 : 0;
-    legIndex++;
-  });
+  // A/D steer while walking; at rest they look and pan without spinning Tiger.
+  // Three.js positive yaw sends local -Z toward -X.
+  cat.rotation.y = -catFacing;
+  animateRig(dt,moving ? speed : 0);
+  let stretch = 1;
+  if (leap?.phase === 'crouch') stretch = 1 - .17 * smoothstep(0,.17,leap.time);
+  if (leap?.phase === 'air') stretch = verticalVelocity > 0 ? 1.08 : .96;
+  if (leap?.phase === 'land') stretch = .83 + .17 * smoothstep(0,.22,leap.time);
+  cat.scale.set(1,stretch,1);
+  cat.position.y = catHeight + (moving && catHeight === 0 ? Math.sin(walkTime*2)*.025 : 0);
   if (swipeTime > 0) {
     swipeTime = Math.max(0,swipeTime-dt);
-    cat.rotation.z = Math.sin((1-swipeTime/.3)*Math.PI)*.17;
+    cat.rotation.z = Math.sin((1-swipeTime/.42)*Math.PI)*.08;
   } else cat.rotation.z = 0;
   cat.visible = invincible <= 0 || Math.floor(invincible*10)%2 === 0;
   catShadow.visible = true;
@@ -424,7 +590,7 @@ function updateAnts(dt, time) {
       const speed = chase ? 1.05 : .62;
       ant.model.position.x += dx/dist * speed*dt;
       ant.model.position.z += dz/dist * speed*dt;
-      ant.model.rotation.y = angleApproach(ant.model.rotation.y,angleTo(dx,dz),dt*7);
+      ant.model.rotation.y = angleApproach(ant.model.rotation.y,-angleTo(dx,dz),dt*7);
     }
     ant.model.position.y = Math.sin(time*9+ant.phase)*.025 + (ant.hitCooldown>0 ? Math.sin(time*34)*.05 : 0);
     if (chase && distance < .78 && ant.attackCooldown <= 0 && catHeight < .5 && pounceTime <= 0) {
@@ -432,31 +598,90 @@ function updateAnts(dt, time) {
     }
   });
 }
+function cameraClearDistance(anchor, destination, obstacles=cameraObstacles) {
+  const toward = destination.clone().sub(anchor);
+  const distance = toward.length();
+  cameraRay.set(anchor,toward.normalize());
+  cameraRay.near = .35;
+  cameraRay.far = distance;
+  const hit = cameraRay.intersectObjects(obstacles,false)[0];
+  return hit ? Math.max(.35,hit.distance-.35) : distance;
+}
 function updateCamera(dt) {
-  const porch = clamp((cat.position.z - 11) / 5, 0, 1);
-  const behind = new THREE.Vector3(-Math.sin(yaw)*9.8, 7.3 - porch*2.7, Math.cos(yaw)*9.8);
-  const wanted = cat.position.clone().add(behind);
-  wanted.x = clamp(wanted.x,-18.7,18.7);
-  wanted.z = clamp(wanted.z,-18.7,19.1);
-  camera.position.lerp(wanted,1-Math.exp(-dt*5));
-  const target = cat.position.clone().add(new THREE.Vector3(0,1.2,0));
-  camera.lookAt(target);
+  if (!dragging) cameraOrbit *= Math.exp(-dt*.42);
+  cameraYaw = angleApproach(cameraYaw,catFacing+cameraOrbit,1-Math.exp(-dt*3.2));
+  const anchor = cat.position.clone().add(new THREE.Vector3(0,1.05,0));
+  const inShrub = hiddenInBush();
+  const choices = [
+    { turn:0, height:6.25, distance:8.2, penalty:inShrub ? .14 : 0 },
+    { turn:0, height:8.4, distance:7.6, penalty:inShrub ? 0 : .08 },
+    { turn:.48, height:6.8, distance:7.8, penalty:.13 },
+    { turn:-.48, height:6.8, distance:7.8, penalty:.13 },
+  ];
+  let best = null;
+  for (const choice of choices) {
+    const angle = cameraYaw+choice.turn;
+    const candidate = new THREE.Vector3(
+      cat.position.x-Math.sin(angle)*choice.distance,
+      choice.height,
+      cat.position.z+Math.cos(angle)*choice.distance,
+    );
+    candidate.x = clamp(candidate.x,-18.5,31.7);
+    candidate.z = clamp(candidate.z,-18.5,17.2);
+    const length = candidate.distanceTo(anchor);
+    const clear = cameraClearDistance(anchor,candidate);
+    // Leaves are soft occluders: prefer a clear angle or a higher view, but
+    // never push the camera onto Tiger just because he entered a shrub.
+    const softClear = cameraClearDistance(anchor,candidate,cameraFoliage);
+    const score = clear/length-choice.penalty
+      - (softClear<length ? .14*(1-softClear/length) : 0);
+    if (!best || score>best.score) {
+      best = { score, candidate, clear, length };
+    }
+  }
+  const wanted = best.candidate;
+  if (best.clear < best.length) {
+    wanted.copy(anchor).lerp(wanted,Math.max(1.5,best.clear)/best.length);
+  }
+  const closing = camera.position.distanceTo(anchor) > wanted.distanceTo(anchor);
+  camera.position.lerp(wanted,1-Math.exp(-dt*(closing ? 10 : 4)));
+  // The smooth path can itself cross a branch or wall: keep the final point clear.
+  const visibleDistance = cameraClearDistance(anchor,camera.position);
+  const actualDistance = camera.position.distanceTo(anchor);
+  if (visibleDistance < actualDistance) {
+    camera.position.copy(anchor).lerp(camera.position,Math.max(1.5,visibleDistance)/actualDistance);
+  }
+  const forward = new THREE.Vector3(Math.sin(catFacing),0,-Math.cos(catFacing));
+  const target = anchor.addScaledVector(forward,.72);
+  cameraFocus.lerp(target,1-Math.exp(-dt*7));
+  camera.lookAt(cameraFocus);
 }
 function animate() {
   const dt = Math.min(clock.getDelta(), .05);
   const time = clock.elapsedTime;
   if (mode === 'intro') {
     introTime += dt;
-    const t = clamp(introTime/1.55,0,1);
-    cat.position.z = 19.7 - t*2.7;
-    cat.scale.setScalar(.55 + .45*t);
-    cat.position.y = Math.sin(t*Math.PI)*.04;
+    const t = clamp(introTime/3.55,0,1);
+    const reveal = smoothstep(3.25,5.35,introTime);
+    cat.position.z = 25 - t*8.4 - reveal*7.1;
+    const throughFlap = smoothstep(23.2,20.0,cat.position.z)
+      * (1-smoothstep(19.3,17.6,cat.position.z));
+    cat.scale.set(1,1-.10*throughFlap,1);
+    animateRig(dt,3.5);
+    cat.position.y = Math.sin(walkTime*2)*.018;
     catShadow.visible = true;
     catShadow.position.set(cat.position.x,.018,cat.position.z);
-    const targetCam = new THREE.Vector3(3.8,3.5,15.4);
-    camera.position.lerp(targetCam,dt*3);
-    camera.lookAt(cat.position.x,.8,cat.position.z);
-    if (t >= 1) { mode = 'playing'; cat.position.z=17; cat.scale.setScalar(1); showToast('Find the soldier ants!'); }
+    flapHinge.rotation.x = smoothstep(23.8,21.7,cat.position.z) * 1.28;
+    const cameraOffset = 3.9-1.5*smoothstep(21,18,cat.position.z);
+    const lowCamera = new THREE.Vector3(0,1.48,cat.position.z+cameraOffset);
+    const highCamera = new THREE.Vector3(1.5,6.3,17.2);
+    camera.position.copy(lowCamera.lerp(highCamera,reveal));
+    camera.lookAt(new THREE.Vector3(0,1.04,cat.position.z-4.4)
+      .lerp(new THREE.Vector3(0,1.2,cat.position.z-3.1),reveal));
+    if (introTime >= 5.35) {
+      mode = 'playing'; cat.position.z=9.5; cat.scale.set(1,1,1);
+      showToast('The backyard is yours to explore!');
+    }
   } else if (mode === 'playing') {
     swipeCooldown = Math.max(0,swipeCooldown-dt);
     invincible = Math.max(0,invincible-dt);
@@ -470,6 +695,7 @@ function animate() {
     updateCat(dt);
     updateAnts(dt,time);
     updateCamera(dt);
+    if (flapHinge) flapHinge.rotation.x *= Math.exp(-dt*1.5);
     updateStatus();
   } else if (mode === 'title' && cat) {
     camera.position.set(13,13,14);
@@ -483,6 +709,11 @@ function animate() {
     if (fx.age>=fx.life) { scene.remove(fx.mesh); fx.mesh.geometry.dispose(); fx.mesh.material.dispose(); effects.splice(i,1); }
   }
   if (toastTime > 0) { toastTime-=dt; if (toastTime<=0) ui.toast.classList.add('hidden'); }
+  worldTime += dt;
+  for (const uniforms of windMaterials) {
+    uniforms.windTime.value = worldTime;
+    if (cat) uniforms.catWorld.value.set(cat.position.x,cat.position.z);
+  }
   renderer.render(scene,camera);
 }
 renderer.setAnimationLoop(animate);
