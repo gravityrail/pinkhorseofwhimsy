@@ -82,6 +82,7 @@ const cameraRay = new THREE.Raycaster();
 const cameraObstacles = [];
 const cameraFoliage = [];
 const patioCanopy = [];
+const roofRay = new THREE.Raycaster();
 const windMaterials = [];
 let worldTime = 0;
 let catFacing = 0;
@@ -217,6 +218,7 @@ try {
     if (/Patio canopy roof/.test(name)) {
       obj.material.transparent = true;
       obj.material.depthWrite = false;
+      obj.material.side = THREE.DoubleSide;
       patioCanopy.push(obj);
     }
     if (/Leaf green|Sunlit leaf|Deep leaf|Grass blades/.test(name)) {
@@ -751,9 +753,17 @@ function animate() {
     uniforms.windTime.value = worldTime;
     if (cat) uniforms.catWorld.value.set(cat.position.x,cat.position.z);
   }
+  let canopyBlocksTiger = false;
+  if (cat && (mode === 'intro' || mode === 'playing')) {
+    const toTiger = cat.position.clone().add(new THREE.Vector3(0,1.05,0)).sub(camera.position);
+    const distance = toTiger.length();
+    roofRay.set(camera.position,toTiger.normalize());
+    roofRay.near = .05;
+    roofRay.far = distance - .20;
+    canopyBlocksTiger = roofRay.intersectObjects(patioCanopy,false).length > 0;
+  }
   for (const roof of patioCanopy) {
-    const inCameraPath=mode!=='title' && camera.position.z>11 && camera.position.z<24
-      && Math.abs(camera.position.x)<14;
+    const inCameraPath=canopyBlocksTiger;
     const wanted=inCameraPath ? 0 : 1;
     roof.material.opacity += (wanted-roof.material.opacity)*(1-Math.exp(-dt*14));
     roof.castShadow = !inCameraPath;

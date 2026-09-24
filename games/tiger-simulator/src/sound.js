@@ -121,38 +121,51 @@ export class GameSound {
   }
   swipe() {
     if (!this.ctx || this.muted) return;
-    this.noiseHit(this.ctx.currentTime,.16,.10,1900);
-    this.voice('meow');
-  }
-  voice(kind) {
-    if (!this.ctx || this.muted) return;
     const t=this.ctx.currentTime;
-    const meow=kind==='meow';
-    const length=meow?.43:.23;
-    const osc=this.ctx.createOscillator(); osc.type='sawtooth';
-    const start=meow?370:225;
-    osc.frequency.setValueAtTime(start,t);
-    osc.frequency.exponentialRampToValueAtTime(meow?550:180,t+length*.38);
-    osc.frequency.exponentialRampToValueAtTime(meow?335:145,t+length);
-    const voice=this.ctx.createGain();
-    voice.gain.setValueAtTime(.0001,t);
-    voice.gain.exponentialRampToValueAtTime(meow?.13:.12,t+.035);
-    voice.gain.setValueAtTime(meow?.13:.12,t+length*.55);
-    voice.gain.exponentialRampToValueAtTime(.0001,t+length);
-    const low=this.ctx.createBiquadFilter(); low.type='lowpass'; low.frequency.value=meow?1850:1000;
-    const vowel=this.ctx.createBiquadFilter(); vowel.type='peaking';
-    vowel.frequency.value=meow?780:550; vowel.Q.value=1.0; vowel.gain.value=8;
-    osc.connect(low).connect(vowel).connect(voice).connect(this.effects);
-    osc.start(t); osc.stop(t+length+.02);
+    const air=this.ctx.createBufferSource(); air.buffer=this.noise;
+    const filter=this.ctx.createBiquadFilter(); filter.type='bandpass'; filter.Q.value=.65;
+    filter.frequency.setValueAtTime(650,t);
+    filter.frequency.exponentialRampToValueAtTime(2300,t+.10);
+    filter.frequency.exponentialRampToValueAtTime(920,t+.22);
+    const envelope=this.ctx.createGain();
+    envelope.gain.setValueAtTime(.0001,t);
+    envelope.gain.linearRampToValueAtTime(.075,t+.075);
+    envelope.gain.exponentialRampToValueAtTime(.0001,t+.23);
+    air.connect(filter).connect(envelope).connect(this.effects);
+    air.start(t); air.stop(t+.24);
   }
   effort() {
-    this.voice('effort');
+    if (!this.ctx || this.muted) return;
+    const t=this.ctx.currentTime;
+    const length=.23;
+    const osc=this.ctx.createOscillator(); osc.type='sawtooth';
+    osc.frequency.setValueAtTime(225,t);
+    osc.frequency.exponentialRampToValueAtTime(180,t+length*.38);
+    osc.frequency.exponentialRampToValueAtTime(145,t+length);
+    const voice=this.ctx.createGain();
+    voice.gain.setValueAtTime(.0001,t);
+    voice.gain.exponentialRampToValueAtTime(.12,t+.035);
+    voice.gain.setValueAtTime(.12,t+length*.55);
+    voice.gain.exponentialRampToValueAtTime(.0001,t+length);
+    const low=this.ctx.createBiquadFilter(); low.type='lowpass'; low.frequency.value=1000;
+    const vowel=this.ctx.createBiquadFilter(); vowel.type='peaking';
+    vowel.frequency.value=550; vowel.Q.value=1.0; vowel.gain.value=8;
+    osc.connect(low).connect(vowel).connect(voice).connect(this.effects);
+    osc.start(t); osc.stop(t+length+.02);
   }
   hit() {
     if (!this.ctx || this.muted) return;
     const t=this.ctx.currentTime;
-    this.tone(440,t,.14,.16,this.effects,'triangle');
-    this.tone(660,t+.055,.18,.10,this.effects,'sine');
+    const thump=this.ctx.createOscillator(); thump.type='sine';
+    thump.frequency.setValueAtTime(175,t);
+    thump.frequency.exponentialRampToValueAtTime(72,t+.17);
+    const envelope=this.ctx.createGain();
+    envelope.gain.setValueAtTime(.0001,t);
+    envelope.gain.exponentialRampToValueAtTime(.20,t+.012);
+    envelope.gain.exponentialRampToValueAtTime(.0001,t+.18);
+    thump.connect(envelope).connect(this.effects);
+    thump.start(t); thump.stop(t+.20);
+    this.noiseHit(t,.065,.045,350);
   }
   update(mode, walkTime, walking, grounded, surface, cat, ants) {
     if (!this.ctx || this.ctx.state!=='running') return;
