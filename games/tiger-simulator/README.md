@@ -1,6 +1,6 @@
 # Tiger Simulator
 
-A first-pass 3D browser game starring Tiger, based on the supplied backyard and Tiger photos. Tiger walks from inside the house through the cat flap into a cat-scale yard with a tree, brick ring, string lights, covered patio, flower planter, potted flowers, L-shaped seating, fences, garage, dark pickup, and leafy cover.
+A first-pass 3D browser game starring Tiger, based on the supplied backyard and Tiger photos. Tiger walks from inside the house through the cat flap into a cat-scale yard with a tree, brick ring, string lights anchored to the patio roof's yard-facing corners, covered patio, flower planter, potted flowers, L-shaped seating, fences, garage, dark pickup, and leafy cover.
 
 ## Run locally
 

@@ -551,14 +551,17 @@ for i in range(13):
     cube("patio grout", (-11.4+i*1.9,-17.8,.103), (.025,4.4,.01), brick_light)
 # The photographed patio has an angled canopy. Three timber supports sit on
 # concrete plinths; the center walkway from the cat flap stays clear.
+PATIO_CORNER_X=11.4
+PATIO_FRONT_Y=-14.88
+PATIO_FRONT_Z=5.27
 awning=cube('angled patio canopy',(0,-17.5,6.16),(24.0,5.4,.19),patio_roof)
 awning.rotation_euler.x=-math.atan2(1.82,5.4)
 for x in (-10.3,-4.4,10.3):
     cube('patio post concrete block',(x,-14.95,.38),(.64,.64,.76),concrete,.05)
     cube('patio timber post',(x,-14.95,3.01),(.23,.23,4.58),wood,.035)
     rod('patio diagonal strut',(x,-14.95,4.56),(x,-16.18,5.9),.075,wood,8)
-for x in (-11.4,11.4):
-    rod('patio side fascia',(x,-20.13,7.05),(x,-14.88,5.27),.11,wood,8)
+for x in (-PATIO_CORNER_X,PATIO_CORNER_X):
+    rod('patio side fascia',(x,-20.13,7.05),(x,PATIO_FRONT_Y,PATIO_FRONT_Z),.11,wood,8)
 
 def outdoor_bench(label,x,y,length,along_x=True):
     if along_x:
@@ -733,15 +736,17 @@ for j,(sx,sy) in enumerate(shrub_centers):
 
 finish_surface_leaves()
 
-# String lights from the house to the tree.
-for sx in (-8,8):
-    prev=(sx,-19.4,5.55)
-    dest=(sx*.20,2.5,6.7)
+# String lights tie directly to the yard-facing corners of the patio roof.
+for side in (-1,1):
+    sx=side*PATIO_CORNER_X
+    anchor=(sx,PATIO_FRONT_Y,PATIO_FRONT_Z)
+    uv('string light roof eyelet',anchor,(.07,.07,.07),silver,10,6)
+    dest=(side*2.28,2.5,6.7)
+    last=anchor
     for i in range(1,13):
         t=i/12
-        p=(prev[0]*(1-t)+dest[0]*t, prev[1]*(1-t)+dest[1]*t,
-           prev[2]*(1-t)+dest[2]*t-1.0*math.sin(math.pi*t))
-        if i==1: last=prev
+        p=(anchor[0]*(1-t)+dest[0]*t, anchor[1]*(1-t)+dest[1]*t,
+           anchor[2]*(1-t)+dest[2]*t-1.0*math.sin(math.pi*t))
         rod("string light cable", last,p,.009,brown_dark,5)
         if i%2==0:
             rod("bulb stem", p, (p[0],p[1],p[2]-.13), .022,black,6)
