@@ -91,6 +91,10 @@ document.addEventListener('pointerdown', (event) => {
   if (event.pointerType === 'touch') enableTouchControls();
 }, true);
 document.addEventListener('touchstart', enableTouchControls, { passive: true, capture: true });
+const gameRoot=document.getElementById('app');
+gameRoot.addEventListener('selectstart', (event) => event.preventDefault());
+gameRoot.addEventListener('dragstart', (event) => event.preventDefault());
+gameRoot.addEventListener('contextmenu', (event) => event.preventDefault());
 let cat = null;
 let flapHinge = null;
 let tailPivot = null;
@@ -691,7 +695,6 @@ window.addEventListener('blur', () => {
   keys.clear();
   if (leap?.phase === 'crouch') leap = null;
 });
-canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 canvas.addEventListener('pointerdown', (e) => {
   if (e.button === 0 && mode === 'playing' && e.pointerType !== 'touch') {
     keys.add('MouseSwipe'); trySwipe();
