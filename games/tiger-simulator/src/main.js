@@ -59,6 +59,24 @@ function updateSoundButton() {
 updateSoundButton();
 ui.sound.addEventListener('click', () => { sound.setMuted(!sound.muted); updateSoundButton(); });
 let mode = 'loading';
+// Some in-car browsers expose a fine primary pointer despite having a touchscreen.
+// A real touch event is the fallback when their capability hints are missing.
+let touchEnabled = navigator.maxTouchPoints > 0 ||
+  matchMedia('(any-pointer: coarse)').matches || /Tesla/i.test(navigator.userAgent);
+document.documentElement.classList.toggle('touch-enabled', touchEnabled);
+function showTouchControls() {
+  ui.touch.classList.toggle('hidden', !touchEnabled || (mode !== 'intro' && mode !== 'playing'));
+}
+function enableTouchControls() {
+  if (touchEnabled) return;
+  touchEnabled = true;
+  document.documentElement.classList.add('touch-enabled');
+  showTouchControls();
+}
+document.addEventListener('pointerdown', (event) => {
+  if (event.pointerType === 'touch') enableTouchControls();
+}, true);
+document.addEventListener('touchstart', enableTouchControls, { passive: true, capture: true });
 let cat = null;
 let flapHinge = null;
 let tailPivot = null;
@@ -335,7 +353,7 @@ function startGame() {
   ui.start.classList.add('hidden');
   ui.hud.classList.remove('hidden');
   ui.controls.classList.remove('hidden');
-  if (matchMedia('(pointer: coarse)').matches) ui.touch.classList.remove('hidden');
+  showTouchControls();
   cat.position.set(0,0,25);
   cat.rotation.set(0,0,0);
   camera.position.set(0,1.48,28.9);
