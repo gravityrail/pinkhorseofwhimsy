@@ -14,5 +14,17 @@ html,body,#app,canvas,.touch-controls,.touch-controls button{touch-action:none}.
   .touch-enabled .touch-controls{left:30px;right:30px}
   .touch-enabled .touch-controls .dpad button{min-width:68px;min-height:68px}
   .touch-enabled .touch-controls .actions{grid-template-columns:repeat(2,92px);grid-template-rows:repeat(2,68px)}
-  .touch-enabled .touch-controls .actions button{min-height:68px}
+.touch-enabled .touch-controls .actions button{min-height:68px}
 }
+
+.debug-panel{position:absolute;z-index:8;top:165px;right:26px;width:226px;padding:12px;border:1px solid #91cde6a8;border-radius:11px;background:#0d2535e8;color:#e9f8ff;box-shadow:0 8px 28px #07131c88;font:700 11px 'DM Sans',sans-serif;letter-spacing:.035em}
+.debug-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;color:#66d2ff;letter-spacing:.16em}
+.debug-heading span{font-size:9px;color:#b3d0dd;letter-spacing:.09em}
+.debug-row{display:flex;gap:5px;margin-bottom:7px}
+.debug-panel select,.debug-panel button{min-height:37px;border:1px solid #8ac8e599;border-radius:6px;background:#1d4052;color:#f0fbff;font:700 11px 'DM Sans',sans-serif;padding:6px;touch-action:manipulation}
+.debug-panel select{min-width:0;flex:1}
+.debug-panel button{cursor:pointer}
+.debug-panel button:hover{background:#28607c}
+.debug-panel button:disabled{opacity:.45;cursor:wait}
+.debug-defeat{width:100%}
+@media(max-width:700px){.debug-panel{top:118px;right:12px;width:190px;padding:9px}.debug-heading{margin-bottom:6px}.debug-row{gap:3px}.debug-panel select,.debug-panel button{font-size:10px;min-height:40px}}
