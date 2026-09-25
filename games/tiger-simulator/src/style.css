@@ -34,3 +34,11 @@ html,body,#app,canvas,.touch-controls,.touch-controls button{touch-action:none}.
 .jump-charge-fill{width:0;height:100%;border-radius:5px;background:linear-gradient(90deg,#f7cc6e,#ff8745);box-shadow:0 0 7px #ffc76e}
 .jump-charge.full .jump-charge-fill{background:linear-gradient(90deg,#ffd365,#79e9ff);box-shadow:0 0 12px #74edff}
 .jump-charge span{display:block;margin-top:3px;color:#fff1c6;font:800 10px 'DM Sans',sans-serif;letter-spacing:.10em}
+
+/* Long presses must stay game input, including on browsers that report a fine pointer. */
+html,body,#app,#app *{
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-touch-callout:none;
+  -webkit-tap-highlight-color:transparent;
+}
