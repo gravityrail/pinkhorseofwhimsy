@@ -28,3 +28,9 @@ html,body,#app,canvas,.touch-controls,.touch-controls button{touch-action:none}.
 .debug-panel button:disabled{opacity:.45;cursor:wait}
 .debug-defeat{width:100%}
 @media(max-width:700px){.debug-panel{top:118px;right:12px;width:190px;padding:9px}.debug-heading{margin-bottom:6px}.debug-row{gap:3px}.debug-panel select,.debug-panel button{font-size:10px;min-height:40px}}
+
+.jump-charge{position:absolute;z-index:6;width:112px;transform:translate(-50%,-50%);pointer-events:none;text-align:center;filter:drop-shadow(0 2px 4px #10201a)}
+.jump-charge-track{height:11px;padding:2px;border:1px solid #fff7d5;border-radius:9px;background:#123322de;overflow:hidden}
+.jump-charge-fill{width:0;height:100%;border-radius:5px;background:linear-gradient(90deg,#f7cc6e,#ff8745);box-shadow:0 0 7px #ffc76e}
+.jump-charge.full .jump-charge-fill{background:linear-gradient(90deg,#ffd365,#79e9ff);box-shadow:0 0 12px #74edff}
+.jump-charge span{display:block;margin-top:3px;color:#fff1c6;font:800 10px 'DM Sans',sans-serif;letter-spacing:.10em}

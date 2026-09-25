@@ -167,6 +167,24 @@ export class GameSound {
     thump.start(t); thump.stop(t+.20);
     this.noiseHit(t,.065,.045,350);
   }
+  acWake() {
+    if (!this.ctx || this.muted) return;
+    const t=this.ctx.currentTime;
+    this.noiseHit(t,.24,.075,340);
+    for (let i=0;i<3;i++) {
+      const at=t+i*.19;
+      const osc=this.tone(92+i*33,at,.23,.095,this.effects,'sawtooth');
+      if (osc) osc.frequency.exponentialRampToValueAtTime(65+i*38,at+.22);
+    }
+  }
+  acStomp(final=false) {
+    if (!this.ctx || this.muted) return;
+    const t=this.ctx.currentTime;
+    const osc=this.tone(final ? 125 : 215,t,final ? .65 : .30,.13,this.effects,'triangle');
+    if (osc) osc.frequency.exponentialRampToValueAtTime(final ? 45 : 95,
+      t+(final ? .64 : .29));
+    this.noiseHit(t,final ? .22 : .09,final ? .09 : .045,final ? 300 : 650);
+  }
   update(mode, walkTime, walking, grounded, surface, cat, ants) {
     if (!this.ctx || this.ctx.state!=='running') return;
     if (mode==='intro' || mode==='playing') this.scheduleMusic();
