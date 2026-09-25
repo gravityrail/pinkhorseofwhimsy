@@ -16,7 +16,7 @@ renderer.toneMappingExposure = 1.20;
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xb6d7ae);
 scene.fog = new THREE.Fog(0xb6d7ae, 31, 78);
-const camera = new THREE.PerspectiveCamera(57, innerWidth / innerHeight, .1, 110);
+const camera = new THREE.PerspectiveCamera(57, innerWidth / innerHeight, .1, 190);
 camera.position.set(13, 13, 14);
 camera.lookAt(0, 1, -2);
 
@@ -33,6 +33,7 @@ sun.shadow.camera.near = 1;
 sun.shadow.camera.far = 65;
 sun.shadow.bias = -.0004;
 scene.add(sun);
+scene.add(sun.target);
 const fill = new THREE.DirectionalLight(0xc9e9ca, .5);
 fill.position.set(15, 10, -14);
 scene.add(fill);
@@ -47,10 +48,20 @@ const ui = {
   lifeCount: document.getElementById('life-count'),
   lives: document.getElementById('lives'),
   antCount: document.getElementById('ant-count'),
+  missionLabel: document.querySelector('.mission-label'),
+  mission: document.querySelector('.mission'),
   status: document.getElementById('status'),
   toast: document.getElementById('toast'),
   sound: document.getElementById('sound-toggle'),
+  debugPanel: document.getElementById('debug-panel'),
+  debugLevel: document.getElementById('debug-level'),
+  debugJump: document.getElementById('debug-jump'),
+  debugDefeat: document.getElementById('debug-defeat'),
 };
+// Development tools are visible by default during this first-pass build.
+// Append ?debug=0 to the URL for a clean play view.
+const debugEnabled = new URLSearchParams(location.search).get('debug') !== '0';
+ui.debugPanel.classList.toggle('hidden',!debugEnabled);
 const sound = new GameSound();
 function updateSoundButton() {
   ui.sound.textContent = sound.muted ? 'SOUND OFF' : 'SOUND ON';
@@ -59,6 +70,24 @@ function updateSoundButton() {
 updateSoundButton();
 ui.sound.addEventListener('click', () => { sound.setMuted(!sound.muted); updateSoundButton(); });
 let mode = 'loading';
+// Some in-car browsers expose a fine primary pointer despite having a touchscreen.
+// A real touch event is the fallback when their capability hints are missing.
+let touchEnabled = navigator.maxTouchPoints > 0 ||
+  matchMedia('(any-pointer: coarse)').matches || /Tesla/i.test(navigator.userAgent);
+document.documentElement.classList.toggle('touch-enabled', touchEnabled);
+function showTouchControls() {
+  ui.touch.classList.toggle('hidden', !touchEnabled || (mode !== 'intro' && mode !== 'playing'));
+}
+function enableTouchControls() {
+  if (touchEnabled) return;
+  touchEnabled = true;
+  document.documentElement.classList.add('touch-enabled');
+  showTouchControls();
+}
+document.addEventListener('pointerdown', (event) => {
+  if (event.pointerType === 'touch') enableTouchControls();
+}, true);
+document.addEventListener('touchstart', enableTouchControls, { passive: true, capture: true });
 let cat = null;
 let flapHinge = null;
 let tailPivot = null;
@@ -103,6 +132,10 @@ let lastHardContact = null;
 let hardImpactCooldown = 0;
 let dragging = false;
 let dragX = 0;
+let level = 1;
+let transition = null;
+let levelPad = null;
+const PAD_POSITION = new THREE.Vector3(20.2, 0, 16.8);
 
 const bushes = [
   [-16,15],[-15,10],[-17,3],[-15,-9],[-13,-16],
@@ -114,7 +147,7 @@ const antStarts = [
 ];
 // These bounds include room for Tiger's body around the modeled solids.
 const solidBoxes = [
-  ['garage',19.1,32.5,-2.5,9.7,Infinity],
+  ['garage',19.1,32.5,-2.5,11.05,Infinity],
   ['pickup',22.7,27.3,11.0,20.5,Infinity],
   ['planter and bench',3.8,8.35,13.95,17.1,.9],
   ['wall bench',-9.9,-4.6,18.0,19.1,.9],
@@ -124,6 +157,15 @@ const solidPosts = [
   ...[-10.3,-4.4,10.3].map((x) => ['patio post',x,14.95,.67,Infinity]),
   ...[[-11.3,18.35],[-2.6,18.4],[2.5,18.6],[11.1,18.4],[-11.2,16.0]]
     .map(([x,z]) => ['flower pot',x,z,.52,.65]),
+];
+const frontSolidBoxes = [
+  ['house',-13.5,13.5,21.5,58.4,Infinity],
+  ['air conditioner',13.2,17.35,45.55,48.75,1.8],
+];
+const frontSolidPosts = [
+  ['front tree',-8,79,1.15,Infinity],
+  ['front porch column',-5.5,63,.55,Infinity],
+  ['front porch column',5.5,63,.55,Infinity],
 ];
 
 function rand(seed) {
@@ -194,11 +236,16 @@ function updateHud() {
   ui.antCount.textContent = `${asleep} / ${ants.length}`;
 }
 function hiddenInBush() {
-  if (!cat) return false;
+  if (!cat || level !== 1) return false;
   return bushes.some(([x,z]) => Math.hypot(cat.position.x - x, cat.position.z - z) < 1.75);
 }
 function surfaceAt(position) {
   const {x,z} = position;
+  if (level === 2) {
+    if ((x > 17.4 && z < 98) || (Math.abs(x)<6.2 && z>=58.5 && z<65.3)
+        || (Math.abs(x)<1.55 && z<96 && z>=64.5)) return 'concrete';
+    return 'grass';
+  }
   if (z > 20 && Math.abs(x) < 12.2) return 'wood';
   const ringDistance = Math.hypot(x,z+2.5);
   if (ringDistance > 2.9 && ringDistance < 3.65) return 'concrete';
@@ -207,6 +254,13 @@ function surfaceAt(position) {
 }
 function hardSurfaceAt(position) {
   const {x,z} = position;
+  if (level === 2) {
+    if (x < -18.4 || x > 31.5 || z < 22.8 || z > 95.5) return true;
+    if (frontSolidBoxes.some(([,minX,maxX,minZ,maxZ,height]) => catHeight<=height
+        && x>minX && x<maxX && z>minZ && z<maxZ)) return true;
+    return frontSolidPosts.some(([,px,pz,radius,height]) => catHeight<=height
+      && Math.hypot(x-px,z-pz)<radius);
+  }
   if (x < -18.4 || x > 31.5 || z < -18.4 || z > 18.55) return true;
   if (Math.hypot(x,z+2.5) < 1.05) return true;
   if (solidBoxes.some(([,minX,maxX,minZ,maxZ,height]) => catHeight<=height
@@ -219,8 +273,52 @@ function updateStatus() {
   const hidden = hiddenInBush();
   ui.status.textContent = hidden ? 'Hidden in the leaves'
     : leap?.phase === 'crouch' ? 'Ready to spring…'
-    : leap?.swipeOnLand ? 'Pouncing!' : 'Explore the jungle';
+    : leap?.swipeOnLand ? 'Pouncing!'
+    : level === 2 ? 'Explore the front yard'
+    : levelPad?.active ? 'The blue pad by the truck is ready' : 'Explore the jungle';
   ui.status.classList.toggle('hidden-status', hidden);
+}
+
+function makeLevelPad() {
+  const group = new THREE.Group();
+  group.position.copy(PAD_POSITION);
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(1.04,1.10,.13,48),
+    new THREE.MeshStandardMaterial({color:0x666d74,roughness:.5,metalness:.28,
+      emissive:0x000000,emissiveIntensity:0}));
+  base.position.y=.08; base.receiveShadow=true;
+  group.add(base);
+  const core = new THREE.Mesh(new THREE.CircleGeometry(.77,48),
+    new THREE.MeshBasicMaterial({color:0xbac0c5,side:THREE.DoubleSide}));
+  core.rotation.x=-Math.PI/2; core.position.y=.157;
+  group.add(core);
+  const canvas = document.createElement('canvas'); canvas.width=canvas.height=256;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#ffffff'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.font='900 133px system-ui'; ctx.fillText('↟',128,112);
+  ctx.font='900 32px system-ui'; ctx.fillText('NEXT',128,209);
+  const emblem=new THREE.Mesh(new THREE.PlaneGeometry(1.28,1.28),
+    new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(canvas),transparent:true,
+      opacity:.32,depthWrite:false,side:THREE.DoubleSide}));
+  emblem.rotation.x=-Math.PI/2; emblem.position.y=.165;
+  group.add(emblem);
+  const ring = new THREE.Mesh(new THREE.RingGeometry(1.07,1.25,48),
+    new THREE.MeshBasicMaterial({color:0x58d6ff,transparent:true,opacity:0,
+      blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+  ring.rotation.x=-Math.PI/2; ring.position.y=.174;
+  group.add(ring);
+  const light = new THREE.PointLight(0x4abfff,0,4.5);
+  light.position.y=.7; group.add(light);
+  scene.add(group);
+  levelPad={group,base,core,emblem,ring,light,active:false};
+}
+function setLevelPadActive() {
+  if (!levelPad || levelPad.active) return;
+  levelPad.active=true;
+  levelPad.base.material.color.setHex(0x164b85);
+  levelPad.base.material.emissive.setHex(0x0c71c0);
+  levelPad.base.material.emissiveIntensity=.85;
+  levelPad.core.material.color.setHex(0x35bfff);
+  levelPad.emblem.material.opacity=.92;
 }
 
 const loader = new GLTFLoader();
@@ -233,9 +331,9 @@ try {
   yard.traverse((obj) => {
     if (!obj.isMesh) return;
     obj.receiveShadow = true;
-    obj.castShadow = !/Lawn|Grass patch|Terracotta|Warm brick|Drive concrete/i.test(obj.material?.name || '');
+    obj.castShadow = !/Lawn|Grass patch|Terracotta|Warm brick|Drive concrete|Street asphalt|Utility poles and wires/i.test(obj.material?.name || '');
     const name = obj.material?.name || '';
-    if (/Leaf green|Sunlit leaf|Deep leaf/.test(name)) {
+    if (/Leaf green|Sunlit leaf|Deep leaf|Autumn .* leaf/.test(name)) {
       obj.material.transparent = false;
       obj.material.opacity = 1;
       obj.material.depthWrite = true;
@@ -251,7 +349,7 @@ try {
       obj.material.side = THREE.DoubleSide;
       patioCanopy.push(obj);
     }
-    if (/Leaf green|Sunlit leaf|Deep leaf|Grass blades/.test(name)) {
+    if (/Leaf green|Sunlit leaf|Deep leaf|Autumn .* leaf|Grass blades/.test(name)) {
       const isGrass = /Grass blades/.test(name);
       // Grass roots are authored at y=.012. Give them zero bend weight so a
       // gust rotates the silhouette above the ground instead of sliding it.
@@ -279,11 +377,12 @@ try {
       };
       obj.material.needsUpdate = true;
     }
-    if (!/Lawn|Grass patch|Grass blades|Leaf green|Sunlit leaf|Deep leaf|Terracotta brick|Warm brick|Drive concrete|Warm indoor floor|Patio canopy roof/i.test(name)) {
+    if (!/Lawn|Grass patch|Grass blades|Leaf green|Sunlit leaf|Deep leaf|Autumn .* leaf|Terracotta brick|Warm brick|Drive concrete|Street asphalt|Utility poles and wires|Warm indoor floor|Patio canopy roof/i.test(name)) {
       cameraObstacles.push(obj);
     }
   });
   scene.add(yard);
+  makeLevelPad();
   makeFlap("LET'S GO", '#332715', '#f4dc97');
   cat = catGltf.scene;
   // Yaw first keeps the jump pitch aligned with Tiger's heading at every angle.
@@ -321,6 +420,8 @@ try {
   ui.loading.classList.add('hidden');
   mode = 'title';
   updateHud();
+  ui.debugJump.disabled=false;
+  ui.debugDefeat.disabled=false;
 } catch (err) {
   console.error(err);
   ui.loading.textContent = 'Could not load the backyard models. Refresh to try again.';
@@ -335,7 +436,7 @@ function startGame() {
   ui.start.classList.add('hidden');
   ui.hud.classList.remove('hidden');
   ui.controls.classList.remove('hidden');
-  if (matchMedia('(pointer: coarse)').matches) ui.touch.classList.remove('hidden');
+  showTouchControls();
   cat.position.set(0,0,25);
   cat.rotation.set(0,0,0);
   camera.position.set(0,1.48,28.9);
@@ -345,6 +446,55 @@ function startGame() {
   cameraOrbit = 0;
   showToast('Follow Tiger through the cat flap…');
 }
+function showMissionForLevel() {
+  if (level===2) {
+    ui.missionLabel.textContent='FRONT YARD';
+    ui.mission.innerHTML='A whole new world <strong>↗</strong>';
+  } else {
+    ui.missionLabel.textContent='BACKYARD PATROL';
+    ui.mission.innerHTML='Soldier ants asleep <strong id="ant-count"></strong>';
+    ui.antCount=document.getElementById('ant-count');
+    updateHud();
+  }
+  ui.debugLevel.value=String(level);
+}
+function debugJumpToLevel(target) {
+  if (!debugEnabled || !cat) return;
+  sound.start();
+  keys.clear();
+  level=target; mode='playing'; transition=null; leap=null;
+  catHeight=0; verticalVelocity=0; swipeTime=0;
+  cat.visible=true; cat.scale.set(1,1,1); cat.rotation.set(0,0,0);
+  catFacing=target===1 ? 0 : Math.PI;
+  cat.position.set(target===1 ? 0 : 20.2,0,target===1 ? 9.5 : 30.2);
+  cat.rotation.y=-catFacing;
+  cameraYaw=catFacing; cameraOrbit=0;
+  camera.position.set(cat.position.x,8,cat.position.z+(target===1 ? 7 : -8));
+  cameraFocus.copy(cat.position).add(new THREE.Vector3(0,1.05,0));
+  camera.lookAt(cameraFocus);
+  scene.fog.near=target===1 ? 31 : 50;
+  scene.fog.far=target===1 ? 78 : 145;
+  catShadow.visible=true;
+  ui.start.classList.add('hidden'); ui.end.classList.add('hidden');
+  ui.hud.classList.remove('hidden'); ui.controls.classList.remove('hidden');
+  showTouchControls();
+  showMissionForLevel();
+  showToast(target===1 ? 'Back to the backyard!' : 'Exploring the front yard!');
+}
+function debugDefeatAll() {
+  if (!debugEnabled || !ants.length) return;
+  for (const ant of ants) {
+    ant.health=0; ant.awake=false; ant.hitCooldown=0; ant.fall=1;
+    ant.model.rotation.z=1.35; ant.model.position.y=.04;
+    for (const pip of ant.brains) pip.visible=false;
+  }
+  asleep=ants.length;
+  updateHud();
+  setLevelPadActive();
+  showToast('All ants asleep. The jump pad is ready!');
+}
+ui.debugJump.addEventListener('click',() => debugJumpToLevel(Number(ui.debugLevel.value)));
+ui.debugDefeat.addEventListener('click',debugDefeatAll);
 function restart() { location.reload(); }
 document.getElementById('start-button').addEventListener('click', startGame);
 document.getElementById('restart-button').addEventListener('click', restart);
@@ -417,7 +567,10 @@ function hitAnt(ant) {
     asleep++;
     showToast('Soldier ant knocked out!');
     updateHud();
-    if (asleep === ants.length) setTimeout(() => finish(true), 800);
+    if (asleep === ants.length) {
+      setLevelPadActive();
+      showToast('The jump pad by the truck is glowing!');
+    }
   } else {
     showToast(`${ant.health} brain${ant.health === 1 ? '' : 's'} left`);
   }
@@ -489,22 +642,72 @@ function finish(won) {
   ui.touch.classList.add('hidden');
 }
 
+function beginLevelTransition() {
+  if (mode !== 'playing' || level !== 1 || !levelPad?.active) return;
+  mode='transition';
+  transition={time:0,from:cat.position.clone()};
+  keys.clear();
+  catFacing=Math.PI;
+  leap={phase:'air',time:0,swipeOnLand:false};
+  swipeTime=0;
+  verticalVelocity=8;
+  sound.effort();
+  showToast('Over the fence, Tiger!');
+}
+function updateLevelTransition(dt) {
+  transition.time+=dt;
+  const t=clamp(transition.time/1.45,0,1);
+  const glide=smoothstep(0,1,t);
+  cat.position.x=THREE.MathUtils.lerp(transition.from.x,20.2,glide);
+  cat.position.z=THREE.MathUtils.lerp(transition.from.z,26.6,glide);
+  catHeight=3.55*Math.sin(Math.PI*t);
+  verticalVelocity=3.55*Math.PI/1.45*Math.cos(Math.PI*t);
+  leap.time+=dt;
+  cat.position.y=catHeight;
+  cat.rotation.y=-Math.PI;
+  cat.rotation.x=verticalVelocity>0 ? .15 : -.10;
+  cat.rotation.z=0;
+  animateRig(dt,0);
+  catShadow.position.set(cat.position.x,.018,cat.position.z);
+  catShadow.material.opacity=Math.max(0,1-catHeight*.23);
+  const cameraTarget=new THREE.Vector3(cat.position.x+6.7,7.6,cat.position.z-4.7);
+  camera.position.lerp(cameraTarget,1-Math.exp(-dt*3.8));
+  cameraFocus.lerp(cat.position.clone().add(new THREE.Vector3(0,1.3,0)),
+    1-Math.exp(-dt*5));
+  camera.lookAt(cameraFocus);
+  if (t>=1) {
+    mode='playing'; level=2; transition=null;
+    leap={phase:'land',time:0,swipeOnLand:false};
+    catHeight=0; verticalVelocity=0; cat.position.y=0;
+    catShadow.material.opacity=1;
+    cameraYaw=catFacing; cameraOrbit=0;
+    scene.fog.near=50; scene.fog.far=145;
+    showMissionForLevel();
+    sound.hit();
+    showToast('The front yard is yours to explore!');
+  }
+}
+
 function resolveObstacles(old) {
   let contact = null;
   const xBeforeClamp = cat.position.x, zBeforeClamp = cat.position.z;
   cat.position.x = clamp(cat.position.x, -18.4, 31.5);
-  cat.position.z = clamp(cat.position.z, -18.4, 18.55);
+  cat.position.z = level === 1
+    ? clamp(cat.position.z,-18.4,18.55)
+    : clamp(cat.position.z,22.8,95.5);
   if (cat.position.x !== xBeforeClamp || cat.position.z !== zBeforeClamp) contact = 'fence or house';
   // Central oak trunk; the low brick ring stays walkable.
-  const dx = cat.position.x, dz = cat.position.z + 2.5;
-  if (Math.hypot(dx,dz) < 1.05) {
-    const a = Math.atan2(dz,dx);
-    cat.position.x = Math.cos(a)*1.05;
-    cat.position.z = -2.5 + Math.sin(a)*1.05;
-    contact = 'oak trunk';
+  if (level === 1) {
+    const dx = cat.position.x, dz = cat.position.z + 2.5;
+    if (Math.hypot(dx,dz) < 1.05) {
+      const a = Math.atan2(dz,dx);
+      cat.position.x = Math.cos(a)*1.05;
+      cat.position.z = -2.5 + Math.sin(a)*1.05;
+      contact = 'oak trunk';
+    }
   }
   // The driveway stays walkable. Resolve modeled hard props and structures.
-  for (const [name,minX,maxX,minZ,maxZ,height] of solidBoxes) {
+  for (const [name,minX,maxX,minZ,maxZ,height] of level===1 ? solidBoxes : frontSolidBoxes) {
     if (catHeight<=height && cat.position.x>minX && cat.position.x<maxX
         && cat.position.z>minZ && cat.position.z<maxZ) {
       const edges = [
@@ -518,7 +721,7 @@ function resolveObstacles(old) {
       contact = name;
     }
   }
-  for (const [name,x,z,radius,height] of solidPosts) {
+  for (const [name,x,z,radius,height] of level===1 ? solidPosts : frontSolidPosts) {
     if (catHeight>height) continue;
     const dx=cat.position.x-x, dz=cat.position.z-z;
     const distance=Math.hypot(dx,dz);
@@ -652,6 +855,8 @@ function updateCat(dt) {
     hardImpactCooldown = .25;
   }
   lastHardContact = hardContact;
+  if (level===1 && levelPad?.active && catHeight<.12
+      && flatDistance(cat.position,PAD_POSITION)<.98) beginLevelTransition();
   // A/D steer while walking; at rest they look and pan without spinning Tiger.
   // Three.js positive yaw sends local -Z toward -X.
   cat.rotation.y = -catFacing;
@@ -741,6 +946,10 @@ function updateCamera(dt) {
     { turn:.48, height:6.8, distance:7.8, penalty:.13 },
     { turn:-.48, height:6.8, distance:7.8, penalty:.13 },
   ];
+  if (level===2 && cat.position.z>58 && cat.position.z<70
+      && Math.abs(cat.position.x)<7) {
+    choices.unshift({turn:-1.3,height:7.5,distance:15.5,penalty:-.25});
+  }
   let best = null;
   for (const choice of choices) {
     const angle = cameraYaw+choice.turn;
@@ -750,7 +959,9 @@ function updateCamera(dt) {
       cat.position.z+Math.cos(angle)*choice.distance,
     );
     candidate.x = clamp(candidate.x,-18.5,31.7);
-    candidate.z = clamp(candidate.z,-18.5,17.2);
+    candidate.z = level===1
+      ? clamp(candidate.z,-18.5,cat.position.x>18.5 && cat.position.z>10 ? 27 : 17.2)
+      : clamp(candidate.z,14.5,97.0);
     const length = candidate.distanceTo(anchor);
     const clear = cameraClearDistance(anchor,candidate);
     // Leaves are soft occluders: prefer a clear angle or a higher view, but
@@ -764,7 +975,7 @@ function updateCamera(dt) {
   }
   const wanted = best.candidate;
   if (best.clear < best.length) {
-    wanted.copy(anchor).lerp(wanted,Math.max(1.5,best.clear)/best.length);
+    wanted.lerp(anchor,1-Math.min(1,Math.max(1.5,best.clear)/best.length));
   }
   const closing = camera.position.distanceTo(anchor) > wanted.distanceTo(anchor);
   camera.position.lerp(wanted,1-Math.exp(-dt*(closing ? 10 : 4)));
@@ -772,7 +983,7 @@ function updateCamera(dt) {
   const visibleDistance = cameraClearDistance(anchor,camera.position);
   const actualDistance = camera.position.distanceTo(anchor);
   if (visibleDistance < actualDistance) {
-    camera.position.copy(anchor).lerp(camera.position,Math.max(1.5,visibleDistance)/actualDistance);
+    camera.position.lerp(anchor,1-Math.min(1,Math.max(1.5,visibleDistance)/actualDistance));
   }
   const forward = new THREE.Vector3(Math.sin(catFacing),0,-Math.cos(catFacing));
   const target = anchor.addScaledVector(forward,.72);
@@ -816,6 +1027,8 @@ function animate() {
     updateCamera(dt);
     if (flapHinge) flapHinge.rotation.x *= Math.exp(-dt*1.5);
     updateStatus();
+  } else if (mode === 'transition') {
+    updateLevelTransition(dt);
   } else if (mode === 'title' && cat) {
     camera.position.set(13,13,14);
     camera.lookAt(0,1,-2);
@@ -829,6 +1042,18 @@ function animate() {
   }
   if (toastTime > 0) { toastTime-=dt; if (toastTime<=0) ui.toast.classList.add('hidden'); }
   worldTime += dt;
+  if (levelPad?.active) {
+    const pulse=(worldTime*1.5)%1;
+    levelPad.ring.scale.setScalar(1+pulse*.48);
+    levelPad.ring.material.opacity=(1-pulse)*.70;
+    levelPad.light.intensity=1.4+.55*Math.sin(worldTime*5);
+    levelPad.base.material.emissiveIntensity=.75+.22*Math.sin(worldTime*5);
+  }
+  if (cat) {
+    sun.position.set(cat.position.x-10,24,cat.position.z+10);
+    sun.target.position.set(cat.position.x,0,cat.position.z);
+    sun.target.updateMatrixWorld();
+  }
   for (const uniforms of windMaterials) {
     uniforms.windTime.value = worldTime;
     if (cat) uniforms.catWorld.value.set(cat.position.x,cat.position.z);
@@ -852,7 +1077,8 @@ function animate() {
     const surface = surfaceAt(cat.position);
     const walking = mode==='intro' || (mode==='playing' && leap?.phase !== 'crouch' &&
       (keys.has('KeyW') || keys.has('ArrowUp') || keys.has('KeyS') || keys.has('ArrowDown')));
-    sound.update(mode,walkTime,walking,catHeight<.05 && leap?.phase!=='air',surface,
+    sound.update(mode==='transition' ? 'playing' : mode,walkTime,walking,
+      catHeight<.05 && leap?.phase!=='air',surface,
       cat.position,ants);
   }
   renderer.render(scene,camera);

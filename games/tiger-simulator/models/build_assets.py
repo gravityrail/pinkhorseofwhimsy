@@ -178,6 +178,9 @@ brown_dark = mat("Bark shadows", (0.21, 0.16, 0.1))
 leaf = pbr_mat("Leaf green", (0.27, 0.49, 0.16), 'leaf')
 leaf_light = pbr_mat("Sunlit leaf", (0.40, 0.59, 0.22), 'leaf')
 leaf_dark = pbr_mat("Deep leaf", (0.17, 0.33, 0.13), 'leaf')
+autumn_gold = pbr_mat("Autumn gold leaf", (0.78, 0.56, 0.16), 'leaf')
+autumn_orange = pbr_mat("Autumn orange leaf", (0.77, 0.31, 0.10), 'leaf')
+autumn_red = pbr_mat("Autumn red leaf", (0.54, 0.17, 0.11), 'leaf')
 grass = pbr_mat("Lawn", (0.24, 0.44, 0.14), 'grass')
 grass_light = pbr_mat("Grass patch", (0.36, 0.54, 0.20), 'grass')
 grass_blade = pbr_mat("Grass blades", (0.27, 0.43, 0.12), 'grass', roughness=1)
@@ -204,8 +207,18 @@ flower = mat("Tiny wildflowers", (0.86, 0.62, 0.67))
 flower_gold = mat("Marigold petals", (0.96, 0.64, 0.12))
 flower_violet = mat("Violet petals", (0.63, 0.38, 0.77))
 flower_coral = mat("Coral petals", (0.93, 0.34, 0.27))
+flower_foliage = pbr_mat("Flower foliage, still with blooms", (0.20, 0.38, 0.15), 'leaf')
 soil = mat("Planter earth", (0.23, 0.17, 0.105))
 patio_roof = pbr_mat("Patio canopy roof", (0.37, 0.36, 0.32), 'wood')
+street = pbr_mat("Street asphalt", (0.18, 0.20, 0.19), 'concrete')
+maroon = mat("Maroon front door", (0.32, 0.075, 0.11), .42)
+rose_red = mat("Rose red petals", (0.75, 0.10, 0.18), .8)
+rose_pink = mat("Rose pink petals", (0.92, 0.35, 0.47), .8)
+neighbor_blue = mat("Neighbor blue siding", (0.42, 0.55, 0.61))
+neighbor_yellow = mat("Neighbor yellow siding", (0.77, 0.67, 0.42))
+neighbor_cream = mat("Neighbor cream siding", (0.71, 0.68, 0.58))
+neighbor_brick = pbr_mat("Neighbor brick siding", (0.49, 0.30, 0.24), 'stone')
+utility = mat("Utility poles and wires", (0.19, 0.17, 0.14))
 coat = coat_material()
 tail_coat = tail_coat_material()
 
@@ -517,13 +530,18 @@ for i in range(110):
 # Scattered tapered blades add a real grassy ground layer, with enough height
 # for the browser wind shader to bend their tips as Tiger brushes through.
 grass_vertices, grass_faces = [], []
-for i in range(2050):
+for i in range(3100):
     if i < 1700:
         root_x,root_y = random.uniform(-18.8,18.8),random.uniform(-18.5,18.7)
-    else:
+    elif i < 2050:
         root_x,root_y = random.uniform(20.1,31.8),random.uniform(2.5,18.6)
-    if root_y < -15.6 and abs(root_x) < 12.3: continue
-    if root_x*root_x+(root_y-2.5)**2 < 11.7: continue
+    else:
+        root_x,root_y = random.uniform(-18.7,18.7),random.uniform(-95.0,-64.2)
+    if root_y > -64:
+        if root_y < -15.6 and abs(root_x) < 12.3: continue
+        if root_x*root_x+(root_y-2.5)**2 < 11.7: continue
+    elif abs(root_x)<1.55 or (root_x+8)**2+(root_y+78)**2<30:
+        continue
     for blade in range(random.randint(3,5)):
         x=root_x+random.uniform(-.11,.11)
         y=root_y+random.uniform(-.11,.11)
@@ -582,10 +600,10 @@ outdoor_bench('planter bench',6.10,-14.62,3.8)
 
 def flower_plant(x,y,base,scale,petal):
     top=base+scale*random.uniform(.72,1.15)
-    rod('flower stem',(x,y,base),(x,y,top),.012,leaf_dark,5)
+    rod('flower stem',(x,y,base),(x,y,top),.012,flower_foliage,5)
     for sign in (-1,1):
         uv('flower leaves',(x+sign*scale*.17,y,base+scale*.38),
-           (scale*.21,scale*.10,scale*.055),leaf,10,6)
+           (scale*.21,scale*.10,scale*.055),flower_foliage,10,6)
     uv('flower center',(x,y,top),(.055,.055,.052),flower_gold,8,5)
     for petal_index in range(5):
         angle=math.tau*petal_index/5
@@ -731,7 +749,7 @@ for j,(sx,sy) in enumerate(shrub_centers):
     for k in range(2):
         angle=math.tau*k/2+j
         x,y=sx+(spread+.25)*math.cos(angle),sy+(spread+.25)*math.sin(angle)
-        rod('wildflower stem',(x,y,.04),(x,y,.37),.012,leaf_dark,5)
+        rod('wildflower stem',(x,y,.04),(x,y,.37),.012,flower_foliage,5)
         uv('wildflower',(x,y,.39),(.052,.052,.05),flower,8,4)
 
 finish_surface_leaves()
@@ -790,6 +808,152 @@ for x in (23.08,26.92):
         cyl("pickup wheel hub", (x+(.18 if x>25 else -.18),y,.64), .27, .025,silver,18,(0,math.pi/2,0))
 for x in (23.94,26.06):
     uv("pickup headlamp", (x,-11.02,1.42), (.30,.055,.18), gold,12,7)
+
+# A second playable space continues beyond the fence behind the pickup. The
+# house is deep enough to form a real side passage rather than a shallow facade.
+cube('continuous neighborhood terrain',(0,-72,-.34),(340,154,.35),grass)
+cube('front half driveway',(25,-59.5,-.012),(15,77,.12),concrete)
+cube('long house east wall',(13.03,-39.4,3.6),(.32,36.8,7.2),stucco)
+cube('long house west wall',(-13.03,-39.4,3.6),(.32,36.8,7.2),stucco)
+cube('long house upper story',(0,-41,9.38),(26,35,4.45),stucco)
+cube('long house roof',(0,-40.3,11.82),(28,38,.50),roof)
+cube('long house eave',(0,-40.3,7.35),(28,38,.32),roof)
+for y in (-29,-35,-41,-47,-53):
+    cube('side wall horizontal trim',(13.23,y,3.55),(.045,5.5,.045),trim)
+cube('large driveway-side window',(13.24,-39.0,4.25),(.06,5.4,2.75),truck_glass)
+for y in (-41.85,-36.15):
+    cube('side window upright trim',(13.31,y,4.25),(.12,.16,3.06),trim)
+for z in (2.78,5.73):
+    cube('side window horizontal trim',(13.31,-39.0,z),(.12,5.92,.16),trim)
+cube('side window mullion',(13.34,-39.0,4.25),(.08,.09,2.70),trim)
+cube('side window middle rail',(13.34,-39.0,4.25),(.08,5.7,.08),trim)
+# Driveway-side air conditioner: a broad condenser and its protruding side box.
+cube('air conditioner main unit',(15.2,-47.1,.85),(2.9,2.65,1.7),silver,.10)
+cube('air conditioner side box',(16.73,-47.1,.80),(.66,1.33,1.20),silver,.08)
+for y in (-48.1,-47.6,-47.1,-46.6,-46.1):
+    cube('air conditioner grille',(16.99,y,.83),(.025,.12,.87),rubber)
+cube('air conditioner top grille',(15.2,-47.1,1.72),(2.40,2.17,.04),rubber)
+for y in (-48.2,-47.7,-47.2,-46.7,-46.2):
+    cube('air conditioner top slat',(15.2,y,1.75),(2.35,.065,.035),silver)
+
+# Front facade, maroon door, porch and steps open onto a full lawn.
+cube('house front wall',(0,-58.07,3.6),(26,.34,7.2),stucco)
+for side in (-1,1):
+    x=side*7.7
+    cube('front window pane',(x,-58.29,4.0),(3.2,.07,2.65),truck_glass)
+    for frame_x in (x-1.68,x+1.68):
+        cube('front window vertical trim',(frame_x,-58.37,4.0),(.16,.15,2.95),trim)
+    for frame_z in (2.57,5.43):
+        cube('front window horizontal trim',(x,-58.37,frame_z),(3.52,.15,.16),trim)
+    cube('front window mullion',(x,-58.39,4.0),(.085,.09,2.65),trim)
+cube('maroon front door',(0,-58.32,1.76),(2.15,.14,3.52),maroon,.06)
+for x in (-1.16,1.16):
+    cube('front door jamb',(x,-58.4,1.84),(.16,.18,3.73),trim)
+cube('front door lintel',(0,-58.4,3.62),(2.50,.2,.18),trim)
+uv('front door brass knob',(.74,-58.45,1.8),(.09,.08,.09),gold,12,8)
+cube('front porch',(0,-61.0,.22),(12.0,5.5,.44),brick)
+cube('front porch steps',(0,-64.12,.13),(4.8,.90,.26),brick_light)
+cube('front porch lower step',(0,-64.75,.07),(5.5,.80,.14),brick)
+for x in (-5.5,5.5):
+    cube('front porch column base',(x,-63.0,.35),(.65,.65,.70),concrete,.05)
+    cube('front porch post',(x,-63.0,2.35),(.29,.29,3.7),trim,.035)
+cube('front porch canopy',(0,-61.2,4.38),(13.0,6.1,.32),roof)
+cube('front path',(0,-79.3,.008),(2.7,29.6,.08),concrete)
+cube('front lawn',(0,-79.0,-.13),(40,37.5,.25),grass)
+for i in range(70):
+    x,y=random.uniform(-18.5,18.5),random.uniform(-94,-66)
+    if abs(x)<2 or (x+8)**2+(y+78)**2<32: continue
+    uv('front lawn color patch',(x,y,.014),(.45,.48,.018),
+       grass_light if i%3 else grass,8,4)
+
+# A broad fall tree, with a rounded hemispherical crown and changing leaves.
+tree_x,tree_y=-8,-79.0
+cyl('front tree trunk',(tree_x,tree_y,2.80),.72,5.6,brown,16)
+for angle in (0,.8,1.7,2.5,3.5,4.4,5.4):
+    rod('front tree branch',(tree_x,tree_y,4.2),
+        (tree_x+3.5*math.cos(angle),tree_y+3.0*math.sin(angle),6.8),.18,brown,9)
+front_crown=uv('hemispherical front tree crown',(tree_x,tree_y,7.3),
+    (5.65,5.35,3.25),leaf,32,20)
+for vertex in front_crown.data.vertices:
+    vertex.co.z=max(vertex.co.z,-.34)
+for i in range(38):
+    phi=random.uniform(.12,math.pi*.82)
+    theta=random.uniform(0,math.tau)
+    x=tree_x+5.25*math.sin(phi)*math.cos(theta)
+    y=tree_y+4.95*math.sin(phi)*math.sin(theta)
+    z=7.3+2.8*math.cos(phi)
+    color=(leaf_light,leaf,autumn_gold,autumn_orange,autumn_red)[
+        random.choices(range(5),weights=(7,10,4,3,1))[0]]
+    uv('front tree seasonal foliage',(x,y,max(z,6.32)),
+       (random.uniform(.53,.93),random.uniform(.54,.89),random.uniform(.38,.72)),
+       color,12,8)
+
+# Rose hedges define the street-facing edge without closing the walk to the gate.
+for i,x in enumerate((-17.0,-14.0,-11.0,-8.0,-5.0,5.0,8.0,11.0,14.0,17.0)):
+    y=-93.7+(.26 if i%2 else 0)
+    rod('rose shrub woody stem',(x,y,.05),(x,y,.75),.12,brown,8)
+    uv('rose shrub leafy mound',(x,y,.88),(1.25,.80,.84),
+       leaf_dark if i%3 else leaf,16,10)
+    for j in range(9):
+        theta=math.tau*j/9+i*.3
+        px=x+.74*math.cos(theta)
+        py=y+.46*math.sin(theta)
+        pz=1.45+.20*random.random()
+        uv('rose bloom',(px,py,pz),(.22,.20,.16),
+           rose_red if (i+j)%3 else rose_pink,10,6)
+
+# Pavement, moving-along-the-block road, and houses on both sides of it.
+cube('near sidewalk',(0,-97.05,.03),(338,2.0,.12),concrete)
+cube('residential street',(0,-103.1,-.035),(340,10.5,.11),street)
+cube('opposite sidewalk',(0,-109.15,.03),(338,2.0,.12),concrete)
+for x in range(-160,161,12):
+    cube('street center dash',(x,-103.1,.026),(4.5,.12,.018),flower_gold)
+
+def make_neighbor_house(x,center_y,faces_street,color,index):
+    sign=-1 if faces_street=='south' else 1
+    front_y=center_y+sign*8.05
+    cube('neighbor house body',(x,center_y,3.3),(20.0,16.0,6.6),color)
+    cube('neighbor pitched roof',(x,center_y,7.05),(22.0,18.1,.68),roof)
+    cube('neighbor porch',(x,front_y+sign*1.7,.19),(8.2,3.5,.38),brick)
+    cube('neighbor front door',(x,front_y+sign*.13,1.58),(1.7,.09,3.16),
+         maroon if index%3 else wood_alt)
+    for wx in (x-5.5,x+5.5):
+        cube('neighbor front window',(wx,front_y+sign*.12,3.5),
+             (2.35,.10,2.15),truck_glass)
+        cube('neighbor window sill',(wx,front_y+sign*.20,2.35),
+             (2.62,.22,.12),trim)
+    street_edge=-95.8 if sign<0 else -110.4
+    mid=(front_y+street_edge)/2
+    cube('neighbor front walk',(x,mid,.018),(1.55,abs(street_edge-front_y),.06),concrete)
+    if index%2==0:
+        fence_y=-91.3 if sign<0 else -113.0
+        for n in range(22):
+            fx=x-10.4+n*.99
+            if abs(fx-x)<1.65: continue
+            cube('neighbor front fence picket',(fx,fence_y,.61),(.22,.18,1.22),trim)
+        cube('neighbor front fence rail',(x,fence_y,.96),(21.0,.10,.10),wood_alt)
+
+near_houses=(-144,-112,-80,-48,48,80,112,144)
+far_houses=(-112,-80,-48,-16,16,48,80,112)
+neighbor_colors=(neighbor_blue,neighbor_yellow,neighbor_cream,neighbor_brick)
+for i,x in enumerate(near_houses):
+    cube('neighbor near lawn',(x,-78.0,-.13),(30,38,.25),grass)
+    make_neighbor_house(x,-43.0,'south',neighbor_colors[i%4],i)
+for i,x in enumerate(far_houses):
+    cube('neighbor opposite lawn',(x,-118.0,-.13),(30,18,.25),grass)
+    make_neighbor_house(x,-135.0,'north',neighbor_colors[(i+2)%4],i+1)
+
+for side_y in (-95.6,-110.5):
+    for x in range(-144,145,36):
+        cyl('power line pole',(x,side_y,4.85),.16,9.7,utility,10)
+        rod('power line crossarm',(x-1.1,side_y,8.3),(x+1.1,side_y,8.3),
+            .075,wood,8)
+        for dx in (-.82,.82):
+            uv('power line insulator',(x+dx,side_y,8.46),(.10,.10,.14),trim,8,5)
+    for x in range(-144,144,36):
+        for dx in (-.82,.82):
+            rod('overhead power line',(x+dx,side_y,8.5),
+                (x+36+dx,side_y,8.5),.018,utility,5)
 merge_by_material()
 export("backyard")
 

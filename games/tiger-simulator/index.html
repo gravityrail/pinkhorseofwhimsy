@@ -3,7 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#13291c" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <title>Tiger Simulator — The Backyard Is a Jungle</title>
@@ -27,6 +26,14 @@
       <div id="crosshair" class="crosshair hidden"></div>
       <button id="sound-toggle" class="sound-toggle" aria-label="Toggle game sound" aria-pressed="true">SOUND ON</button>
       <div id="toast" class="toast hidden" role="status"></div>
+      <div id="debug-panel" class="debug-panel hidden" aria-label="Development controls">
+        <div class="debug-heading">DEBUG <span>LEVEL TOOLS</span></div>
+        <div class="debug-row">
+          <select id="debug-level" aria-label="Choose level"><option value="1">Backyard</option><option value="2">Front yard</option></select>
+          <button id="debug-jump" disabled>Jump to level</button>
+        </div>
+        <button id="debug-defeat" class="debug-defeat" disabled>Defeat all enemies</button>
+      </div>
       <div id="controls" class="controls hidden">
         <span><kbd>W / S</kbd> walk</span>
         <span><kbd>A / D</kbd> look / steer</span>
