@@ -16,7 +16,7 @@ Open the local Vite URL. Press **Enter** or **Let's Go** to leave the house.
 | --- | --- |
 | Walk forward or backward, relative to Tiger | W / S or up / down arrows |
 | Look left or right while still; steer while walking | A / D or left / right arrows |
-| Crouch, then jump on release | Hold Space, then release |
+| Crouch, then jump on release; charge a mega jump over up to 3 seconds | Hold Space, then release |
 | Swipe, or queue a swipe during a jump | J or left click |
 | Jump and swipe on landing | Hold K or P, then release |
 | Orbit camera temporarily | Right mouse drag or drag on touch screen |
@@ -25,11 +25,13 @@ Open the local Vite URL. Press **Enter** or **Let's Go** to leave the house.
 
 Each of the six helmeted soldier ants has three brains and animated tripod legs. A swipe or landing pounce removes one brain; after three hits the ant falls unconscious. Tiger has nine lives. Shrubs hide Tiger from pursuing ants. The jump pad starts gray, then glows and pulses blue after all six ants are unconscious. Touch controls appear on touch devices, including wide Tesla screens, and support simultaneous movement and action presses.
 
+On the front driveway, the air conditioner shakes awake and marches across Tiger's path with chomping teeth. A jump onto its roof pauses it for five seconds. Five separate stomps put it into a permanent smoky sleep. The jump charge bar appears beneath Tiger while the jump button is held; a tap gives a normal jump and a full three-second hold gives the highest jump.
+
 The development overlay is on by default for this first pass. **Defeat all enemies** unlocks the pad; **Jump to level** moves Tiger directly to the backyard or front yard. Add `?debug=0` to the URL to hide the overlay.
 
 ## Blender source and web build
 
-`models/tiger.blend`, `models/soldier-ant.blend`, and `models/backyard.blend` are the editable Blender scenes. The asset script regenerates the GLB models used by the browser:
+`models/tiger.blend`, `models/soldier-ant.blend`, `models/backyard.blend`, and `models/air-conditioner.blend` are the editable Blender scenes. The asset script regenerates the GLB models used by the browser:
 
 ```bash
 /Applications/Blender.app/Contents/MacOS/blender -b -t 4 --python games/tiger-simulator/models/build_assets.py

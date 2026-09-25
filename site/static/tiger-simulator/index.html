@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#13291c" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <title>Tiger Simulator — The Backyard Is a Jungle</title>
-    <script type="module" crossorigin src="./assets/index-BiIUe9wj.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BAIcWEaU.css">
+    <script type="module" crossorigin src="./assets/index--1e9I8l4.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-Cydkv2Bu.css">
   </head>
   <body>
     <div id="app">
@@ -26,6 +26,10 @@
         </div>
       </div>
       <div id="crosshair" class="crosshair hidden"></div>
+      <div id="jump-charge" class="jump-charge hidden" role="progressbar" aria-label="Jump strength" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="jump-charge-track"><div id="jump-charge-fill" class="jump-charge-fill"></div></div>
+        <span id="jump-charge-label">JUMP 0%</span>
+      </div>
       <button id="sound-toggle" class="sound-toggle" aria-label="Toggle game sound" aria-pressed="true">SOUND ON</button>
       <div id="toast" class="toast hidden" role="status"></div>
       <div id="debug-panel" class="debug-panel hidden" aria-label="Development controls">
@@ -39,7 +43,7 @@
       <div id="controls" class="controls hidden">
         <span><kbd>W / S</kbd> walk</span>
         <span><kbd>A / D</kbd> look / steer</span>
-        <span><kbd>SPACE</kbd> hold, release to jump</span>
+        <span><kbd>SPACE</kbd> hold up to 3s for mega jump</span>
         <span><kbd>J</kbd> / <kbd>CLICK</kbd> swipe</span>
         <span><kbd>K</kbd> jump + landing swipe</span>
         <span><kbd>SHIFT</kbd> run</span>

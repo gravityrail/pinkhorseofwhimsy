@@ -827,15 +827,6 @@ for z in (2.78,5.73):
     cube('side window horizontal trim',(13.31,-39.0,z),(.12,5.92,.16),trim)
 cube('side window mullion',(13.34,-39.0,4.25),(.08,.09,2.70),trim)
 cube('side window middle rail',(13.34,-39.0,4.25),(.08,5.7,.08),trim)
-# Driveway-side air conditioner: a broad condenser and its protruding side box.
-cube('air conditioner main unit',(15.2,-47.1,.85),(2.9,2.65,1.7),silver,.10)
-cube('air conditioner side box',(16.73,-47.1,.80),(.66,1.33,1.20),silver,.08)
-for y in (-48.1,-47.6,-47.1,-46.6,-46.1):
-    cube('air conditioner grille',(16.99,y,.83),(.025,.12,.87),rubber)
-cube('air conditioner top grille',(15.2,-47.1,1.72),(2.40,2.17,.04),rubber)
-for y in (-48.2,-47.7,-47.2,-46.7,-46.2):
-    cube('air conditioner top slat',(15.2,y,1.75),(2.35,.065,.035),silver)
-
 # Front facade, maroon door, porch and steps open onto a full lawn.
 cube('house front wall',(0,-58.07,3.6),(26,.34,7.2),stucco)
 for side in (-1,1):
@@ -956,6 +947,48 @@ for side_y in (-95.6,-110.5):
                 (x+36+dx,side_y,8.5),.018,utility,5)
 merge_by_material()
 export("backyard")
-
-# The three native Blender projects can be edited independently.
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "models" / "backyard.blend"))
+
+# The driveway condenser is an independent animated glTF. Its low roof is
+# reachable with Tiger's ordinary jump, while the closed service cover hides
+# the mouth until it wakes. Keep named hinges separate from static yard meshes.
+clear()
+ac_steel = pbr_mat("AC brushed galvanized steel", (.52,.58,.59), 'concrete', .66)
+ac_steel.node_tree.nodes.get("Principled BSDF").inputs["Metallic"].default_value=.38
+ac_dark = mat("AC recessed grille", (.055,.073,.080), .76, .12)
+ac_inner = mat("AC mouth interior", (.12,.025,.035), .88)
+ac_tooth = mat("AC enamel teeth", (.91,.87,.72), .32)
+ac_lamp = mat("AC sleeping indicator", (.34,.10,.055), .30,
+    emission=(.16,.015,.005))
+cube('AC cabinet',(0,0,.63),(2.94,2.50,.84),ac_steel,.11)
+cube('AC side electronics box',(1.71,.12,.57),(.58,1.38,.72),ac_steel,.07)
+for y in (-.39,-.18,.03,.24,.45):
+    cube('AC side cooling slot',(2.025,y,.58),(.025,.085,.43),ac_dark)
+cube('AC top fan recess',(0,0,1.062),(2.32,1.92,.026),ac_dark,.035)
+for y in (-.76,-.51,-.26,-.01,.24,.49,.74):
+    cube('AC top fan slat',(0,y,1.078),(2.24,.055,.035),silver,.012)
+for x in (-1.18,1.18):
+    cube('AC front corner trim',(x,-1.285,.60),(.065,.045,.69),silver,.02)
+cube('AC mouth recess',(0,-1.284,.57),(2.30,.048,.49),ac_inner,.03)
+cube('AC mouth lower lip',(0,-1.323,.295),(2.35,.075,.095),ac_steel,.025)
+upper_teeth=pivot('ac_upper_teeth',(0,0,0))
+lower_teeth=pivot('ac_lower_teeth',(0,0,0))
+for i in range(9):
+    x=(i-4)*.235
+    upper=cone('upper fang',(x,-1.355,.71),.088,.20,ac_tooth,4)
+    upper.rotation_euler.x=math.pi
+    parent_keep_world(upper,upper_teeth)
+    lower=cone('lower fang',(x+.11,-1.355,.39),.080,.19,ac_tooth,4)
+    parent_keep_world(lower,lower_teeth)
+cover=cube('ac_mouth_cover',(0,-1.397,.58),(2.43,.075,.56),ac_steel,.035)
+for x in (-.69,.69):
+    uv('ac_eye_lamp',(x,-1.312,.965),(.12,.035,.065),ac_lamp,12,8)
+for side,x in (('left',-1.10),('right',1.10)):
+    for end,y in (('front',-.87),('rear',.87)):
+        hinge=pivot(f'ac_leg_{end}_{side}',(x,y,.23))
+        shin=cube('AC marching foot stem',(x,y,.125),(.17,.19,.21),ac_steel,.03)
+        shoe=cube('AC marching foot pad',(x,y-.055,.035),(.37,.42,.07),ac_dark,.025)
+        parent_keep_world(shin,hinge)
+        parent_keep_world(shoe,hinge)
+export("air-conditioner")
+bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / "models" / "air-conditioner.blend"))

@@ -57,6 +57,9 @@ const ui = {
   debugLevel: document.getElementById('debug-level'),
   debugJump: document.getElementById('debug-jump'),
   debugDefeat: document.getElementById('debug-defeat'),
+  charge: document.getElementById('jump-charge'),
+  chargeFill: document.getElementById('jump-charge-fill'),
+  chargeLabel: document.getElementById('jump-charge-label'),
 };
 // Development tools are visible by default during this first-pass build.
 // Append ?debug=0 to the URL for a clean play view.
@@ -136,6 +139,9 @@ let level = 1;
 let transition = null;
 let levelPad = null;
 const PAD_POSITION = new THREE.Vector3(20.2, 0, 16.8);
+const AC_HOME = new THREE.Vector3(15.2, 0, 47.1);
+const AC_TOP = 1.10;
+let airConditioner = null;
 
 const bushes = [
   [-16,15],[-15,10],[-17,3],[-15,-9],[-13,-16],
@@ -160,7 +166,6 @@ const solidPosts = [
 ];
 const frontSolidBoxes = [
   ['house',-13.5,13.5,21.5,58.4,Infinity],
-  ['air conditioner',13.2,17.35,45.55,48.75,1.8],
 ];
 const frontSolidPosts = [
   ['front tree',-8,79,1.15,Infinity],
@@ -178,6 +183,16 @@ function smoothstep(a, b, x) {
   return t*t*(3-2*t);
 }
 function flatDistance(a, b) { return Math.hypot(a.x - b.x, a.z - b.z); }
+function airConditionerBounds() {
+  if (!airConditioner) return null;
+  const {x,z} = airConditioner.model.position;
+  return ['air conditioner',x-2.05,x+2.05,z-1.50,z+1.50,AC_TOP];
+}
+function overlapsAirConditioner(x,z,margin=0) {
+  const box=airConditionerBounds();
+  return box && x>box[1]-margin && x<box[2]+margin
+    && z>box[3]-margin && z<box[4]+margin;
+}
 function angleTo(dx, dz) { return Math.atan2(dx, -dz); }
 function angleApproach(current, target, amount) {
   let d = ((target - current + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
@@ -258,6 +273,7 @@ function hardSurfaceAt(position) {
     if (x < -18.4 || x > 31.5 || z < 22.8 || z > 95.5) return true;
     if (frontSolidBoxes.some(([,minX,maxX,minZ,maxZ,height]) => catHeight<=height
         && x>minX && x<maxX && z>minZ && z<maxZ)) return true;
+    if (catHeight<=AC_TOP && overlapsAirConditioner(x,z)) return true;
     return frontSolidPosts.some(([,px,pz,radius,height]) => catHeight<=height
       && Math.hypot(x-px,z-pz)<radius);
   }
@@ -274,6 +290,9 @@ function updateStatus() {
   ui.status.textContent = hidden ? 'Hidden in the leaves'
     : leap?.phase === 'crouch' ? 'Ready to spring…'
     : leap?.swipeOnLand ? 'Pouncing!'
+    : level===2 && airConditioner?.state==='defeated' ? 'The condenser is in a deep sleep'
+    : level===2 && airConditioner?.state==='stunned' ? `Condenser paused · ${Math.ceil(airConditioner.stunTimer)}s`
+    : level===2 && airConditioner?.state==='marching' ? 'Dodge or jump on the chomping condenser'
     : level === 2 ? 'Explore the front yard'
     : levelPad?.active ? 'The blue pad by the truck is ready' : 'Explore the jungle';
   ui.status.classList.toggle('hidden-status', hidden);
@@ -321,11 +340,148 @@ function setLevelPadActive() {
   levelPad.emblem.material.opacity=.92;
 }
 
+function makeAirConditionerSmoke() {
+  const canvas=document.createElement('canvas');
+  canvas.width=canvas.height=64;
+  const context=canvas.getContext('2d');
+  const fade=context.createRadialGradient(32,32,2,32,32,31);
+  fade.addColorStop(0,'rgba(105,116,112,.90)');
+  fade.addColorStop(.42,'rgba(119,131,127,.62)');
+  fade.addColorStop(1,'rgba(143,156,150,0)');
+  context.fillStyle=fade;
+  context.fillRect(0,0,64,64);
+  const texture=new THREE.CanvasTexture(canvas);
+  for (let i=0;i<9;i++) {
+    const puff=new THREE.Sprite(new THREE.SpriteMaterial({
+      map:texture,color:0xffffff,
+      transparent:true,opacity:0,depthWrite:false,
+    }));
+    puff.visible=false;
+    scene.add(puff);
+    airConditioner.smoke.push(puff);
+  }
+}
+function resetAirConditioner() {
+  if (!airConditioner) return;
+  const ac=airConditioner;
+  ac.model.position.copy(AC_HOME);
+  // Blender's front panel faces local +Z in glTF. Turn it toward Tiger's
+  // approach from the rear half of the driveway.
+  ac.model.rotation.set(0,Math.PI,0);
+  ac.state='sleeping'; ac.wakeTime=0; ac.stunTimer=0;
+  ac.stomps=0; ac.direction=1; ac.marchTime=0;
+  ac.cover.position.y=ac.coverRest;
+  ac.upperTeeth.position.y=0; ac.lowerTeeth.position.y=0;
+  for (const leg of ac.legs) {
+    leg.part.rotation.x=0; leg.part.position.y=leg.restY;
+  }
+  for (const eye of ac.eyes) {
+    eye.material.emissive.setHex(0x2b0502);
+    eye.material.emissiveIntensity=.35;
+  }
+  for (const puff of ac.smoke) puff.visible=false;
+}
+function stompAirConditioner() {
+  const ac=airConditioner;
+  ac.stomps++;
+  ac.stunTimer=5;
+  ac.state=ac.stomps>=5 ? 'defeated' : 'stunned';
+  ac.model.position.y=0;
+  if (ui.acCount) ui.acCount.textContent=`${ac.stomps} / 5`;
+  sound.hit();
+  sound.acStomp(ac.state==='defeated');
+  pulseAt(ac.model.position,ac.state==='defeated' ? 0xe8e2c7 : 0x8ae5ff,2.0);
+  showToast(ac.state==='defeated'
+    ? 'The condenser is in a deep sleep!'
+    : `Condenser stunned for 5 seconds · ${ac.stomps}/5`);
+}
+function updateAirConditioner(dt) {
+  if (!airConditioner) return;
+  const ac=airConditioner;
+  if (level!==2 || mode!=='playing') return;
+  if (ac.state==='sleeping' && cat.position.x>15.5
+      && Math.abs(cat.position.z-AC_HOME.z)<7.5) {
+    ac.state='waking'; ac.wakeTime=0;
+    sound.acWake();
+    showToast('Something is shaking beside the driveway…');
+  }
+  if (ac.state==='waking') {
+    ac.wakeTime+=dt;
+    const open=smoothstep(.12,.95,ac.wakeTime);
+    ac.model.position.x=AC_HOME.x+Math.sin(ac.wakeTime*52)*.075*(1-open*.5);
+    ac.cover.position.y=ac.coverRest+open*.52;
+    if (ac.wakeTime>=1.08) {
+      ac.state='marching'; ac.model.position.x=AC_HOME.x;
+      showToast('The air conditioner has teeth! Dodge or jump on it.');
+    }
+  }
+  if (ac.state==='marching') {
+    ac.marchTime+=dt;
+    ac.model.position.x+=ac.direction*3.5*dt;
+    if (ac.model.position.x>=28.7) { ac.model.position.x=28.7; ac.direction=-1; }
+    if (ac.model.position.x<=15.2) { ac.model.position.x=15.2; ac.direction=1; }
+    ac.model.position.y=Math.abs(Math.sin(ac.marchTime*10))*.025;
+    if (catHeight<.25 && leap?.phase!=='air'
+        && overlapsAirConditioner(cat.position.x,cat.position.z,.20)) {
+      takeDamage(ac);
+    }
+  } else if (ac.state==='stunned') {
+    ac.stunTimer=Math.max(0,ac.stunTimer-dt);
+    if (ac.stunTimer===0) {
+      ac.state='marching';
+      if (flatDistance(cat.position,ac.model.position)<8)
+        showToast('The condenser woke up again!');
+    }
+  }
+  const active=ac.state!=='sleeping' && ac.state!=='waking';
+  const chomping=ac.state==='marching';
+  ac.eyes.forEach((eye) => {
+    eye.material.emissive.setHex(active && ac.state!=='defeated' ? 0xff3f18 : 0x2b0502);
+    eye.material.emissiveIntensity=chomping ? 1.6 : .35;
+  });
+  ac.upperTeeth.position.y=chomping ? -.10*Math.sin(ac.marchTime*13) : 0;
+  ac.lowerTeeth.position.y=chomping ? .10*Math.sin(ac.marchTime*13) : 0;
+  ac.legs.forEach((leg,i) => {
+    const stride=chomping ? Math.sin(ac.marchTime*12+(i%2 ? Math.PI : 0)) : 0;
+    leg.part.rotation.x=stride*.32;
+    leg.part.position.y=leg.restY+Math.max(0,stride)*.08;
+  });
+  if (ac.state==='defeated') {
+    ac.model.rotation.z+=(-.12-ac.model.rotation.z)*(1-Math.exp(-dt*3));
+    ac.model.position.y+=(-.04-ac.model.position.y)*(1-Math.exp(-dt*3));
+    ac.smoke.forEach((puff,i) => {
+      const cycle=(worldTime*.30+i/9)%1;
+      puff.visible=true;
+      puff.position.set(ac.model.position.x+(i%2 ? -.48 : .45)+Math.sin(worldTime+i)*.25,
+        1.08+cycle*2.25,ac.model.position.z-.28+Math.sin(i*8.3)*.44);
+      puff.scale.setScalar(.52+cycle*.96);
+      puff.material.opacity=.90*(1-cycle);
+    });
+  }
+}
+function updateJumpCharge() {
+  if (mode!=='playing' || leap?.phase!=='crouch' || !cat) {
+    ui.charge.classList.add('hidden');
+    return;
+  }
+  const charge=clamp((leap.time-.18)/2.82,0,1);
+  const point=cat.position.clone().add(new THREE.Vector3(0,.12,0)).project(camera);
+  if (point.z<0 || point.z>1) { ui.charge.classList.add('hidden'); return; }
+  ui.charge.classList.remove('hidden');
+  ui.charge.classList.toggle('full',charge>=1);
+  ui.charge.style.left=`${(point.x*.5+.5)*innerWidth}px`;
+  ui.charge.style.top=`${(-point.y*.5+.5)*innerHeight+28}px`;
+  ui.chargeFill.style.width=`${Math.round(charge*100)}%`;
+  ui.chargeLabel.textContent=charge>=1 ? 'MEGA JUMP!' : `JUMP ${Math.round(charge*100)}%`;
+  ui.charge.setAttribute('aria-valuenow',String(Math.round(charge*100)));
+}
+
 const loader = new GLTFLoader();
 const asset = (file) => `${import.meta.env.BASE_URL}models/${file}.glb`;
 try {
-  const [yardGltf, catGltf, antGltf] = await Promise.all([
-    loader.loadAsync(asset('backyard')), loader.loadAsync(asset('tiger')), loader.loadAsync(asset('soldier-ant')),
+  const [yardGltf, catGltf, antGltf, acGltf] = await Promise.all([
+    loader.loadAsync(asset('backyard')), loader.loadAsync(asset('tiger')),
+    loader.loadAsync(asset('soldier-ant')), loader.loadAsync(asset('air-conditioner')),
   ]);
   const yard = yardGltf.scene;
   yard.traverse((obj) => {
@@ -383,6 +539,24 @@ try {
   });
   scene.add(yard);
   makeLevelPad();
+  const acModel=acGltf.scene;
+  acModel.position.copy(AC_HOME);
+  const acLegs=[];
+  const acEyes=[];
+  acModel.traverse((obj) => {
+    if (obj.isMesh) { obj.castShadow=true; obj.receiveShadow=true; }
+    if (obj.name.startsWith('ac_leg_')) acLegs.push({part:obj,restY:obj.position.y});
+    if (obj.name.startsWith('ac_eye_lamp')) acEyes.push(obj);
+  });
+  airConditioner={model:acModel,cover:acModel.getObjectByName('ac_mouth_cover'),
+    upperTeeth:acModel.getObjectByName('ac_upper_teeth'),
+    lowerTeeth:acModel.getObjectByName('ac_lower_teeth'),
+    legs:acLegs,eyes:acEyes,coverRest:0,state:'sleeping',wakeTime:0,
+    stunTimer:0,stomps:0,direction:1,marchTime:0,smoke:[]};
+  airConditioner.coverRest=airConditioner.cover.position.y;
+  makeAirConditionerSmoke();
+  scene.add(acModel);
+  resetAirConditioner();
   makeFlap("LET'S GO", '#332715', '#f4dc97');
   cat = catGltf.scene;
   // Yaw first keeps the jump pitch aligned with Tiger's heading at every angle.
@@ -449,7 +623,9 @@ function startGame() {
 function showMissionForLevel() {
   if (level===2) {
     ui.missionLabel.textContent='FRONT YARD';
-    ui.mission.innerHTML='A whole new world <strong>↗</strong>';
+    ui.mission.innerHTML='Condenser stomps <strong id="ac-count"></strong>';
+    ui.acCount=document.getElementById('ac-count');
+    ui.acCount.textContent=`${airConditioner?.stomps || 0} / 5`;
   } else {
     ui.missionLabel.textContent='BACKYARD PATROL';
     ui.mission.innerHTML='Soldier ants asleep <strong id="ant-count"></strong>';
@@ -462,6 +638,7 @@ function debugJumpToLevel(target) {
   if (!debugEnabled || !cat) return;
   sound.start();
   keys.clear();
+  resetAirConditioner();
   level=target; mode='playing'; transition=null; leap=null;
   catHeight=0; verticalVelocity=0; swipeTime=0;
   cat.visible=true; cat.scale.set(1,1,1); cat.rotation.set(0,0,0);
@@ -475,6 +652,7 @@ function debugJumpToLevel(target) {
   scene.fog.near=target===1 ? 31 : 50;
   scene.fog.far=target===1 ? 78 : 145;
   catShadow.visible=true;
+  ui.charge.classList.add('hidden');
   ui.start.classList.add('hidden'); ui.end.classList.add('hidden');
   ui.hud.classList.remove('hidden'); ui.controls.classList.remove('hidden');
   showTouchControls();
@@ -707,7 +885,8 @@ function resolveObstacles(old) {
     }
   }
   // The driveway stays walkable. Resolve modeled hard props and structures.
-  for (const [name,minX,maxX,minZ,maxZ,height] of level===1 ? solidBoxes : frontSolidBoxes) {
+  const boxes=level===1 ? solidBoxes : [...frontSolidBoxes,airConditionerBounds()].filter(Boolean);
+  for (const [name,minX,maxX,minZ,maxZ,height] of boxes) {
     if (catHeight<=height && cat.position.x>minX && cat.position.x<maxX
         && cat.position.z>minZ && cat.position.z<maxZ) {
       const edges = [
@@ -743,13 +922,25 @@ function updateLeap(dt) {
   if (!leap) return;
   leap.time += dt;
   if (leap.phase === 'crouch' && leap.releaseRequested && leap.time >= .18) {
+    const charge=clamp((leap.time-.18)/2.82,0,1);
     leap.phase = 'air'; leap.time = 0;
     sound.effort();
-    verticalVelocity = 6.3;
+    verticalVelocity = 6.3+3.7*charge;
     if (leap.swipeOnLand) showToast('POUNCE!');
   } else if (leap.phase === 'air') {
+    const previousHeight=catHeight;
     verticalVelocity -= 16 * dt;
     catHeight += verticalVelocity * dt;
+    if (level===2 && airConditioner
+        && (airConditioner.state==='marching' || airConditioner.state==='stunned')
+        && !leap.stompedAc && verticalVelocity<0
+        && previousHeight>AC_TOP && catHeight<=AC_TOP
+        && overlapsAirConditioner(cat.position.x,cat.position.z,.15)) {
+      leap.stompedAc=true;
+      stompAirConditioner();
+      catHeight=AC_TOP+.04;
+      verticalVelocity=4.1;
+    }
     if (catHeight <= 0) {
       catHeight = 0; verticalVelocity = 0;
       leap.phase = 'land'; leap.time = 0;
@@ -855,6 +1046,9 @@ function updateCat(dt) {
     hardImpactCooldown = .25;
   }
   lastHardContact = hardContact;
+  if (hardContact==='air conditioner' && airConditioner?.state==='marching'
+      && catHeight<.25 && leap?.phase!=='air')
+    takeDamage(airConditioner);
   if (level===1 && levelPad?.active && catHeight<.12
       && flatDistance(cat.position,PAD_POSITION)<.98) beginLevelTransition();
   // A/D steer while walking; at rest they look and pan without spinning Tiger.
@@ -1024,6 +1218,7 @@ function animate() {
     lastSwipe = swipePressed;
     updateCat(dt);
     updateAnts(dt,time);
+    updateAirConditioner(dt);
     updateCamera(dt);
     if (flapHinge) flapHinge.rotation.x *= Math.exp(-dt*1.5);
     updateStatus();
@@ -1034,6 +1229,7 @@ function animate() {
     camera.lookAt(0,1,-2);
     updateAnts(dt,time);
   }
+  updateJumpCharge();
   for (let i=effects.length-1;i>=0;i--) {
     const fx=effects[i]; fx.age+=dt;
     fx.mesh.scale.multiplyScalar(1+dt*4);
