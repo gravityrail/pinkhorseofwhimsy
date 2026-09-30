@@ -678,7 +678,8 @@ export class Game {
       if (a.finished && b.finished) return a.finishPlace - b.finishPlace;
       if (a.finished) return -1;
       if (b.finished) return 1;
-      return (b.lap + b.progress) - (a.lap + a.progress);
+      // Signed progress also keeps the live ranking honest when reversing over the line.
+      return b.routeDistance - a.routeDistance;
     });
   }
 
