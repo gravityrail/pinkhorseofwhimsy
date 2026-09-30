@@ -26,8 +26,8 @@ that also serves standalone HTML5 games as static files.
 | `site/static/CNAME` | Custom-domain marker for GitHub Pages (`pinkhorseofwhimsy.com`). Keep it. |
 | `games/` | **Source of truth** for every arcade game (plus GDevelop pipeline tooling). |
 | `games/2d/`, `games/3d/` | GDevelop example projects + Alien from Mars. |
-| `games/worm/`, `games/pinball/`, `games/indigokart/`, `games/bean-quiz/` | No-build HTML/JS games — copy into `site/static/<slug>/` to publish. |
-| `games/indigo-kart-v2/` | Vite + Three.js kart racer → `site/static/indigokart2/`. |
+| `games/worm/`, `games/pinball/`, `games/bean-quiz/` | No-build HTML/JS games — copy into `site/static/<slug>/` to publish. |
+| `games/indigokart3/` | Canonical Vite + Three.js racer → `site/static/indigokart3/`; both old IndigoKart URLs redirect. |
 | `games/space-bean/` | Vite + React + Three.js rail shooter (**Space Bean**) → `site/static/space-bean/`. (`/star-bean/` is a redirect.) |
 | `games/bean-simulator/` | Vite + Babylon.js first-person dog sim → `site/static/bean-simulator/`. |
 | `games/chickencraft/` | Vite + Babylon.js voxel builder → `site/static/chickencraft/`. |
@@ -74,7 +74,7 @@ npm run build    # production build -> site/build/  (CI uses this)
 2. Add a card to `GAMES` with just `slug: '<slug>'` (no `href`); the play URL defaults to
    `/arcade/games/<slug>/`.
 
-**npm-built game (Vite / Three.js / Babylon, like Indigo Kart v2 & Space Bean)** — source lives
+**npm-built game (Vite / Three.js / Babylon, like IndigoKart 3 & Space Bean)** — source lives
 in the repo; the built output is committed:
 1. Put the game's source under `games/<name>/` as a self-contained npm project. Set its
    production base to the hosted sub-path — e.g. `"build": "vite build --base=/<slug>/"` —

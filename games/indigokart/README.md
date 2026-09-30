@@ -1,11 +1,5 @@
-# Indigo Kart (v1)
+# IndigoKart has moved
 
-Modular vanilla JS + three.js kart racer. Source of truth lives here.
-
-```bash
-rm -rf ../../site/static/indigokart
-mkdir -p ../../site/static/indigokart
-rsync -a --exclude README.md --exclude .DS_Store ./ ../../site/static/indigokart/
-```
-
-Includes arcade controls for gas/brake/drift/item.
+The original and v2 games are consolidated into [IndigoKart 3](../indigokart3/).
+Both old public URLs redirect to `/indigokart3/`. Historical source remains in Git.
+Run the build and publish commands in the new game's README to update all three URLs.

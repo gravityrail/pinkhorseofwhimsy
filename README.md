@@ -24,6 +24,10 @@ npm run build      # production build into site/build/
 
 Standalone games under `site/static/` (like Worm) are served as-is at their path — e.g. `/worm/`. To add one, drop its files in `site/static/<name>/` and add a card to the `GAMES` array in [`site/src/pages/arcade/index.tsx`](site/src/pages/arcade/index.tsx).
 
+## IndigoKart 3
+
+[IndigoKart 3](games/indigokart3/README.md) consolidates the two previous IndigoKart games. Four distinct vehicles, three circuits, Blender-built scenery, drift turbos, items, and keyboard/touch/controller controls. Build and publish with the commands in its README.
+
 ## Adding a game to the Arcade
 
 See [`CLAUDE.md`](CLAUDE.md) for conventions.

@@ -1,0 +1,36 @@
+name: IndigoKart 3 checks
+on:
+  pull_request:
+    paths:
+      - 'games/indigokart3/**'
+      - 'site/static/indigokart*/**'
+      - 'site/src/pages/arcade/index.tsx'
+      - '.github/workflows/indigokart3.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            games/indigokart3/package-lock.json
+            site/package-lock.json
+      - run: npm ci
+        working-directory: games/indigokart3
+      - run: npm test
+        working-directory: games/indigokart3
+      - run: npm run build && npm run publish
+        working-directory: games/indigokart3
+      - name: Verify committed game and legacy redirects match source
+        run: |
+          git diff --exit-code -- site/static/indigokart3 site/static/indigokart site/static/indigokart2
+          test -z "$(git ls-files --others --exclude-standard site/static/indigokart3 site/static/indigokart site/static/indigokart2)"
+      - run: npm ci
+        working-directory: site
+      - run: npm run build
+        working-directory: site
