@@ -22,10 +22,16 @@ test('Dan launches faster, Lola grips harder, Asa carries the most mass',()=>{
   assert.ok(lola.physics.grip>dan.physics.grip);
   assert.ok(tank.physics.mass>dan.physics.mass);
 });
-test('off-road builds keep substantially more speed in sand',()=>{
-  const [truck,dan,,tank]=CARS;
-  assert.ok(run(truck,12,true).speed>run(dan,12,true).speed*1.3);
-  assert.ok(run(tank,12,true).speed>run(dan,12,true).speed*1.3);
+test('all cars retain useful off-road pace without an instant edge speed cap',()=>{
+  for(const car of CARS) {
+    const road=run(car,12),rough=run(car,12,true);
+    assert.ok(rough.speed>road.speed*.82 && rough.speed<road.speed);
+    const before=road.speed;
+    driveStep(road,{throttle:0,steer:0,brake:0},{offroad:true,slope:0},FIXED_STEP);
+    assert.ok(road.speed>before*.99);
+  }
+  const retention=car=>run(car,12,true).speed/run(car,12).speed;
+  assert.ok(retention(CARS[0])>retention(CARS[1]));
 });
 test('fixed simulation gives matching positions at 30, 60 and 120 fps',()=>{
   for (const car of CARS) {
@@ -68,5 +74,6 @@ test('item balancing supplies repairs and comeback boosts',()=>{
 test('loose rally surface rewards the truck’s tires even on the racing line',()=>{
   const truckRatio=run(CARS[0],12,false,1/60,{}, {loose:true}).speed/run(CARS[0],12).speed;
   const sedanRatio=run(CARS[1],12,false,1/60,{}, {loose:true}).speed/run(CARS[1],12).speed;
-  assert.ok(truckRatio>sedanRatio*1.02);
+  assert.ok(truckRatio>sedanRatio);
+  assert.ok(sedanRatio>.95);
 });

@@ -28,8 +28,16 @@ static games. It does not rebuild them. Node 22 or newer is recommended.
 
 These are original stylized models, not manufacturer-supplied CAD assets.
 Suspension, tire tread, steering, driver lean, brake lights and wheel rotation are
-animated. Web Audio synthesizes combustion, electric and turbine engine profiles,
-as well as music, pickups, impacts and race cues. No audio downloads are needed.
+animated. Web Audio mixes original rendered engine layers, road/gravel/rubber friction,
+metal impacts and three full 32-bar music arrangements. Rival engines, tires and
+impacts are spatialized. These are synthesized sound assets, not recordings of
+Toyota or Tesla vehicles. Music and effects have separate volume sliders in Pause.
+
+Rebuild the bundled MP3 bank with Python, NumPy and ffmpeg:
+
+```sh
+python3 art/build_audio.py
+```
 
 ## Controls
 
@@ -42,8 +50,8 @@ as well as music, pickups, impacts and race cues. No audio downloads are needed.
 | Recover (+3 seconds) | R | Y | Reset car |
 | Pause / resume | P / Escape | Start | Pause / Resume |
 
-Menu controller controls: left/right choose driver, up/down choose circuit, A or
-Start races. Menu buttons also support normal Tab / Enter keyboard navigation.
+Menu flow: Play → car → track → Easy / Medium / Hard → Let’s race.
+Controller D-pad moves through the current choices, A / Start confirms, B goes back. Menu buttons also support normal Tab / Enter keyboard navigation.
 Three race classes tune opponents and steering assistance. Drifting on asphalt
 charges a mini-turbo (0.7 seconds) or super-turbo (1.6 seconds); release to fire.
 Boost pads replenish up to three stored boosts. Floating pickups give a shield,
@@ -53,7 +61,18 @@ vehicle, circuit and class. Storage denial does not prevent playing.
 
 ## Art and graphics
 
-Three circuits: Sunset Coast, Neon Harbor and Red Rock Rally. The original Blender
+Three two-lap circuits with 26–30 m roads, generous runoff and visible guardrails:
+
+- **Pacific Grand Tour** — 2.65 km, ocean straight, headland climb, lighthouse sweeper, palm valley.
+- **Harbor Express** — 2.88 km, city boulevard, harbor climb and skyway; rain, wet-road sheen and spray.
+- **Red Rock Speedway** — 3.27 km, fast dirt straights, rolling ridges, canyon descent and dust gusts.
+
+Minimum bend radii exceed 60 m; grades stay below 10%. Every car retains at least
+82% of its road pace off-road, with gradual resistance rather than an instant cap.
+Body-shaped collision boxes transfer linear and angular momentum according to
+mass and contact position. Glancing barrier hits preserve speed along the rail.
+
+ The original Blender
 asset library is `art/indigokart-environments.blend`; its six collections contain
 palms, eroded sandstone, a pavilion, lighthouse, neon tower and festival arch.
 The exact rebuild script is included:
@@ -77,13 +96,21 @@ The game requires WebGL2. It is a stylized browser racer, not a vehicle simulato
 - `src/game/physics.js`: shared player/AI driving, mass, tire grip, surfaces,
   acceleration, braking, signed lap accounting. Fixed 120 Hz simulation, capped
   catch-up to avoid spiralling on slow devices.
-- `src/game/Game.js`: racing, garage, AI steering, input, items, chase camera,
+- `src/game/collisions.js`: oriented bodies, contact impulses, yaw inertia and barriers.
+- `src/game/ai.js`: metre-based steering lookahead and pace control.
+- `src/game/audio.js`: sample bank, spatial car voices and music mixing.
+- `src/game/Weather.js`: moving cloud layers, wind, rain streaks, puddles and wetness.
+- `src/game/Game.js`: racing, step-by-step menu, input, items, chase camera,
   standings, records and pause handling.
 - `src/game/Vehicle.js`: four vehicle identities and animated suspension.
 - `src/game/Track.js`: spline road, terrain contact and scenery placement.
 - `src/game/assets.js`: glTF loading and material batching.
 - `tests/physics.test.js`: launch balance, surfaces, timestep invariance, braking,
   boost, drifting, lap counting and item balance.
+- `tests/collisions.test.js`: bumper/side/head-on impacts, mass, spin, momentum,
+  energy loss, separating bodies and barrier glances.
+- `tests/tracks.test.js`: course dimensions, curvature, wheel heights and full
+  four-car, two-lap race simulations on every circuit.
 
 Development builds expose `window.__INDIGO_KART__` for local browser diagnostics;
 production builds do not. Test keyboard driving, touch and real controllers on

@@ -8,6 +8,9 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { driveStep, chooseItem, advanceLap, FIXED_STEP } from './physics.js';
 import { Racer, createKart, disposeKart } from './Vehicle.js';
+import { resolveCarCollision, resolveBarrier } from './collisions.js';
+import { aiInput } from './ai.js';
+import { Weather } from './Weather.js';
 import { GameAudio } from './audio.js';
 import { KartEffects } from './Effects.js';
 import { damp, formatTime, ordinal } from './utils.js';
@@ -25,6 +28,7 @@ export class Game {
     this.root = root;
     this.config = { car: CARS[0], track: TRACKS[0], difficulty: 'normal' };
     this.state = 'menu';
+    this.menuStep = 0;
     this.audio = new GameAudio();
     this.input = { up: false, down: false, left: false, right: false, drift: false };
     this.accumulator = 0;
@@ -56,29 +60,16 @@ export class Game {
       <div class="game-shell">
         <div id="scene" class="scene"></div>
         <section id="menu" class="menu-screen">
-          <header class="menu-topbar">
-            <a class="arcade-link" href="/arcade/" aria-label="Back to Pink Horse Arcade">↖ <span>PINK HORSE<br>ARCADE</span></a>
-            <div class="edition"><i></i> THE THIRD CHAPTER <span> / </span> EST. FOR FUN</div>
-            <div class="menu-tools"><button id="quality" class="text-button" aria-label="Change graphics quality">HIGH GRAPHICS</button><button class="icon-button" id="menu-sound" aria-label="Toggle sound">♫</button></div>
-          </header>
-          <div class="menu-body">
-            <div class="garage-panel">
-              <p class="eyebrow">FOUR FRIENDS. ZERO SPEED LIMITS.</p>
-              <h1 class="wordmark">INDIGO<span>KART</span><b>3</b></h1>
-              <p class="hero-tag">The good kind of chaos.</p>
-              <div class="section-title"><span>01</span><h2>Meet your driver</h2><small>CHOOSE YOUR RIDE</small></div>
-              <div class="car-picker" id="car-picker"></div>
-              <div id="driver-detail" class="driver-detail"></div>
-              <div class="section-title race-class-title"><span>02</span><h2>Your pace</h2></div>
-              <div class="difficulty-picker" id="difficulty-picker"></div>
-            </div>
-            <div class="showcase-caption"><span class="live-label"><i></i> LIVE FROM THE PADDOCK</span><div id="showcase-name"></div><p id="showcase-tagline"></p><span class="showcase-note">BUILT FOR THE LONG WAY HOME.</span></div>
-          </div>
-          <footer class="race-planner">
-            <div class="circuit-header"><div class="section-title"><span>03</span><h2>Somewhere worth racing.</h2></div><span>3 LAPS <b>·</b> 4 DRIVERS <b>·</b> ALL HEART</span></div>
-            <div class="launch-row"><div class="track-picker" id="track-picker"></div><div class="launch-action"><button id="start-race" class="start-button"><span>LET’S RACE</span><span>↗</span></button><span id="best-time">YOUR NEXT GREAT LAP STARTS HERE</span></div></div>
-            <div class="menu-bottom"><span><kbd>WASD</kbd> DRIVE <kbd>SHIFT</kbd> DRIFT <kbd>SPACE</kbd> BOOST <kbd>X</kbd> ITEM</span><button id="how-to" class="text-button">HOW TO PLAY ↗</button><span>KEYBOARD · TOUCH · CONTROLLER</span></div>
-          </footer>
+          <header class="wizard-top"><a class="wizard-brand" href="/arcade/">↖ Arcade</a><span id="step-count">THE GOOD KIND OF CHAOS</span><div><button id="quality" class="text-button">HIGH GRAPHICS</button><button id="menu-sound" class="icon-button" aria-label="Toggle sound">♫</button></div></header>
+          <main class="wizard-body">
+            <section data-step="0" class="wizard-step welcome"><p class="eyebrow">FOUR FRIENDS. OPEN ROAD.</p><h1 class="wordmark">INDIGO<span>KART</span><b>3</b></h1><p class="wizard-intro">Big roads. Big personalities.<br>Your next great race starts here.</p><button id="play" class="start-button">Play <span>→</span></button></section>
+            <section data-step="1" class="wizard-step hidden"><p class="eyebrow">01 / YOUR DRIVER</p><h2>Choose your car.</h2><p class="wizard-intro">Four different ways to find your flow.</p><div class="car-picker" id="car-picker"></div><div id="driver-detail" class="driver-detail"></div></section>
+            <section data-step="2" class="wizard-step hidden"><p class="eyebrow">02 / YOUR DESTINATION</p><h2>Choose your track.</h2><p class="wizard-intro">Room to race. A view worth chasing.</p><div class="track-picker" id="track-picker"></div></section>
+            <section data-step="3" class="wizard-step hidden"><p class="eyebrow">03 / YOUR PACE</p><h2>How do you race?</h2><p class="wizard-intro">Same open road. Your kind of challenge.</p><div class="difficulty-picker" id="difficulty-picker"></div></section>
+            <section data-step="4" class="wizard-step hidden"><p class="eyebrow">READY WHEN YOU ARE</p><h2>Make it a great race.</h2><div id="race-summary"></div><button id="start-race" class="start-button">Let’s race <span>↗</span></button><p id="best-time"></p></section>
+          </main>
+          <aside class="wizard-caption"><strong id="showcase-name"></strong><p id="showcase-tagline"></p></aside>
+          <footer class="wizard-bottom"><button id="menu-back" class="secondary-button hidden">← Back</button><button id="how-to" class="text-button">How to play ↗</button><span>Keyboard · Touch · Controller</span></footer>
         </section>
         <section id="hud" class="hud hidden">
           <div class="hud-top">
@@ -103,12 +94,13 @@ export class Game {
           </div>
         </section>
         <section id="help" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="help-title"><div class="overlay-card"><p class="eyebrow">A QUICK PIT STOP</p><h2 id="help-title">Find your flow.</h2><div class="help-copy"><p><b>Drive</b> with WASD / arrows. Down brakes, then reverses. Controller: left stick + RT / LT.</p><p><b>Drift</b> with Shift while steering at speed. Release a charged drift for a mini-turbo. Controller: B.</p><p><b>Boost</b> with Space (controller A). Glowing road pads recharge your three boost slots.</p><p><b>Items</b> come from floating pickups. X (controller X) uses your shield, repair, turbo or nearby shockwave.</p><p><b>R</b> resets your car with a time penalty. Escape / Start pauses. Touch controls appear on tablets.</p></div><button id="close-help" class="start-button">GOT IT ↗</button></div></section>
-        <section id="pause" class="overlay hidden"><div class="overlay-card"><p class="eyebrow">RACE PAUSED</p><h2>Catch your breath.</h2><button id="resume" class="start-button">RESUME</button><button class="secondary-button" data-action="menu">QUIT TO MENU</button></div></section>
+        <section id="pause" class="overlay hidden"><div class="overlay-card"><p class="eyebrow">RACE PAUSED</p><h2>Catch your breath.</h2><div class="audio-settings"><label>Music <input id="music-volume" type="range" min="0" max="1" step=".05" value=".38"></label><label>Engines & effects <input id="effects-volume" type="range" min="0" max="1" step=".05" value=".8"></label></div><button id="resume" class="start-button">RESUME</button><button class="secondary-button" data-action="menu">QUIT TO MENU</button></div></section>
         <section id="results" class="overlay hidden"><div class="overlay-card results-card"><p class="eyebrow">RACE COMPLETE</p><h2 id="result-title">Podium finish!</h2><div class="result-summary"><div><span>FINISH</span><strong id="result-place">1st</strong></div><div><span>POINTS</span><strong id="result-points">+12</strong></div><div><span>TIME</span><strong id="result-time">0:00.00</strong></div></div><div id="standings" class="standings"></div><button id="race-again" class="start-button">RACE AGAIN</button><button class="secondary-button" data-action="menu">CHANGE SETUP</button></div></section>
       </div>`;
 
     this.cacheElements();
     this.renderMenuOptions();
+    this.setMenuStep(0);
     this.bindEvents();
     this.initRenderer();
     this.renderMenuBackdrop();
@@ -136,18 +128,34 @@ export class Game {
         <span class="driver-number">0${i+1}</span><span class="driver-avatar">${car.driver[0]}</span><strong>${car.driver}</strong><small>${car.kind === 'truck' ? 'TRAIL TRUCK' : car.kind === 'tank' ? 'CYBER TANK' : 'TESLA'}</small>
       </button>`).join('');
     const car = this.config.car;
-    this.root.querySelector('#driver-detail').innerHTML = `<div><span>${car.bio}</span><strong>${car.name}</strong></div><div class="stat-grid">${this.statRow('SPEED',car.stats.topSpeed)}${this.statRow('LAUNCH',car.stats.acceleration)}${this.statRow('GRIP',car.stats.handling)}${this.statRow('MASS',car.stats.weight)}</div>`;
+    this.root.querySelector('#driver-detail').textContent = car.tagline;
     this.root.querySelector('#showcase-name').textContent = car.name;
     this.root.querySelector('#showcase-tagline').textContent = car.tagline;
     this.el.trackPicker.innerHTML = TRACKS.map((track) => {
       const xs = track.points.map(p=>p[0]), zs = track.points.map(p=>p[2]);
       const minX=Math.min(...xs), minZ=Math.min(...zs), width=Math.max(...xs)-minX, height=Math.max(...zs)-minZ;
       const path=track.points.map((p,i)=>`${i?'L':'M'}${12+(p[0]-minX)/width*76},${8+(p[2]-minZ)/height*40}`).join(' ')+' Z';
-      return `<button class="track-card ${track.id === this.config.track.id ? 'selected' : ''}" aria-pressed="${track.id === this.config.track.id}" data-track="${track.id}"><svg class="circuit-map" viewBox="0 0 100 58" aria-hidden="true"><path d="${path}" /></svg><div><span>${track.badge}</span><strong>${track.name}</strong><small>${track.description}</small></div></button>`;
+      return `<button class="track-card ${track.id === this.config.track.id ? 'selected' : ''}" aria-pressed="${track.id === this.config.track.id}" data-track="${track.id}"><svg class="circuit-map" viewBox="0 0 100 58" aria-hidden="true"><path d="${path}" /></svg><div><span>${track.laps} LAPS · ${track.width} m WIDE</span><strong>${track.name}</strong><small>${track.description}</small></div></button>`;
     }).join('');
-    this.el.difficultyPicker.innerHTML = Object.entries(DIFFICULTIES).map(([id, value]) => `<button class="difficulty ${id === this.config.difficulty ? 'selected' : ''}" aria-pressed="${id === this.config.difficulty}" data-difficulty="${id}">${value.label}</button>`).join('');
+    this.el.difficultyPicker.innerHTML = Object.entries(DIFFICULTIES).map(([id, value]) => `<button class="difficulty ${id === this.config.difficulty ? 'selected' : ''}" aria-pressed="${id === this.config.difficulty}" data-difficulty="${id}"><strong>${value.label}</strong><span>${value.description}</span></button>`).join('');
     const best = this.bestTimes[this.recordKey()];
-    this.root.querySelector('#best-time').textContent = best ? `PERSONAL BEST  /  ${formatTime(best)}` : 'YOUR NEXT GREAT LAP STARTS HERE';
+    this.root.querySelector('#best-time').textContent = best ? `PERSONAL BEST  /  ${formatTime(best)}` : 'Two laps. Four friends. Let’s go.';
+    this.root.querySelector('#race-summary').innerHTML = `<p><span>Driver</span><strong>${car.driver} · ${car.name}</strong></p><p><span>Track</span><strong>${this.config.track.name}</strong></p><p><span>Challenge</span><strong>${DIFFICULTIES[this.config.difficulty].label}</strong></p>`;
+  }
+
+  setMenuStep(step) {
+    this.menuStep=Math.max(0,Math.min(4,step));
+    this.root.querySelectorAll('[data-step]').forEach(panel=>panel.classList.toggle('hidden',Number(panel.dataset.step)!==this.menuStep));
+    this.root.querySelector('#menu-back').classList.toggle('hidden',this.menuStep===0);
+    this.root.querySelector('#step-count').textContent=['THE GOOD KIND OF CHAOS','CHOOSE CAR','CHOOSE TRACK','CHOOSE PACE','LET’S RACE'][this.menuStep];
+    this.el.menu.dataset.currentStep=this.menuStep;
+    this.root.querySelector(`[data-step="${this.menuStep}"] button`)?.focus({preventScroll:true});
+    this.el.menu.scrollTop=0;
+  }
+
+  advanceMenu() {
+    if(this.menuStep===4) this.startRace();
+    else this.setMenuStep(this.menuStep+1);
   }
 
   recordKey() { return `${this.config.track.id}:${this.config.car.id}:${this.config.difficulty}`; }
@@ -161,9 +169,11 @@ export class Game {
       const carButton = event.target.closest('[data-car]');
       const trackButton = event.target.closest('[data-track]');
       const difficultyButton = event.target.closest('[data-difficulty]');
-      if (carButton) { this.config.car = CARS.find((car) => car.id === carButton.dataset.car); this.renderMenuOptions(); this.updateShowcase(); this.playUiTone(); }
-      if (trackButton) { this.config.track = TRACKS.find((track) => track.id === trackButton.dataset.track); this.renderMenuOptions(); this.renderMenuBackdrop(); this.playUiTone(); }
-      if (difficultyButton) { this.config.difficulty = difficultyButton.dataset.difficulty; this.renderMenuOptions(); this.playUiTone(); }
+      if (carButton) { this.config.car = CARS.find((car) => car.id === carButton.dataset.car); this.renderMenuOptions(); this.updateShowcase(); this.playUiTone(); this.setMenuStep(2); }
+      if (trackButton) { this.config.track = TRACKS.find((track) => track.id === trackButton.dataset.track); this.renderMenuOptions(); this.renderMenuBackdrop(); this.playUiTone(); this.setMenuStep(3); }
+      if (difficultyButton) { this.config.difficulty = difficultyButton.dataset.difficulty; this.renderMenuOptions(); this.playUiTone(); this.setMenuStep(4); }
+      if (event.target.closest('#play')) { this.playUiTone(); this.setMenuStep(1); }
+      if (event.target.closest('#menu-back')) this.setMenuStep(this.menuStep-1);
       if (event.target.closest('#start-race')) this.startRace();
       if (event.target.closest('#pause-button') || event.target.closest('#resume')) this.togglePause();
       if (event.target.closest('#race-again')) this.startRace();
@@ -177,10 +187,12 @@ export class Game {
       if (event.target.closest('#quality')) this.toggleQuality();
     });
 
+    this.root.querySelector('#music-volume').addEventListener('input',e=>this.audio.setVolume('music',Number(e.target.value)));
+    this.root.querySelector('#effects-volume').addEventListener('input',e=>this.audio.setVolume('effects',Number(e.target.value)));
     window.addEventListener('keydown', (event) => {
       if (event.code === 'Escape' && !this.root.querySelector('#help').classList.contains('hidden')) { this.root.querySelector('#help').classList.add('hidden'); this.root.querySelector('#how-to').focus(); return; }
       if (CONTROL_KEYS[event.code] && this.state === 'racing') { this.input[CONTROL_KEYS[event.code]] = true; event.preventDefault(); }
-      if (event.code === 'Enter' && this.state === 'menu' && this.root.querySelector('#help').classList.contains('hidden') && !event.target.closest('button,a')) this.startRace();
+      if (event.code === 'Enter' && this.state === 'menu' && this.root.querySelector('#help').classList.contains('hidden') && !event.target.closest('button,a')) this.advanceMenu();
       if (event.code === 'KeyX' && !event.repeat) this.activateItem();
       if (event.code === 'KeyR' && !event.repeat) this.recover();
       if (event.code === 'Space' && this.state === 'racing') { event.preventDefault(); if (!event.repeat) this.activateBoost(); }
@@ -205,7 +217,7 @@ export class Game {
 
   initRenderer() {
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(61, 1, 0.1, 650);
+    this.camera = new THREE.PerspectiveCamera(61, 1, 0.1, 3200);
     this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
     this.renderer.shadowMap.enabled = true;
@@ -247,6 +259,7 @@ export class Game {
   }
 
   clearWorld() {
+    this.weather?.dispose(); this.weather=null;
     this.effects?.dispose();
     this.effects = null;
     this.trackWorld?.dispose();
@@ -264,7 +277,7 @@ export class Game {
   setupWorld(trackData, preview = false) {
     this.clearWorld();
     this.scene.background = new THREE.Color(trackData.palette.sky);
-    const sky = new THREE.Mesh(new THREE.SphereGeometry(500,24,16), new THREE.ShaderMaterial({
+    const sky = new THREE.Mesh(new THREE.SphereGeometry(2600,24,16), new THREE.ShaderMaterial({
       side:THREE.BackSide, depthWrite:false,
       uniforms:{ top:{value:new THREE.Color(trackData.time === 'night' ? 0x080f28 : 0x4d91af)}, horizon:{value:new THREE.Color(trackData.palette.fog)} },
       vertexShader:'varying vec3 vPos; void main(){ vPos=position; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }',
@@ -282,8 +295,9 @@ export class Game {
       space: { hemiSky: 0x4a5a9e, hemiIntensity: 0.9, sunColor: 0xcfd8ff, sunIntensity: 2.5, sunPosition: [-60, 115, -85], fog: 0.001 },
     };
     const rig = rigs[trackData.time] || rigs.sunset;
-    this.scene.fog = new THREE.FogExp2(trackData.palette.fog, rig.fog);
+    this.scene.fog = new THREE.FogExp2(trackData.palette.fog, rig.fog*.25);
     this.trackWorld = new TrackWorld(this.scene, trackData);
+    this.weather = new Weather(this.scene,this.trackWorld);
 
     const hemi = new THREE.HemisphereLight(rig.hemiSky, trackData.palette.ground, rig.hemiIntensity);
     this.scene.add(hemi);
@@ -301,8 +315,8 @@ export class Game {
     this.scene.add(sun);
 
     if (trackData.time === 'sunset') {
-      const sunDisc = new THREE.Mesh(new THREE.SphereGeometry(7, 18, 12), new THREE.MeshBasicMaterial({ color: 0xffe7a1 }));
-      sunDisc.position.set(-120, 42, -180);
+      const sunDisc = new THREE.Mesh(new THREE.SphereGeometry(70, 18, 12), new THREE.MeshBasicMaterial({ color: 0xffe7a1 }));
+      sunDisc.position.set(-1200, 320, -1800);
       this.scene.add(sunDisc);
     }
   }
@@ -377,10 +391,11 @@ export class Game {
     const player = new Racer({ name: this.config.car.driver, car: this.config.car, color: 0xffffff, isPlayer: true, skill: 1, lane: -0.2, lightsOn });
     this.racers.push(player);
     CARS.filter(car => car.id !== this.config.car.id).forEach((car, i) => {
-      this.racers.push(new Racer({ name: car.driver, car, color: car.accent, skill: difficulty.pace + (i - 1) * .018, lane: (i - 1) * .2, lightsOn }));
+      this.racers.push(new Racer({ name: car.driver, car, color: car.accent, skill: difficulty.pace + (i - 1) * .018, lane: i % 2 === 0 ? .2 : -.2, lightsOn }));
     });
     this.racers.forEach((racer, index) => { racer.reset(this.trackWorld, index); racer.lap = -1; this.scene.add(racer.mesh); });
     this.player = player;
+    this.audio.prepare(this.racers);
     this.effects = new KartEffects(this.scene, this.config.track);
     const forward = new THREE.Vector3(Math.sin(player.yaw), 0, Math.cos(player.yaw));
     this.cameraPosition.copy(player.position).addScaledVector(forward, -10).add(new THREE.Vector3(0, 5.5, 0));
@@ -450,6 +465,7 @@ export class Game {
     this.audio.setEngine(0, 0, false);
     this.audio.stopMusic();
     this.renderMenuOptions();
+    this.setMenuStep(0);
     this.renderMenuBackdrop();
   }
 
@@ -467,7 +483,7 @@ export class Game {
     const assistError = this.angleDifference(targetYaw, racer.yaw);
     const assist = Math.abs(steerInput) < .1 ? difficulty.assist : difficulty.assist * .15;
     const assistedSteer = THREE.MathUtils.clamp(steerInput + assistError * assist, -1, 1);
-    const { drifting } = driveStep(racer, { steer: assistedSteer, throttle, brake, boost: boosting, drift: this.input.drift }, { offroad, slope: nearest.tangent.y, loose: this.config.track.road?.style === 'dirt' }, dt);
+    const { drifting } = driveStep(racer, { steer: assistedSteer, throttle, brake, boost: boosting, drift: this.input.drift }, { offroad, slope: nearest.tangent.y, wetness: this.weather?.wetness || 0, loose: this.config.track.road?.style === 'dirt' }, dt);
     if (drifting) {
       this.driftCharge = Math.min(2, this.driftCharge + dt);
     } else if (this.wasDrifting) {
@@ -479,21 +495,6 @@ export class Game {
     }
     this.wasDrifting = drifting;
     if (drifting) this.effects?.emitRate('boost', racer.position.clone().add(new THREE.Vector3(0,.2,0)), racer.velocity.clone().multiplyScalar(-.2), 14, dt, .4);
-    // Track walls are forgiving: a soft inward impulse and speed loss, not a stop.
-    const hardEdge = this.config.track.width * 0.93;
-    if (Math.abs(nearest.offset) > hardEdge) {
-      const excess = Math.abs(nearest.offset) - hardEdge;
-      racer.velocity.addScaledVector(nearest.side, -Math.sign(nearest.offset) * (10 + excess * 5) * dt);
-      racer.velocity.multiplyScalar(1 - Math.min(0.9, dt * 2.8));
-      if (racer.bumpCooldown <= 0) {
-        const wallImpact = Math.max(2, racer.speed * 0.42 + excess * 2);
-        this.audio.crash(wallImpact);
-        racer.damage = Math.min(1, racer.damage + (racer.shieldTimer > 0 ? 0 : Math.max(0, (wallImpact - 4) * 0.0035)));
-        this.shake = Math.min(0.55, 0.15 + wallImpact * 0.018);
-        racer.bumpCooldown = 0.3;
-      }
-    }
-    racer.bumpCooldown -= dt;
     racer.syncVisual(this.trackWorld, dt, assistedSteer, { throttle, brake, boost: boosting, damage: racer.damage });
     this.updateProgress(racer);
     this.checkBoostPickup();
@@ -553,6 +554,7 @@ export class Game {
     const frame = this.trackWorld.frameAt(this.player.progress);
     this.player.position.copy(frame.point); this.player.velocity.set(0,0,0); this.player.speed = 0;
     this.player.yaw = Math.atan2(frame.tangent.x, frame.tangent.z);
+    this.player.angularVelocity=0; this.player.crashTimer=0;
     this.raceTime += 3; this.clearInput(); this.driftCharge = 0;
     this.flashMessage('BACK ON TRACK +3s', 1);
   }
@@ -573,82 +575,31 @@ export class Game {
   }
 
   updateAI(racer, dt, index) {
-    const nearest = this.trackWorld.nearest(racer.position, racer.progress);
-    const difficulty = DIFFICULTIES[this.config.difficulty];
-    const lookAhead = 0.018 + Math.min(racer.speed / 1700, 0.025);
-    const frame = this.trackWorld.frameAt(nearest.progress + lookAhead);
-    const lane = Math.sin(this.raceTime * (0.24 + index * 0.025) + racer.aiWobble) * this.config.track.width * difficulty.error + racer.lane * this.config.track.width;
-    const target = frame.point.clone().addScaledVector(frame.side, lane);
-    const desiredYaw = Math.atan2(target.x - racer.position.x, target.z - racer.position.z);
-    const yawError = this.angleDifference(desiredYaw, racer.yaw);
-    const steer = THREE.MathUtils.clamp(yawError * 2.3, -1, 1);
-    const aheadTangent = this.trackWorld.frameAt(nearest.progress + .035).tangent;
-    const curveAmount = 1 - Math.max(-1, Math.min(1, nearest.tangent.dot(aheadTangent)));
-    const targetSpeed = racer.car.physics.maxSpeed * racer.skill * (1 - Math.min(.45, curveAmount * 5));
-    const throttle = racer.speed < targetSpeed ? 1 : 0;
-    const brake = racer.speed > targetSpeed + 3 ? .5 : 0;
+    const {nearest,steer,throttle,brake}=aiInput(racer,this.trackWorld,DIFFICULTIES[this.config.difficulty],this.raceTime,index,this.racers);
     driveStep(racer, { steer, throttle, brake, drift: false, boost: false }, {
       offroad: Math.abs(nearest.offset) > this.config.track.width * .53,
-      slope: nearest.tangent.y, loose: this.config.track.road?.style === 'dirt',
+      slope: nearest.tangent.y, wetness: this.weather?.wetness || 0, loose: this.config.track.road?.style === 'dirt',
     }, dt);
-    if (Math.abs(nearest.offset) > this.config.track.width * .78) racer.velocity.addScaledVector(nearest.side, -Math.sign(nearest.offset) * 18 * dt);
     racer.syncVisual(this.trackWorld, dt, steer, { throttle, brake, damage: racer.damage });
     this.updateProgress(racer);
   }
 
   handleCollisions(dt) {
-    for (let i = 0; i < this.racers.length; i += 1) {
-      for (let j = i + 1; j < this.racers.length; j += 1) {
-        const a = this.racers[i]; const b = this.racers[j];
-        const delta = new THREE.Vector3().subVectors(a.position, b.position); delta.y = 0;
-        const distance = delta.length();
-        if (distance < 2.15 && distance > 0.01) {
-          const normal = delta.multiplyScalar(1 / distance);
-          const overlap = 2.15 - distance;
-          const massA = a.car.physics.mass;
-          const massB = b.car.physics.mass;
-          a.position.addScaledVector(normal, overlap * massB / (massA + massB));
-          b.position.addScaledVector(normal, -overlap * massA / (massA + massB));
-          const relative = new THREE.Vector3().subVectors(a.velocity, b.velocity).dot(normal);
-          if (relative < 0) {
-            const impactSpeed = Math.abs(relative);
-            const impulse = -(1.15 * relative) / (1 / massA + 1 / massB);
-            a.velocity.addScaledVector(normal, impulse / massA);
-            b.velocity.addScaledVector(normal, -impulse / massB);
-            if (impactSpeed > 2.5) {
-              const damageBase = Math.max(0, impactSpeed - 2.5) * 0.006;
-              a.damage = Math.min(1, a.damage + (a.shieldTimer > 0 ? 0 : damageBase) * (massB / (massA + massB)) * 1.45);
-              b.damage = Math.min(1, b.damage + (b.shieldTimer > 0 ? 0 : damageBase) * (massA / (massA + massB)) * 1.45);
-            }
-            if ((a.isPlayer || b.isPlayer) && this.player.bumpCooldown <= 0) {
-              this.audio.crash(impactSpeed);
-              this.shake = Math.min(0.62, impactSpeed * 0.04);
-              this.player.bumpCooldown = 0.22;
-            }
-          }
-        }
-      }
+    this.racers.forEach(r=>{r.bumpCooldown=Math.max(0,r.bumpCooldown-dt);});
+    const impact=(hit,r)=>{
+      if(!hit || hit.speed<2 || r.bumpCooldown>0) return;
+      this.audio.crash(hit.speed,hit.point);
+      this.effects?.sparks.spawn(hit.point.clone().add(new THREE.Vector3(0,.55,0)),hit.normal.clone().multiplyScalar(3),Math.min(24,Math.ceil(hit.speed)),8);
+      if(r.isPlayer)this.shake=Math.min(.55,hit.speed*.025);
+      r.bumpCooldown=.2;
+    };
+    for(let i=0;i<this.racers.length;i++) for(let j=i+1;j<this.racers.length;j++) {
+      const a=this.racers[i],b=this.racers[j];
+      impact(resolveCarCollision(a,b),a.isPlayer?a:b);
     }
-  }
-
-  // Tracks with `rails` (the orbital circuit) hard-clamp every kart inside the
-  // guard rails — it is a very long way down. Runs after collisions so even a
-  // hefty shunt can't push anyone through the barrier.
-  applyRailClamp(racer) {
-    const limit = this.config.track.width * 0.56;
-    const nearest = this.trackWorld.nearest(racer.position, racer.progress);
-    if (Math.abs(nearest.offset) <= limit) return;
-    const overshoot = Math.abs(nearest.offset) - limit;
-    racer.position.addScaledVector(nearest.side, -Math.sign(nearest.offset) * overshoot);
-    const lateral = racer.velocity.dot(nearest.side);
-    if (Math.sign(lateral) === Math.sign(nearest.offset)) {
-      // Reflect the outward velocity back at ~60% — a springy rail bounce.
-      racer.velocity.addScaledVector(nearest.side, -lateral * 1.6);
-      if (racer.isPlayer && racer.bumpCooldown <= 0 && Math.abs(lateral) > 2) {
-        this.audio.crash(Math.abs(lateral) * 0.55);
-        this.shake = Math.min(0.4, 0.1 + Math.abs(lateral) * 0.012);
-        racer.bumpCooldown = 0.25;
-      }
+    for(const r of this.racers) {
+      if(this.config.track.barrierScale) impact(resolveBarrier(r,this.trackWorld.nearest(r.position),this.config.track.width*this.config.track.barrierScale),r);
+      r.mesh.position.copy(r.position);
     }
   }
 
@@ -717,7 +668,7 @@ export class Game {
     const order = this.raceOrder();
     const place = order.indexOf(this.player) + 1;
     this.el.position.textContent = ordinal(place);
-    this.el.lap.textContent = `LAP ${Math.min(3, Math.max(1, this.player.lap + 1))} / 3`;
+    this.el.lap.textContent = `LAP ${Math.min(this.config.track.laps, Math.max(1, this.player.lap + 1))} / ${this.config.track.laps}`;
     this.el.speed.textContent = Math.round(this.player.speed * 3.6);
     this.el.gear.textContent = this.player.speed < 1 ? 'N' : `${Math.min(5, Math.floor(this.player.speed / 9) + 1)}`;
     this.el.raceTime.textContent = formatTime(this.raceTime);
@@ -807,7 +758,6 @@ export class Game {
       else { this.player.velocity.multiplyScalar(1 - 1.1 * dt); this.player.speed = this.player.velocity.length(); this.player.position.addScaledVector(this.player.velocity, dt); this.player.syncVisual(this.trackWorld, dt, 0, { damage: this.player.damage }); }
       this.racers.slice(1).forEach((racer, index) => { if (!racer.finished) this.updateAI(racer, dt, index + 1); });
       this.handleCollisions(dt);
-      if (this.config.track.rails) this.racers.forEach((racer) => this.applyRailClamp(racer));
       this.boostTimer = Math.max(0, this.boostTimer - dt);
       if (this.playerFinishDelay != null) { this.playerFinishDelay -= dt; if (this.playerFinishDelay <= 0) { this.playerFinishDelay = null; this.completeRace(); } }
     }
@@ -831,15 +781,14 @@ export class Game {
       this.gamepadPrevious = pressed; return;
     }
     if (this.state === 'menu') {
-      if (edge(14) || edge(15)) {
-        const index = CARS.indexOf(this.config.car);
-        this.config.car = CARS[(index+(edge(15)?1:3))%4]; this.renderMenuOptions(); this.updateShowcase();
+      const choices=[...this.root.querySelectorAll(`[data-step="${this.menuStep}"] button`)];
+      if(edge(14)||edge(15)||edge(12)||edge(13)) {
+        const index=choices.indexOf(document.activeElement),delta=edge(15)||edge(13)?1:-1;
+        choices[(index+delta+choices.length)%choices.length]?.focus();
       }
-      if (edge(12) || edge(13)) {
-        const index = TRACKS.indexOf(this.config.track);
-        this.config.track = TRACKS[(index+(edge(13)?1:2))%3]; this.renderMenuOptions(); this.renderMenuBackdrop();
-      }
-      if (edge(0) || edge(9)) this.startRace();
+      if(edge(1))this.setMenuStep(this.menuStep-1);
+      if(edge(0)||edge(9)) { const focused=choices.includes(document.activeElement)?document.activeElement:choices[0]; focused?.click(); }
+
     } else {
       if (edge(9)) this.togglePause();
       if (edge(0)) this.activateBoost();
@@ -868,6 +817,15 @@ export class Game {
       shield.visible = true; shield.scale.setScalar(1 + (1-this.pulseTime/.6)*6);
       if (this.pulseTime <= 0) { shield.scale.setScalar(1); shield.visible = false; }
     }
+    const active=this.state==='racing';
+    if(this.weather && this.state!=='paused')this.weather.update(dt,this.elapsed+performance.now()*.0001,this.racers?.length?this.player.position:this.menuFrame.point,this.sun);
+    this.audio.update(this.racers,this.player,this.camera,this.weather,active);
+    if(active && this.countdown<=0)this.effects.updateTires(this.racers,this.trackWorld);
+    if(active && this.countdown<=0) this.racers.forEach(r=>{
+      const rear=r.position.clone().add(new THREE.Vector3(-Math.sin(r.yaw)*1.7,.18,-Math.cos(r.yaw)*1.7));
+      if(this.weather.wetness>.2 && r.speed>5)this.effects.emitRate('spray',rear,r.velocity.clone().multiplyScalar(.3),r.speed*.6,dt,2);
+      if(!r.isPlayer && r.speed>8 && r.slip>.15)this.effects.emitRate('smoke',rear,r.velocity.clone().multiplyScalar(.15),20,dt,1);
+    });
     this.bloom.enabled = this.quality === 'high';
     this.composer.render();
   };

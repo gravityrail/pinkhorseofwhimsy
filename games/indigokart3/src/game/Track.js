@@ -29,7 +29,9 @@ export class TrackWorld {
       'catmullrom',
       0.45,
     );
-    this.sampleCount = 720;
+    this.curve.arcLengthDivisions = 4096;
+    this.sampleCount = 1536;
+    this.extent = Math.max(...data.points.flatMap(p=>[Math.abs(p[0]),Math.abs(p[2])])) + 260;
     this.samples = [];
     this.length = this.curve.getLength();
     // 'space' tracks float in orbit: no terrain, guard rails, and orbital scenery.
@@ -41,7 +43,8 @@ export class TrackWorld {
     if (this.space) this.buildSpaceScenery();
     else this.buildTerrain();
     this.buildRoad();
-    if (data.rails) this.buildRails();
+    this.buildCourseDetails();
+    if (data.barrierScale || data.rails) this.buildRails();
     this.buildStartLine();
     this.buildBoostPads();
     this.buildPowerUps();
@@ -62,10 +65,10 @@ export class TrackWorld {
     };
     const arch = place('festival-arch', .005, 1, 0, this.data.width / 17);
     arch.position.y = this.frameAt(.005).point.y;
-    for (let i = 0; i < 42; i++) {
-      const t = (i + .4) / 42;
+    for (let i = 0; i < 110; i++) {
+      const t = (i + .4) / 110;
       const side = i % 2 ? -1 : 1;
-      const distance = this.data.width * .7 + this.random() * 14;
+      const distance = this.data.width * 1.2 + this.random() * 24;
       if (this.data.kit === 'neon') place('neon-tower', t, side, distance + 5, .5 + this.random() * 1.2);
       else if (this.data.kit === 'coast') place(i % 4 === 0 ? 'coastal-rocks' : 'palm', t, side, distance, .75 + this.random() * .65);
       else place('coastal-rocks', t, side, distance + 7, 1.2 + this.random() * 2.4);
@@ -73,17 +76,17 @@ export class TrackWorld {
     for (let i=0;i<18;i++) {
       const angle=i/18*Math.PI*2;
       const rock=scenery(this.data.kit === 'neon' ? 'neon-tower' : 'coastal-rocks');
-      rock.position.set(Math.cos(angle)*175,-5,Math.sin(angle)*175);
-      if (this.data.kit === 'neon') rock.scale.set(2,1.2+this.random()*1.6,2);
-      else rock.scale.set(5+this.random()*3,4+this.random()*6,5+this.random()*3);
+      rock.position.set(Math.cos(angle)*(this.extent-60),-5,Math.sin(angle)*(this.extent-60));
+      if (this.data.kit === 'neon') rock.scale.set(6,5+this.random()*8,6);
+      else rock.scale.set(16+this.random()*14,14+this.random()*20,16+this.random()*14);
       rock.rotation.y=angle; this.group.add(rock);
     }
     if (this.data.kit === 'coast') {
-      place('lighthouse', .46, -1, 26, 1.8);
-      for (const t of [.1, .2, .84]) place('pavilion', t, -1, 22, 1.3);
+      place('lighthouse', .46, -1, 55, 3.2);
+      for (const t of [.1, .2, .84]) place('pavilion', t, -1, 45, 2.2);
     }
     if (this.data.kit === 'desert') {
-      for (const t of [.12, .42, .68, .9]) place('pavilion', t, 1, 23, 1.3);
+      for (const t of [.12, .42, .68, .9]) place('pavilion', t, 1, 48, 2.2);
     }
     // Wind-carried motes make atmosphere readable without a full-screen overlay.
     const geometry = new THREE.BufferGeometry();
@@ -114,7 +117,7 @@ export class TrackWorld {
     // The terrain surface follows the nearest section of road, then smoothly
     // falls away. This creates broad supporting hills instead of floating road
     // ribbons, and gives trackside scenery a real patch of ground to stand on.
-    const terrainGeometry = new THREE.PlaneGeometry(360, 360, 72, 72);
+    const terrainGeometry = new THREE.PlaneGeometry(this.extent*2, this.extent*2, 240, 240);
     terrainGeometry.rotateX(-Math.PI / 2);
     const positions = terrainGeometry.attributes.position;
     for (let i = 0; i < positions.count; i += 1) {
@@ -139,14 +142,14 @@ export class TrackWorld {
     this.group.add(ground);
 
     // A solid skirt hides the edge of the generated landscape from low angles.
-    const groundBase = mesh(new THREE.CylinderGeometry(182, 188, 6, 48), material(palette.ground), 0, terrain.kind === 'island' ? -11 : -3.4, 0);
+    const groundBase = mesh(new THREE.CylinderGeometry(this.extent, this.extent+8, 6, 64), material(palette.ground), 0, terrain.kind === 'island' ? -11 : -3.4, 0);
     groundBase.receiveShadow = true;
     groundBase.castShadow = false;
     this.group.add(groundBase);
 
     if (terrain.kind === 'island') {
       const water = mesh(
-        new THREE.CylinderGeometry(280, 280, 1, 64),
+        new THREE.CylinderGeometry(this.extent*2, this.extent*2, 1, 96),
         material(palette.water, { metalness: 0.15, roughness: 0.2, transparent: true, opacity: 0.9 }),
         0, -5.2, 0,
       );
@@ -162,7 +165,7 @@ export class TrackWorld {
       water.castShadow = false;
       this.group.add(water);
     } else {
-      const cityFloor = mesh(new THREE.CylinderGeometry(230, 230, 2, 48), material(palette.ground), 0, -3.7, 0);
+      const cityFloor = mesh(new THREE.CylinderGeometry(this.extent, this.extent, 2, 64), material(palette.ground), 0, -3.7, 0);
       cityFloor.castShadow = false;
       this.group.add(cityFloor);
     }
@@ -272,13 +275,16 @@ export class TrackWorld {
       if (distanceSq < bestDistanceSq) { bestDistanceSq = distanceSq; closest = sample; }
     }
     const distance = Math.sqrt(bestDistanceSq);
-    const base = this.data.kit === 'coast' ? -8 : -.32;
-    const shelf = this.data.width * 0.74;
-    const hillRadius = this.data.width * 2.85;
+    const hills = Math.sin(x*.006+this.data.seed)*Math.cos(z*.007)*18 + Math.sin(x*.017-z*.013)*7;
+    const base = this.data.kit === 'coast' ? -8 + Math.max(0,hills-3)*1.6 : this.data.kit === 'desert' ? 5 + hills*1.5 : -.32;
+
+    const shelf = this.data.width * 1.05;
+    const hillRadius = this.data.width * 5.5;
     if (distance >= hillRadius) return base;
     const raw = THREE.MathUtils.clamp((hillRadius - distance) / (hillRadius - shelf), 0, 1);
     const blend = raw * raw * (3 - 2 * raw);
-    const roadBed = closest.point.y - 0.34;
+    const along=(x-closest.point.x)*closest.tangent.x+(z-closest.point.z)*closest.tangent.z;
+    const roadBed = closest.point.y + along*closest.tangent.y - 0.12;
     const naturalVariation = Math.sin(x * 0.085 + this.data.seed) * Math.cos(z * 0.073) * 0.32 * blend * (1 - blend);
     return THREE.MathUtils.lerp(base, roadBed, blend) + naturalVariation;
   }
@@ -286,7 +292,7 @@ export class TrackWorld {
   groundHeightAt(x, z) {
     const probe = new THREE.Vector3(x, 0, z);
     const nearest = this.nearest(probe);
-    if (Math.abs(nearest.offset) <= this.data.width * 0.69) return nearest.point.y + 0.045;
+    if (Math.abs(nearest.offset) <= this.data.width * .69) return nearest.point.y + .045;
     // In orbit there is no ground beside the road; rails keep karts within the
     // 0.69 band, so this only pads wheel samples that poke past the edge.
     if (this.space) return nearest.point.y + 0.045;
@@ -374,6 +380,47 @@ export class TrackWorld {
     return geo;
   }
 
+  roadTexture() {
+    const canvas=document.createElement('canvas');canvas.width=canvas.height=256;
+    const ctx=canvas.getContext('2d'),pixels=ctx.createImageData(256,256);
+    for(let i=0;i<pixels.data.length;i+=4) {
+      const grain=180+Math.floor(this.random()*65);
+      pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=grain;pixels.data[i+3]=255;
+    }
+    ctx.putImageData(pixels,0,0);
+    const texture=new THREE.CanvasTexture(canvas);texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
+    texture.repeat.set(10,8);texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=4;
+    return texture;
+  }
+
+  buildCourseDetails() {
+    const lineMat=material(this.data.kit==='desert'?0xc6aa82:0xf3eee2,{roughness:.7});
+    for(const side of [-1,1])this.group.add(new THREE.Mesh(this.stripGeometry(side*.476-.006,side*.476+.006,.065),lineMat));
+    if(this.data.kit!=='desert') {
+      const marks=new THREE.InstancedMesh(new THREE.BoxGeometry(.24,.025,5),lineMat,Math.floor(this.length/16));
+      const dummy=new THREE.Object3D();
+      for(let i=0;i<marks.count;i++) {
+        const f=this.frameAt(i/marks.count);dummy.position.copy(f.point);dummy.position.y+=.07;
+        dummy.rotation.set(0,Math.atan2(f.tangent.x,f.tangent.z),0);dummy.updateMatrix();marks.setMatrixAt(i,dummy.matrix);
+      }
+      this.group.add(marks);
+    }
+    for(const [name,t] of this.data.sectors||[]) {
+      const f=this.frameAt(t+.008),canvas=document.createElement('canvas');canvas.width=768;canvas.height=256;
+      const ctx=canvas.getContext('2d');ctx.fillStyle=this.dark?'#152938':'#193d35';ctx.fillRect(0,0,768,256);
+      ctx.strokeStyle='#b4e4c8';ctx.lineWidth=12;ctx.strokeRect(8,8,752,240);
+      ctx.fillStyle='#fcf5e4';ctx.font='bold 54px sans-serif';ctx.textAlign='center';ctx.fillText(name.toUpperCase(),384,120);ctx.font='32px sans-serif';ctx.fillText('INDIGOKART GRAND TOUR   →',384,193);
+      const tex=new THREE.CanvasTexture(canvas);tex.colorSpace=THREE.SRGBColorSpace;
+      const sign=new THREE.Group(),face=mesh(new THREE.BoxGeometry(10,3.3,.16),material(0xffffff,{map:tex,emissive:0xffffff,emissiveMap:tex,emissiveIntensity:this.dark?.55:.04}));face.position.y=5;
+      sign.add(face);for(const x of [-3.5,3.5])sign.add(mesh(new THREE.CylinderGeometry(.13,.13,5,6),material(0x697a7d),x,2.5,0));
+      sign.position.copy(f.point).addScaledVector(f.side,this.data.width*1.1);sign.rotation.y=Math.atan2(-f.tangent.x,-f.tangent.z);this.group.add(sign);
+    }
+    // Spectator areas distinguish the start/finish from the open-road sectors.
+    for(const t of [.015,.03,.985])this.addDecorAt(t,-1,'grandstands',this.data.width*1.6,2.5);
+    if(this.data.kit==='desert')for(let i=0;i<24;i++)this.addDecorAt((i+.4)/24,i%2?1:-1,'outback',this.data.width*1.4+this.random()*35,1.5);
+    if(this.data.kit==='neon')for(let i=0;i<36;i++)this.addDecorAt(i/36,i%2?1:-1,'city',this.data.width*1.1,1.5);
+  }
+
   buildRoad() {
     const { palette } = this.data;
     const style = this.data.road?.style;
@@ -383,7 +430,7 @@ export class TrackWorld {
       const road = new THREE.Mesh(this.rainbowGeometry(), new THREE.MeshBasicMaterial({ vertexColors: true }));
       this.group.add(road);
     } else {
-      const road = new THREE.Mesh(this.stripGeometry(-0.5, 0.5, 0.04), material(palette.road, { roughness: style === 'dirt' ? 1 : 0.82 }));
+      const road = new THREE.Mesh(this.stripGeometry(-0.5, 0.5, 0.04), material(palette.road, { map:this.roadTexture(), roughness: style === 'dirt' ? 1 : this.data.weather === 'rain' ? .24 : .82, metalness: this.data.weather === 'rain' ? .28 : .02 }));
       road.receiveShadow = true;
       this.group.add(road);
     }
@@ -406,7 +453,7 @@ export class TrackWorld {
         const sample = this.samples[i];
         for (const sideSign of [-1, 1]) {
           const post = mesh(new THREE.CylinderGeometry(0.14, 0.17, 1.1, 6), postMat);
-          post.position.copy(sample.point).addScaledVector(sample.side, sideSign * this.data.width * 0.6);
+          post.position.copy(sample.point).addScaledVector(sample.side, sideSign * this.data.width * 0.97);
           post.position.y += 0.5;
           this.group.add(post);
         }
@@ -451,24 +498,24 @@ export class TrackWorld {
     // Glowing guard rails along both edges. Game.js pairs these with a hard
     // physics clamp, so karts bounce off instead of sailing into the void.
     const railColor = this.data.palette.stripeA;
-    const railMat = material(railColor, { emissive: railColor, emissiveIntensity: 1.5, metalness: 0.45, roughness: 0.3 });
+    const railMat = material(this.dark ? 0x576571 : 0xb7bbc0, { emissive: this.dark ? railColor : 0, emissiveIntensity: .15, metalness: .6, roughness: .38 });
     const postMat = material(0x2a2c48, { metalness: 0.6, roughness: 0.4 });
     for (const sideSign of [-1, 1]) {
       const railPoints = [];
       for (let i = 0; i < this.sampleCount; i += 6) {
         const sample = this.samples[i];
-        railPoints.push(sample.point.clone().addScaledVector(sample.side, sideSign * this.data.width * 0.66));
+        railPoints.push(sample.point.clone().addScaledVector(sample.side, sideSign * this.data.width * (this.data.barrierScale || .66)));
       }
       for (const height of [0.55, 1.2]) {
         const curve = new THREE.CatmullRomCurve3(railPoints.map((p) => p.clone().add(new THREE.Vector3(0, height, 0))), true);
-        const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 420, height > 1 ? 0.13 : 0.09, 6, true), railMat);
+        const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, this.sampleCount, .16, 5, true), railMat);
         tube.castShadow = false;
         this.group.add(tube);
       }
-      for (let i = 0; i < this.sampleCount; i += 10) {
+      for (let i = 0; i < this.sampleCount; i += 12) {
         const sample = this.samples[i];
         const post = mesh(new THREE.BoxGeometry(0.18, 1.35, 0.18), postMat);
-        post.position.copy(sample.point).addScaledVector(sample.side, sideSign * this.data.width * 0.66);
+        post.position.copy(sample.point).addScaledVector(sample.side, sideSign * this.data.width * (this.data.barrierScale || .66));
         post.position.y += 0.68;
         post.castShadow = false;
         this.group.add(post);
@@ -1283,7 +1330,7 @@ export class TrackWorld {
       for (let i = 0; i < count; i += 1) {
         const t = (zone.from + (i + this.random() * 0.7) / count * span) % 1;
         const side = (i % 2) ? 1 : -1;
-        const distance = this.data.width * (0.82 + this.random() * 0.85);
+        const distance = this.data.width * (1.18 + this.random() * 1.2);
         const altitude = this.frameAt(t).point.y;
         // At high elevations palms thin out in favor of rocks.
         const type = zone.type === 'palms' && altitude > 15 && this.random() > 0.42 ? 'cliffs' : zone.type;
@@ -1293,7 +1340,7 @@ export class TrackWorld {
 
     // Track specs can provide any number of explicit decorations as data.
     for (const item of this.data.decorations || []) {
-      this.addDecorAt(item.progress, item.side || 1, item.type, item.distance || this.data.width, item.scale || 1);
+      this.addDecorAt(item.progress, item.side || 1, item.type, Math.max(item.distance || this.data.width, this.data.width*1.3), item.scale || 1);
     }
   }
 
@@ -1311,7 +1358,7 @@ export class TrackWorld {
     for (const pad of this.boostPads) {
       let delta = Math.abs(progress - pad.progress);
       delta = Math.min(delta, 1 - delta);
-      if (delta < 0.012 && pad.cooldown <= 0) {
+      if (delta < 4 / this.length && pad.cooldown <= 0) {
         pad.cooldown = 5;
         return pad;
       }
@@ -1324,7 +1371,7 @@ export class TrackWorld {
     for (const powerUp of this.powerUps || []) {
       let delta = Math.abs(progress - powerUp.progress);
       delta = Math.min(delta, 1 - delta);
-      if (delta < 0.014 && Math.abs(nearest.offset - powerUp.lane) < 3 && powerUp.cooldown <= 0) {
+      if (delta < 3.5 / this.length && Math.abs(nearest.offset - powerUp.lane) < 3 && powerUp.cooldown <= 0) {
         powerUp.cooldown = 9;
         powerUp.group.visible = false;
         return powerUp;
@@ -1365,9 +1412,23 @@ export class TrackWorld {
       const distance = dx * dx + dz * dz;
       if (distance < bestDistance) { bestDistance = distance; bestIndex = i; }
     }
-    const sample = this.samples[bestIndex];
-    const offset = new THREE.Vector3(position.x - sample.point.x, 0, position.z - sample.point.z).dot(sample.side);
-    return { ...sample, index: bestIndex, progress: bestIndex / this.sampleCount, offset, distance: Math.sqrt(bestDistance) };
+    // Project onto the two adjacent segments, removing stair-step height and
+    // lap progress as the car crosses each sample on a kilometre-scale track.
+    let result=null, distance=Infinity;
+    for(const index of [(bestIndex-1+this.sampleCount)%this.sampleCount,bestIndex]) {
+      const a=this.samples[index], b=this.samples[(index+1)%this.sampleCount];
+      const dx=b.point.x-a.point.x, dz=b.point.z-a.point.z;
+      const u=THREE.MathUtils.clamp(((position.x-a.point.x)*dx+(position.z-a.point.z)*dz)/(dx*dx+dz*dz),0,1);
+      const point=a.point.clone().lerp(b.point,u);
+      const d=(position.x-point.x)**2+(position.z-point.z)**2;
+      if(d<distance) {
+        distance=d;
+        const tangent=a.tangent.clone().lerp(b.tangent,u).normalize();
+        const side=new THREE.Vector3().crossVectors(UP,tangent).normalize();
+        result={point,tangent,side,index,progress:((index+u)/this.sampleCount)%1,offset:new THREE.Vector3(position.x-point.x,0,position.z-point.z).dot(side),distance:Math.sqrt(d)};
+      }
+    }
+    return result;
   }
 
   dispose() {

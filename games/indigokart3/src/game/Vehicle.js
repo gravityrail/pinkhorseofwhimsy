@@ -175,7 +175,7 @@ export class Racer {
   reset(track, gridIndex) {
     const row = Math.floor(gridIndex / 2);
     const side = gridIndex % 2 ? 1 : -1;
-    const progress = (1 - (row * 0.014 + 0.018)) % 1;
+    const progress = (1 - (row * 6 + 7) / track.length) % 1;
     const frame = track.frameAt(progress);
     this.position.copy(frame.point).addScaledVector(frame.side, side * 2.35);
     this.position.y = frame.point.y + 0.05;
@@ -194,7 +194,8 @@ export class Racer {
     this.finishPlace = 0;
     this.damage = 0;
     this.steer = 0;
-    this.routeDistance = null;
+    this.angularVelocity = 0;
+    this.crashTimer = 0;
     this.mesh.position.copy(this.position);
     this.mesh.rotation.set(0, this.yaw, 0);
   }

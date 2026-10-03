@@ -339,3 +339,70 @@ kbd { font:inherit; border:1px solid #ffffff33; border-radius:3px; padding:3px 5
 @keyframes pit-in { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
 
 .menu-screen.night #showcase-name, .menu-screen.night #showcase-tagline { color:var(--cream); text-shadow:none; }
+
+/* One decision at a time. Every menu choice is comfortably readable at a TV distance. */
+.menu-screen {padding:28px 5vw 30px;background:linear-gradient(90deg,rgba(9,17,28,.97),rgba(9,17,28,.78) 48%,rgba(9,17,28,.1));color:#fff;display:flex;flex-direction:column;min-height:100%;}
+.menu-screen[data-current-step="2"],.menu-screen[data-current-step="3"] {background:rgba(9,17,28,.88);}
+.wizard-top,.wizard-bottom {display:flex;align-items:center;justify-content:space-between;gap:24px;flex-shrink:0;}
+.wizard-top>div {display:flex;align-items:center;gap:22px;}
+.wizard-brand {color:#fff;text-decoration:none;font-size:22px;font-weight:800;}
+#step-count {font-size:18px;letter-spacing:.1em;font-weight:700;color:#cbd8df;}
+.menu-screen .text-button {font-size:18px;letter-spacing:.03em;color:#e6eef2;padding:12px 0;}
+.menu-screen .icon-button {width:54px;height:54px;font-size:28px;}
+.wizard-body {flex:1;display:flex;align-items:center;padding:40px 0;min-height:0;}
+.wizard-step {width:min(1140px,100%);animation:step-in .32s ease both;}
+@keyframes step-in {from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.wizard-step h2 {font-size:clamp(38px,4.2vw,64px);line-height:1.1;letter-spacing:-.035em;margin:10px 0 18px;font-weight:850;}
+.wizard-step .eyebrow {font-size:18px;letter-spacing:.15em;animation:none;}
+.wizard-intro {font-size:24px;line-height:1.5;color:#d0dce3;margin:0 0 34px;max-width:650px;}
+.wizard-step .wordmark {font-size:clamp(70px,9vw,136px);line-height:.88;margin:28px 0 36px;}
+.wizard-step .wordmark span {display:block;}
+.wizard-step .wordmark b {font-size:1.45em;}
+.wizard-step .start-button {display:flex;align-items:center;justify-content:space-between;width:min(430px,100%);height:88px;font-size:34px;letter-spacing:0;border-radius:12px;padding:0 28px;text-transform:none;box-shadow:0 5px 0 #b69624;}
+.wizard-step .start-button:hover {transform:translateY(-3px);box-shadow:0 8px 0 #b69624;}
+.wizard-step .car-picker {grid-template-columns:repeat(2,minmax(0,1fr));max-width:650px;gap:16px;}
+.wizard-step .car-card {min-height:138px;padding:22px 24px 22px 84px;border-radius:14px;border:2px solid #526072;background:rgba(18,31,45,.92);box-shadow:none;}
+.wizard-step .car-card:hover,.wizard-step .car-card:focus-visible {border-color:var(--car);background:#263e51;}
+.wizard-step .car-card.selected {border-color:var(--car);background:rgba(29,47,61,.94);}
+.wizard-step .car-card:after {display:none;}
+.wizard-step .driver-avatar {position:absolute;left:20px;top:35px;width:46px;height:56px;font-size:34px;color:var(--car);display:grid;place-items:center;background:none;}
+.wizard-step .driver-number {display:none;}
+.wizard-step .car-card strong {display:block;font:800 32px/1.25 inherit;font-family:inherit;font-size:32px;line-height:1.25;letter-spacing:0;}
+.wizard-step .car-card small {display:block;font-size:18px;margin-top:9px;color:#c6d3dc;letter-spacing:.04em;}
+.wizard-step .driver-detail {font-size:22px;line-height:1.4;padding:20px 0;max-width:650px;border:0;min-height:0;color:#dae4eb;background:none;}
+.wizard-caption {position:absolute;right:5vw;bottom:110px;max-width:32%;text-align:right;text-shadow:0 2px 10px #000;}
+.wizard-caption strong {font-size:32px;}.wizard-caption p{font-size:20px;color:#e9f0f4;}
+.menu-screen[data-current-step="2"] .wizard-caption,.menu-screen[data-current-step="3"] .wizard-caption {display:none;}
+.wizard-step .track-picker {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;width:100%;}
+.wizard-step .track-card {min-width:0;display:flex;flex-direction:column;align-items:stretch;gap:24px;padding:26px;border:2px solid #526072;border-radius:16px;background:#152638;color:#fff;text-align:left;min-height:330px;}
+.wizard-step .track-card:hover,.wizard-step .track-card:focus-visible {border-color:var(--yellow);background:#21384b;transform:translateY(-4px);}
+.wizard-step .track-card.selected {border-color:#7b96ad;box-shadow:none;}.wizard-step .track-card:after {display:none;}
+.wizard-step .circuit-map {width:100%;height:105px;flex:none;}.wizard-step .circuit-map path {stroke:#a0e2bd;stroke-width:2;fill:none;stroke-linejoin:round;}
+.wizard-step .track-card span {font-size:16px;letter-spacing:.06em;color:#9dd9b9;}
+.wizard-step .track-card strong {display:block;font-size:29px;line-height:1.15;margin:12px 0;font-weight:850;letter-spacing:-.025em;}
+.wizard-step .track-card small {display:block;font-size:18px;line-height:1.45;white-space:normal;color:#c5d2db;}
+.wizard-step .difficulty-picker {display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:0;max-width:100%;}
+.wizard-step .difficulty {padding:34px 28px;border:2px solid #526072;border-radius:16px;text-align:left;background:#152638;color:#fff;min-height:230px;}
+.wizard-step .difficulty:hover,.wizard-step .difficulty:focus-visible {border-color:var(--yellow);background:#263e51;}
+.wizard-step .difficulty strong {font-size:38px;display:block;letter-spacing:0;text-transform:none;}
+.wizard-step .difficulty span {display:block;font-size:21px;line-height:1.5;margin-top:18px;letter-spacing:0;text-transform:none;color:#cbd8e0;}
+.wizard-bottom .secondary-button {width:auto;padding:14px 24px;font-size:22px;margin:0;border-radius:10px;}
+.wizard-bottom>span {margin-left:auto;color:#c2cfd9;font-size:18px;}
+#race-summary {max-width:640px;margin:26px 0 32px;}
+#race-summary p {padding:18px 0;margin:0;border-bottom:1px solid #415264;}
+#race-summary span {display:block;font-size:18px;color:#aac0d0;margin-bottom:7px;}
+#race-summary strong {font-size:27px;line-height:1.3;}
+#best-time {font-size:18px;color:#c3d3de;margin-top:26px;}
+.audio-settings {margin:24px 0;}.audio-settings label {display:flex;align-items:center;justify-content:space-between;gap:20px;margin:18px 0;font-size:20px;}.audio-settings input {width:45%;accent-color:var(--yellow);}
+.overlay .eyebrow {font-size:18px;}.overlay .start-button,.overlay .secondary-button{font-size:24px;min-height:58px;}.help-copy p {font-size:19px;line-height:1.5;}.overlay-card{max-height:90vh;overflow:auto;}
+button:focus-visible,a:focus-visible {outline:3px solid #fff;outline-offset:5px;}
+@media(max-width:850px){
+  .menu-screen{padding:20px 5vw;background:rgba(9,17,28,.83);}.wizard-top #step-count{display:none;}.wizard-top .text-button{font-size:16px;}.wizard-body{padding:30px 0;}.wizard-caption{display:none;}.wizard-step .track-picker{grid-template-columns:1fr;gap:12px;}.wizard-step .track-card{display:grid;grid-template-columns:90px 1fr;min-height:150px;padding:18px;gap:20px;}.wizard-step .circuit-map{width:90px;height:90px;}.wizard-step .track-card strong{font-size:25px;}.wizard-step .difficulty-picker{grid-template-columns:1fr;gap:12px;}.wizard-step .difficulty{min-height:110px;padding:20px 24px;}.wizard-step .difficulty strong{font-size:30px;}.wizard-step .difficulty span{margin-top:6px;font-size:19px;}.wizard-bottom>span{display:none;}.wizard-step h2{font-size:40px;}.wizard-intro{font-size:21px;margin-bottom:24px;}.wizard-step .wordmark{font-size:84px;}.wizard-step .car-card{padding:22px 15px;min-height:140px;}.wizard-step .driver-avatar{display:none;}.wizard-step .car-card small{font-size:16px;}.wizard-step .car-card strong{font-size:28px;}
+}
+@media(prefers-reduced-motion:reduce){.wizard-step{animation:none}.wizard-step button{transition:none}}
+.wizard-step .track-card small {max-width:none;}
+.wizard-caption #showcase-name {font-size:30px;color:#fff8ea;text-shadow:0 2px 8px #000;}
+.wizard-caption #showcase-tagline {font-size:20px;color:#e2edf2;line-height:1.4;}
+.wizard-bottom .secondary-button {color:#e2edf2;letter-spacing:0;}
+.wizard-step .car-card[data-car="asa"] .driver-avatar {color:#74f2bf;}
+@media(max-width:850px){.wizard-body{flex:0 0 auto;min-height:auto;align-items:flex-start;padding:36px 0;}.wizard-bottom{padding:16px 0 24px;}.wizard-top{position:static;}.wizard-step .wordmark{font-size:clamp(56px,18vw,84px);}.wizard-step .track-card{grid-template-columns:70px minmax(0,1fr);gap:16px;}.wizard-step .circuit-map{width:70px;}}

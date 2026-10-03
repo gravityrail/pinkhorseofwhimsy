@@ -16,10 +16,10 @@ function makeSoftParticleTexture() {
 }
 
 class ParticlePool {
-  constructor(scene, { color, size, max = 90, life = 0.8, lift = 0.5 }) {
+  constructor(scene, { color, size, max = 90, life = 0.8, lift = 0.5, gravity = 0 }) {
     this.max = max;
     this.defaultLife = life;
-    this.lift = lift;
+    this.lift = lift; this.gravity=gravity;
     this.cursor = 0;
     this.positions = new Float32Array(max * 3);
     this.items = Array.from({ length: max }, () => ({ life: 0, velocity: new THREE.Vector3() }));
@@ -73,6 +73,7 @@ class ParticlePool {
       this.positions[p] += item.velocity.x * dt;
       this.positions[p + 1] += item.velocity.y * dt;
       this.positions[p + 2] += item.velocity.z * dt;
+      item.velocity.y -= this.gravity*dt;
       item.velocity.multiplyScalar(Math.max(0, 1 - dt * 1.7));
     }
     this.geometry.attributes.position.needsUpdate = true;
@@ -88,7 +89,11 @@ class ParticlePool {
 
 export class KartEffects {
   constructor(scene, track) {
-    this.accumulators = { dust: 0, smoke: 0, boost: 0, damage: 0 };
+    this.scene=scene;this.skidCursor=0;this.skidDistance=new WeakMap();
+    this.skids=new THREE.InstancedMesh(new THREE.PlaneGeometry(.24,1.1),new THREE.MeshBasicMaterial({color:0x181c20,transparent:true,opacity:.24,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2}),640);
+    const blank=new THREE.Matrix4().makeScale(0,0,0);for(let i=0;i<640;i++)this.skids.setMatrixAt(i,blank);
+    this.skids.frustumCulled=false;this.scene.add(this.skids);
+    this.accumulators = { dust: 0, smoke: 0, boost: 0, damage: 0, spray: 0 };
     // Tracks can tint their offroad dust (red outback dirt, sepia gold-rush
     // roads); the boost trail goes cyan wherever it's dark enough to glow.
     const dark = track.time === 'night' || track.time === 'space';
@@ -96,7 +101,25 @@ export class KartEffects {
     this.dust = new ParticlePool(scene, { color: dustColor, size: 1.15, max: 130, life: 1.05, lift: 1.1 });
     this.smoke = new ParticlePool(scene, { color: 0xdfe5ea, size: 0.72, max: 80, life: 0.68, lift: 0.6 });
     this.boost = new ParticlePool(scene, { color: dark ? 0x57e7ff : 0xffd84d, size: 0.62, max: 110, life: 0.46, lift: 0.22 });
+    this.sparks = new ParticlePool(scene, { color: 0xffd38a, size: .17, max: 160, life: .4, lift: 3, gravity: 9.81 });
+    this.spray = new ParticlePool(scene, { color: 0xaebdc9, size: .5, max: 220, life: .55, lift: .7 });
     this.damage = new ParticlePool(scene, { color: 0x34343d, size: 0.92, max: 90, life: 1.25, lift: 1.45 });
+  }
+
+  updateTires(racers,track) {
+    const dummy=new THREE.Object3D();
+    for(const r of racers) {
+      const last=this.skidDistance.get(r);
+      if(r.offroad || r.speed<8 || !((r.slip||0)>.12 || r.brake>.4) || (last && last.distanceTo(r.position)<.8))continue;
+      this.skidDistance.set(r,r.position.clone());
+      for(const side of [-1,1]) {
+        dummy.position.copy(r.position).add(new THREE.Vector3(Math.cos(r.yaw)*side-Math.sin(r.yaw),0,-Math.sin(r.yaw)*side-Math.cos(r.yaw)));
+        const f=track.nearest(dummy.position);dummy.position.y=f.point.y+.07;
+        dummy.rotation.set(-Math.PI/2,0,-r.yaw);dummy.updateMatrix();
+        this.skids.setMatrixAt(this.skidCursor++%640,dummy.matrix);
+      }
+    }
+    this.skids.instanceMatrix.needsUpdate=true;
   }
 
   emitRate(kind, origin, velocity, rate, dt, spread = 1) {
@@ -108,6 +131,7 @@ export class KartEffects {
   }
 
   update(dt) {
+    this.sparks.update(dt); this.spray.update(dt);
     this.dust.update(dt);
     this.smoke.update(dt);
     this.boost.update(dt);
@@ -115,6 +139,8 @@ export class KartEffects {
   }
 
   dispose() {
+    this.scene.remove(this.skids);this.skids.geometry.dispose();this.skids.material.dispose();
+    this.sparks.dispose(); this.spray.dispose();
     this.dust.dispose();
     this.smoke.dispose();
     this.boost.dispose();

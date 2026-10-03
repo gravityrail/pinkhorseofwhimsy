@@ -1,4 +1,3 @@
-// Three launch circuits and four original driver builds. Stats: 1–10; physics: SI units.
 export const CARS = [
   {
     "id": "indigo",
@@ -17,8 +16,8 @@ export const CARS = [
     },
     "physics": {
       "mass": 1650,
-      "power": 22500,
-      "maxSpeed": 44,
+      "power": 25874.999999999996,
+      "maxSpeed": 53,
       "grip": 7.2,
       "offroadGrip": 0.8,
       "offroadDrag": 0.62,
@@ -44,8 +43,8 @@ export const CARS = [
     },
     "physics": {
       "mass": 1900,
-      "power": 29000,
-      "maxSpeed": 46,
+      "power": 33350,
+      "maxSpeed": 55,
       "grip": 7.6,
       "offroadGrip": 0.48,
       "offroadDrag": 1.35,
@@ -71,8 +70,8 @@ export const CARS = [
     },
     "physics": {
       "mass": 1550,
-      "power": 23500,
-      "maxSpeed": 44,
+      "power": 27024.999999999996,
+      "maxSpeed": 53,
       "grip": 10,
       "offroadGrip": 0.5,
       "offroadDrag": 1.2,
@@ -98,8 +97,8 @@ export const CARS = [
     },
     "physics": {
       "mass": 3100,
-      "power": 34000,
-      "maxSpeed": 46,
+      "power": 39100,
+      "maxSpeed": 55,
       "grip": 6.5,
       "offroadGrip": 0.9,
       "offroadDrag": 0.45,
@@ -112,12 +111,12 @@ export const CARS = [
 
 export const TRACKS = [
   {
-    "id": "sunset-cove",
-    "name": "Sunset Coast",
-    "description": "Salt in the air. Gold on the asphalt.",
+    "id": "pacific-grand-tour",
+    "name": "Pacific Grand Tour",
+    "description": "A huge ocean straight, sweeping headlands and a climb through the palms.",
     "seed": 14731,
-    "width": 15,
-    "laps": 3,
+    "width": 26,
+    "laps": 2,
     "time": "sunset",
     "palette": {
       "sky": 9881032,
@@ -132,97 +131,112 @@ export const TRACKS = [
     "terrain": {
       "kind": "island",
       "foliage": "palms",
-      "roughness": 0.65
+      "roughness": 0.8
     },
     "boosts": [
-      0.12,
-      0.39,
-      0.68,
-      0.88
+      0.06,
+      0.22,
+      0.42,
+      0.62,
+      0.82,
+      0.94
     ],
     "powerups": [
-      0.26,
-      0.56,
-      0.81
+      0.12,
+      0.32,
+      0.53,
+      0.74,
+      0.9
     ],
     "points": [
       [
-        0,
-        2,
-        78
+        -180,
+        10,
+        200
       ],
       [
-        54,
-        3,
-        70
-      ],
-      [
-        98,
-        5,
-        38
-      ],
-      [
-        108,
-        9,
-        -12
-      ],
-      [
-        86,
-        17,
-        -61
-      ],
-      [
-        38,
-        23,
-        -82
-      ],
-      [
-        -10,
-        20,
-        -70
-      ],
-      [
-        -40,
+        140,
         12,
-        -45
+        200
       ],
       [
-        -74,
+        360,
+        18,
+        170
+      ],
+      [
+        490,
+        32,
+        30
+      ],
+      [
+        470,
+        46,
+        -150
+      ],
+      [
+        320,
+        54,
+        -260
+      ],
+      [
+        60,
+        35,
+        -280
+      ],
+      [
+        -220,
+        16,
+        -280
+      ],
+      [
+        -450,
+        8,
+        -210
+      ],
+      [
+        -550,
         5,
-        -52
+        -30
       ],
       [
-        -104,
-        3,
-        -25
-      ],
-      [
-        -105,
-        2,
-        28
-      ],
-      [
-        -76,
-        2,
-        63
-      ],
-      [
-        -34,
-        2,
-        75
+        -460,
+        8,
+        200
       ]
     ],
     "zones": [],
     "badge": "01 / GOLDEN HOUR",
-    "kit": "coast"
+    "kit": "coast",
+    "weather": "coastal",
+    "music": "coast",
+    "sectors": [
+      [
+        "Ocean straight",
+        0
+      ],
+      [
+        "Headland climb",
+        0.3
+      ],
+      [
+        "Lighthouse sweeper",
+        0.5
+      ],
+      [
+        "Palm valley",
+        0.76
+      ]
+    ],
+    "barrierScale": 0.87
   },
   {
-    "id": "moonlight-metro",
-    "name": "Neon Harbor",
-    "description": "Electric streets. Midnight mischief.",
+    "id": "harbor-express",
+    "name": "Harbor Express",
+    "description": "Wide city boulevards, an elevated harbor run and sweeping bends in the rain.",
     "seed": 98217,
-    "width": 13,
-    "laps": 3,
+    "width": 28,
+    "laps": 2,
     "time": "night",
     "palette": {
       "sky": 1052459,
@@ -237,111 +251,110 @@ export const TRACKS = [
     "terrain": {
       "kind": "city",
       "foliage": "cypress",
-      "roughness": 0.25
+      "roughness": 0.8
     },
     "boosts": [
-      0.09,
-      0.31,
-      0.55,
-      0.79
+      0.06,
+      0.22,
+      0.42,
+      0.62,
+      0.82,
+      0.94
     ],
     "powerups": [
-      0.2,
-      0.46,
-      0.72,
-      0.91
+      0.12,
+      0.32,
+      0.53,
+      0.74,
+      0.9
     ],
     "points": [
       [
-        0,
-        1,
-        82
-      ],
-      [
-        48,
-        1,
-        79
-      ],
-      [
-        86,
-        3,
-        57
-      ],
-      [
-        94,
-        8,
-        18
-      ],
-      [
-        75,
-        11,
-        -15
-      ],
-      [
-        92,
-        7,
-        -51
-      ],
-      [
-        61,
-        3,
-        -83
-      ],
-      [
-        17,
-        2,
-        -72
-      ],
-      [
-        -11,
-        5,
-        -92
-      ],
-      [
-        -51,
-        7,
-        -79
-      ],
-      [
-        -75,
+        -100,
         4,
+        260
+      ],
+      [
+        240,
+        6,
+        260
+      ],
+      [
+        480,
+        12,
+        170
+      ],
+      [
+        540,
+        20,
         -50
       ],
       [
-        -93,
-        2,
-        -10
+        440,
+        27,
+        -250
       ],
       [
-        -84,
-        1,
-        35
+        180,
+        27,
+        -290
       ],
       [
-        -55,
-        1,
-        61
+        -120,
+        18,
+        -290
       ],
       [
-        -20,
-        1,
-        57
+        -450,
+        6,
+        -230
+      ],
+      [
+        -560,
+        4,
+        -30
+      ],
+      [
+        -460,
+        4,
+        260
       ]
     ],
     "zones": [],
     "badge": "02 / AFTER DARK",
-    "kit": "neon"
+    "kit": "neon",
+    "weather": "rain",
+    "music": "harbor",
+    "sectors": [
+      [
+        "Festival boulevard",
+        0
+      ],
+      [
+        "Harbor climb",
+        0.3
+      ],
+      [
+        "Skyway",
+        0.5
+      ],
+      [
+        "Home straight",
+        0.78
+      ]
+    ],
+    "barrierScale": 0.87
   },
   {
-    "id": "outback-run",
-    "name": "Red Rock Rally",
-    "description": "Big skies. Red dirt. Full throttle.",
+    "id": "red-rock-speedway",
+    "name": "Red Rock Speedway",
+    "description": "Fast red-dirt straights, rolling ridges and a vast open canyon with room to slide.",
     "badge": "03 / WILD COUNTRY",
     "seed": 61616,
-    "width": 15,
-    "laps": 3,
+    "width": 30,
+    "laps": 2,
     "time": "day",
-    "music": "outback",
+    "music": "rally",
     "palette": {
       "sky": 10474736,
       "fog": 15255976,
@@ -356,97 +369,132 @@ export const TRACKS = [
     "terrain": {
       "kind": "plain",
       "foliage": "gums",
-      "roughness": 0.2
+      "roughness": 0.8
     },
     "boosts": [
-      0.08,
-      0.3,
-      0.52,
-      0.74,
-      0.92
+      0.06,
+      0.22,
+      0.42,
+      0.62,
+      0.82,
+      0.94
     ],
     "powerups": [
-      0.18,
-      0.42,
-      0.64,
-      0.88
+      0.12,
+      0.32,
+      0.53,
+      0.74,
+      0.9
     ],
     "points": [
       [
-        -140,
-        1,
-        40
+        -230,
+        14,
+        270
       ],
       [
-        -60,
-        1,
-        55
+        100,
+        22,
+        280
       ],
       [
-        40,
-        1.5,
-        58
+        420,
+        30,
+        240
       ],
       [
-        130,
-        2,
-        42
+        640,
+        42,
+        80
       ],
       [
-        146,
-        1,
-        -4
+        620,
+        52,
+        -150
       ],
       [
-        122,
-        1,
-        -44
+        380,
+        32,
+        -330
       ],
       [
-        20,
-        1.5,
-        -58
+        30,
+        12,
+        -370
       ],
       [
-        -90,
-        1,
-        -52
+        -320,
+        18,
+        -310
       ],
       [
-        -143,
-        1,
-        -12
+        -570,
+        29,
+        -180
+      ],
+      [
+        -660,
+        18,
+        30
+      ],
+      [
+        -550,
+        10,
+        240
       ]
     ],
     "zones": [],
     "kit": "desert",
     "road": {
       "style": "dirt"
-    }
+    },
+    "weather": "dust",
+    "sectors": [
+      [
+        "Outback flat-out",
+        0
+      ],
+      [
+        "Ridge run",
+        0.27
+      ],
+      [
+        "Canyon descent",
+        0.52
+      ],
+      [
+        "Red-rock sweep",
+        0.78
+      ]
+    ],
+    "barrierScale": 0.87
   }
 ];
 
 export const DIFFICULTIES = {
   "easy": {
-    "label": "Easy Cruise",
-    "pace": 0.82,
-    "error": 0.18,
+    "label": "Easy",
+    "pace": 0.78,
+    "error": 0.04,
     "aggression": 0.25,
-    "assist": 0.42
+    "assist": 0.42,
+    "description": "Gentle rivals. Helpful steering. Plenty of room to learn."
   },
   "normal": {
-    "label": "Arcade",
-    "pace": 0.94,
-    "error": 0.1,
+    "label": "Medium",
+    "pace": 0.91,
+    "error": 0.025,
     "aggression": 0.48,
-    "assist": 0.3
+    "assist": 0.24,
+    "description": "A close race. Earn your wins with clean lines and clever items."
   },
   "hard": {
-    "label": "Grand Prix",
-    "pace": 1.05,
-    "error": 0.04,
+    "label": "Hard",
+    "pace": 1,
+    "error": 0.012,
     "aggression": 0.7,
-    "assist": 0.2
+    "assist": 0.12,
+    "description": "Fast rivals. Light steering help. Bring your best lap."
   }
 };
 
