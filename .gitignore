@@ -19,3 +19,9 @@ games/trellis/.runpod-state.json
 
 # Claude Code local session settings
 .claude/settings.local.json
+
+# IndigoKart build and local browser verification
+games/indigokart3/dist/
+.playwright-cli/
+output/playwright/
+*.blend1

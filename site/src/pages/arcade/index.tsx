@@ -71,24 +71,14 @@ const GAMES: GameCard[] = [
     cover: '/arcade/splashes/pinball.png',
   },
   {
-    title: 'Indigo Kart',
+    title: 'IndigoKart 3',
     author: 'Pink Horse of Whimsy',
     description:
-      'A pint-sized 3D kart racer with classic box-art splash. Drift the loop, grab items, and chase the best lap — touch and gamepad friendly.',
+      'Four friends. Three open-road circuits. Race Indigo’s green Toyota truck, Dan’s blue Tesla, Lola’s pink Tesla, or Asa’s neon cyber tank. Drift for turbo, grab shields and shockwaves, and explore Blender-crafted coastal, neon and red-rock scenery. Keyboard, touch and controller ready.',
     type: '3D',
-    slug: 'indigokart',
-    href: '/indigokart/',
-    cover: '/arcade/splashes/indigokart.png',
-  },
-  {
-    title: 'Indigo Kart v2',
-    author: 'Pink Horse of Whimsy',
-    description:
-      'A ground-up Three.js rebuild — seven circuits including Candy Canyon, sunset island, neon night city, orbital rainbow ring, present-day and 1892 Grass Valley, and a kangaroo-lined outback highway. Four karts (including Sugar Pop), turbo and repair pickups, sprung four-wheel physics, and a soundtrack per track.',
-    type: '3D',
-    slug: 'indigokart2',
-    href: '/indigokart2/',
-    cover: '/arcade/splashes/indigokart2.png',
+    slug: 'indigokart3',
+    href: '/indigokart3/',
+    screenshot: '/indigokart3/screenshots/pacific-grand-tour.png',
   },
   {
     title: 'Bean Simulator',
