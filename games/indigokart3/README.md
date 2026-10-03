@@ -3,6 +3,15 @@
 The canonical IndigoKart game in the Pink Horse Arcade. Replaces the original and
 v2 builds; `/indigokart/` and `/indigokart2/` redirect to `/indigokart3/`.
 
+## Gameplay screenshots
+
+Actual captures of the current game, including its racing HUD. The arcade card
+uses the Pacific Grand Tour image; these are not concept art.
+
+![Indigo racing past the lighthouse on Pacific Grand Tour](public/screenshots/pacific-grand-tour.png)
+
+![The four racers on a wet Harbor Express straight](public/screenshots/harbor-express.png)
+
 ## Play / build
 
 ```sh

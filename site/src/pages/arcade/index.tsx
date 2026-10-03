@@ -74,11 +74,11 @@ const GAMES: GameCard[] = [
     title: 'IndigoKart 3',
     author: 'Pink Horse of Whimsy',
     description:
-      'Four friends. Three spectacular circuits. Race Indigo’s green Toyota truck, Dan’s blue Tesla, Lola’s pink Tesla, or Asa’s neon cyber tank. Drift for turbo, grab shields and shockwaves, and explore Blender-crafted coastal, neon and red-rock scenery. Keyboard, touch and controller ready.',
+      'Four friends. Three open-road circuits. Race Indigo’s green Toyota truck, Dan’s blue Tesla, Lola’s pink Tesla, or Asa’s neon cyber tank. Drift for turbo, grab shields and shockwaves, and explore Blender-crafted coastal, neon and red-rock scenery. Keyboard, touch and controller ready.',
     type: '3D',
     slug: 'indigokart3',
     href: '/indigokart3/',
-    cover: '/arcade/splashes/indigokart3.png',
+    screenshot: '/indigokart3/screenshots/pacific-grand-tour.png',
   },
   {
     title: 'Bean Simulator',
