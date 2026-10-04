@@ -22,6 +22,16 @@ interface GameCard {
 // and output to site/static/arcade/games/<slug>/
 const GAMES: GameCard[] = [
   {
+    title: 'Dolly’s Tennessee Quiz',
+    author: 'Pink Horse of Whimsy',
+    description:
+      'Big hair, big heart, big Tennessee trivia! Cartoon Dolly hosts a rhinestone-studded show about Knoxville, the Smoky Mountains, and her mountain roots. Play solo or pass the mic, use a Little Help lifeline, and shine in the 500-point encore. Touch and controller friendly.',
+    type: '2D',
+    slug: 'dollys-tennessee-quiz',
+    href: '/dollys-tennessee-quiz/',
+    cover: '/arcade/splashes/dollys-tennessee-quiz.png',
+  },
+  {
     title: 'Bean Quiz',
     author: 'Pink Horse of Whimsy',
     description:
