@@ -1,0 +1,211 @@
+// The first option is the correct answer; the game shuffles every answer list.
+window.QUIZ_BANK = {
+  knoxville: [
+    [
+      "Which golden Knoxville landmark looks like a little sun on a stalk?",
+      [
+        "The Sunsphere",
+        "The Space Needle",
+        "The Gateway Arch",
+        "The Moon Tower",
+      ],
+      "The Sunsphere was built for Knoxville’s 1982 World’s Fair.",
+      "https://www.visitknoxville.com/sunsphere-tickets/",
+    ],
+    [
+      "Knoxville welcomed the world for a World’s Fair in which year?",
+      ["1982", "1962", "2002", "1922"],
+      "More than 11 million people came to Knoxville’s 1982 World’s Fair.",
+      "https://www.visitknoxville.com/worlds-fair/",
+    ],
+    [
+      "Which river sparkles beside downtown Knoxville?",
+      ["Tennessee River", "Colorado River", "Hudson River", "Columbia River"],
+      "The Tennessee River winds past Knoxville’s downtown waterfront.",
+      "https://www.visitknoxville.com/sunsphere-tickets/",
+    ],
+    [
+      "Where can you shop, eat, and people-watch in a historic downtown square?",
+      ["Market Square", "Times Square", "Jackson Square", "Union Square"],
+      "Market Square has been a Knoxville gathering place since the 1860s.",
+      "https://www.visitknoxville.com/things-to-do/popular-spots/market-square/",
+    ],
+    [
+      "The Sunsphere’s observation deck is on which floor?",
+      ["Fourth", "Fortieth", "First", "Twentieth"],
+      "The fourth-floor observation deck offers a full-circle view of Knoxville.",
+      "https://www.visitknoxville.com/sunsphere-tickets/",
+    ],
+    [
+      "Knoxville’s Urban Wilderness is especially good for what?",
+      [
+        "Hiking and biking",
+        "Glacier climbing",
+        "Ocean surfing",
+        "Desert camel racing",
+      ],
+      "The Urban Wilderness connects parks and trails close to downtown.",
+      "https://www.visitknoxville.com/things-to-do/popular-spots/market-square/",
+    ],
+    [
+      "What color is the famous globe at the top of the Sunsphere?",
+      ["Gold", "Purple", "Green", "Orange"],
+      "That golden globe is the skyline’s signature sparkle.",
+      "https://www.visitknoxville.com/sunsphere-tickets/",
+    ],
+    [
+      "Which university campus can you see from the Sunsphere?",
+      [
+        "University of Tennessee",
+        "University of Oregon",
+        "Harvard University",
+        "University of Hawaii",
+      ],
+      "The University of Tennessee campus is one of the landmarks in the panoramic view.",
+      "https://www.visitknoxville.com/sunsphere-tickets/",
+    ],
+    [
+      "Which mountains are part of the Sunsphere’s panoramic view?",
+      ["Great Smoky Mountains", "Rocky Mountains", "Alps", "Himalayas"],
+      "On a clear day, the view stretches toward the Great Smoky Mountains.",
+      "https://www.visitknoxville.com/sunsphere-tickets/",
+    ],
+  ],
+  smokies: [
+    [
+      "What gives the Smoky Mountains their smoky look?",
+      [
+        "A natural bluish haze",
+        "Giant campfires",
+        "Factory chimneys",
+        "Volcanoes",
+      ],
+      "Natural compounds released by plants help create the mountains’ blue haze.",
+      "https://www.nps.gov/articles/000/where-mountains-breathe.htm",
+    ],
+    [
+      "The Smokies are nicknamed the world capital of which little animal?",
+      ["Salamanders", "Penguins", "Kangaroos", "Camels"],
+      "These cool, moist forests are famous for their amazing salamander diversity.",
+      "https://www.nps.gov/grsm/faqs.htm",
+    ],
+    [
+      "Which Smokies insects put on a synchronized light show?",
+      ["Fireflies", "Butterflies", "Dragonflies", "Bumblebees"],
+      "Synchronous fireflies can coordinate their flashing patterns. Nature has stage lighting, too!",
+      "https://www.nps.gov/grsm/learn/nature/fireflies.htm",
+    ],
+    [
+      "What kind of bear lives in the Smokies?",
+      ["American black bear", "Polar bear", "Giant panda", "Spectacled bear"],
+      "American black bears are part of the park’s remarkable wildlife.",
+      "https://www.nps.gov/grsm/learn/nature/animals.htm",
+    ],
+    [
+      "Cades Cove is best described as what?",
+      [
+        "A valley surrounded by mountains",
+        "A coral reef",
+        "A skyscraper",
+        "A desert dune",
+      ],
+      "Cades Cove is a scenic mountain valley south of Townsend, Tennessee.",
+      "https://www.nps.gov/grsm/planyourvisit/cadescove.htm",
+    ],
+    [
+      "Which historic building would you find in Cades Cove?",
+      [
+        "A gristmill",
+        "A Roman colosseum",
+        "A spaceport",
+        "An Egyptian pyramid",
+      ],
+      "Historic cabins, churches, and a gristmill help tell the valley’s story.",
+      "https://www.nps.gov/grsm/learn/historyculture/cades-cove-history.htm",
+    ],
+    [
+      "When was Great Smoky Mountains National Park established?",
+      ["1934", "1834", "2004", "1776"],
+      "The national park was established in 1934.",
+      "https://www.nps.gov/articles/000/where-mountains-breathe.htm",
+    ],
+    [
+      "What makes a firefly’s lantern glow?",
+      [
+        "Bioluminescence",
+        "Tiny batteries",
+        "Reflected moonlight",
+        "A miniature candle",
+      ],
+      "Bioluminescence is light produced through a natural chemical process.",
+      "https://www.nps.gov/grsm/learn/nature/fireflies.htm",
+    ],
+    [
+      "Which animal might you spot in Cades Cove?",
+      ["White-tailed deer", "Zebra", "Giraffe", "Emperor penguin"],
+      "Deer, wild turkeys, and black bears are among Cades Cove’s wildlife.",
+      "https://www.nps.gov/grsm/learn/historyculture/cades-cove-history.htm",
+    ],
+  ],
+  dolly: [
+    [
+      "Where was Dolly Parton born?",
+      [
+        "Locust Ridge, Tennessee",
+        "Las Vegas, Nevada",
+        "Brooklyn, New York",
+        "Paris, France",
+      ],
+      "Dolly’s story began in Locust Ridge, Tennessee, in 1946.",
+      "https://www.loc.gov/item/n79128064/dolly-parton/",
+    ],
+    [
+      "What does Dolly’s Imagination Library give to children?",
+      ["Books", "Guitars", "Cowboy boots", "Movie tickets"],
+      "The Imagination Library gifts books to inspire a love of reading.",
+      "https://imaginationlibrary.com/about-us/",
+    ],
+    [
+      "Which year did Dolly launch her Imagination Library?",
+      ["1995", "1965", "2015", "1985"],
+      "The book-gifting program began in her home county in 1995.",
+      "https://imaginationlibrary.com/about-us/",
+    ],
+    [
+      "Which Tennessee county was the Imagination Library’s first home?",
+      ["Sevier County", "Shelby County", "Davidson County", "Hamilton County"],
+      "Dolly launched the program in Sevier County, where she grew up.",
+      "https://imaginationlibrary.com/about-us/",
+    ],
+    [
+      "Which Dolly song tells the story of a homemade patchwork coat?",
+      ["Coat of Many Colors", "Jolene", "9 to 5", "Here You Come Again"],
+      "Coat of Many Colors draws on Dolly’s own childhood.",
+      "https://www.loc.gov/item/n79128064/dolly-parton/",
+    ],
+    [
+      "Dolly was one of how many children in her family?",
+      ["Twelve", "Three", "Six", "Two"],
+      "Dolly was the fourth of twelve children. That’s a whole choir!",
+      "https://countrymusichalloffame.org/hall-of-fame/dolly-parton",
+    ],
+    [
+      "What is Dolly’s middle name?",
+      ["Rebecca", "Rose", "June", "Mae"],
+      "Her full name is Dolly Rebecca Parton.",
+      "https://www.loc.gov/item/n79128064/dolly-parton/",
+    ],
+    [
+      "Which month is Dolly’s birthday in?",
+      ["January", "July", "October", "April"],
+      "Dolly was born on January 19, 1946.",
+      "https://www.loc.gov/item/n79128064/dolly-parton/",
+    ],
+    [
+      "The Imagination Library serves children from birth until what age?",
+      ["Five", "Sixteen", "Twelve", "Twenty-one"],
+      "The program helps the littlest readers, from birth to age five.",
+      "https://imaginationlibrary.com/about-us/",
+    ],
+  ],
+};
