@@ -1,0 +1,15 @@
+{
+  "provider": "ElevenLabs",
+  "voice_id": "p6QRScdgOl8CsUYeJKUM",
+  "voice_name": "Tennessee Quiz - Mountain Host",
+  "model_id": "eleven_v3",
+  "description": "An original female country quiz-show host in her late fifties with an authentic East Tennessee Appalachian mountain accent. Musical Southern lilt, softened vowels, warm smile in the voice, bright slightly breathy upper-mid register with a gently husky edge, quick playful wit, small natural chuckles, unhurried homespun storytelling. She sounds self-assured, kind and sharp as a tack, never shrill or cartoonishly exaggerated. Natural intimate studio speech, crisp clear words. A distinct fictional character, not an imitation of any real person.",
+  "notice": "Original AI Southern character voice for an unofficial tribute. Not a recording or clone of Dolly Parton.",
+  "settings": {
+    "stability": 0.5,
+    "similarity_boost": 0.75,
+    "style": 0.3,
+    "use_speaker_boost": true,
+    "speed": 0.96
+  }
+}
