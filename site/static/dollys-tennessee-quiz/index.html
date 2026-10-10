@@ -37,16 +37,36 @@
         <div class="speech" id="speech" aria-live="polite">
           Big hair. Big heart. Big Tennessee trivia!
         </div>
+        <a
+          id="host-source"
+          class="host-source"
+          hidden
+          target="_blank"
+          rel="noopener noreferrer"
+        ></a>
         <span class="host-label">YOUR HOST, DOLLY</span>
+        <div class="voice-controls">
+          <button id="repeat-voice" class="secondary">↻ Listen again</button
+          ><span id="voice-status" aria-live="polite"
+            >Turn sound on to hear the mountain host</span
+          >
+        </div>
       </aside>
       <section class="show" id="show" aria-label="Trivia show"></section>
     </main>
     <footer>
       Made with mountain love & a whole lot of rhinestones.
-      <span>Unofficial fan-made tribute · Original host dialogue</span>
+      <span
+        >Unofficial tribute · AI Southern character voice · Original dialogue &
+        sourced Dolly quips</span
+      >
     </footer>
     <div id="confetti" aria-hidden="true"></div>
     <script src="data.js"></script>
+    <script src="host.js"></script>
+    <script src="voice-manifest.js"></script>
+    <audio id="narration" preload="none"></audio>
+    <script src="voice.js"></script>
     <script src="game.js"></script>
     <script>
       window.ARCADE_CONTROLS = {

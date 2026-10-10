@@ -25,7 +25,7 @@ const GAMES: GameCard[] = [
     title: 'Dolly’s Tennessee Quiz',
     author: 'Pink Horse of Whimsy',
     description:
-      'Big hair, big heart, big Tennessee trivia! Cartoon Dolly hosts a rhinestone-studded show about Knoxville, the Smoky Mountains, and her mountain roots. Play solo or pass the mic, use a Little Help lifeline, and shine in the 500-point encore. Touch and controller friendly.',
+      'Big hair, big heart, big Tennessee trivia! Cartoon Dolly hosts with an East Tennessee tribute voice, 45 questions, and back-porch stories about her Appalachian roots, sharp wit, and independence. Play solo or pass the mic, use a Little Help lifeline, and shine in the 500-point encore. Touch and controller friendly.',
     type: '2D',
     slug: 'dollys-tennessee-quiz',
     href: '/dollys-tennessee-quiz/',
